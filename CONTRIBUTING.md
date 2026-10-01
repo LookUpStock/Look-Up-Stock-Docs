@@ -14,7 +14,22 @@ Im Folgenden werden die Repositories mit **BE**, **FE** und **Docs** abgekürzt.
 
 ## Ordnerstruktur
 
-**BE und FE**
+**BE**
+
+```
+src/main/java/        Quellcode (Paket com.lookupstock.backend und unterpakete
+src/main/resources/   Konfiguration (application.properties)
+src/test/java/        Automatisierte Tests
+.mvn/wrapper/         Maven Wrapper (legt die Maven-Version fest)
+mvnw, mvnw.cmd        Maven Wrapper für Linux/macOS bzw. Windows
+pom.xml               Maven-Projektdatei mit Abhängigkeiten
+.env.example          Vorgabe für Umgebungsvariablen
+.github/workflows/    CI-Pipeline
+Dockerfile
+README.md
+```
+
+**FE**
 
 ```
 src/                  Quellcode
