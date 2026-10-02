@@ -136,7 +136,7 @@ Für die Kernlogik gilt zusätzlich der Zielwert der Testabdeckung aus Abschnitt
 
 | NFR | Anforderung | Art des Nachweises | Testfall-ID oder Prüfmethode | Sprint |
 |---|---|---|---|---|
-| NF-01 | Performance der Simulation: 10.000 Pfade, mit 5 Anlagen (Messfall), Horizont bis 30 Jahre, serverseitig ≤ 3 s in 95 % von 20 Messläufen | Performancetest (Messung von `runtimeMs`) | AT-04-34 | 1 |
+| NF-01 | Performance der Simulation: 10.000 Pfade, mit 5 Anlagen (Messfall), Horizont bis 40 Jahre, serverseitig ≤ 3 s in 95 % von 20 Messläufen | Performancetest (Messung von `runtimeMs`) | AT-04-34 | 1 |
 | NF-02 | Performance der Suche: ≤ 1 s mit Cache-Treffer, ≤ 3 s ohne Cache | Zeitmessung im Abnahmetest | AT-02-11, AT-02-12 | 1 |
 | NF-03 | Passwörter nur gehasht gespeichert | Unit-Test und Prüfung der Datenbankinhalte | wird mit US-01 ergänzt | 2 |
 | NF-04 | Zugriff auf fremde Ressourcen liefert 404 | Integrations- und Abnahmetest | wird mit US-01 ergänzt | 2 |
