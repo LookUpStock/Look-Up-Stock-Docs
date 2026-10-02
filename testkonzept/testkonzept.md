@@ -7,7 +7,7 @@
 | **Issue** | Docs #23 Testkonzept v1 und Abnahmetestfälle |
 | **Verantwortlich** | Paul Kaufmann (Paul02112004) |
 | **Stand** | 02.10.2026 |
-| **Grundlagen** | Kurzformat-Tabellen Sprint 1 mit Akzeptanzkriterien (Stand 30.09.2026), API-Design (Stand 02.10.2026), ADR-01 bis ADR-03, Aktivitätsdiagramm US-04 v1, Domänenmodell v1, Sprint-Planning-Protokoll Sprint 1, CONTRIBUTING.md |
+| **Grundlagen** | Kurzformat-Tabellen Sprint 1 mit Akzeptanzkriterien (Stand 30.09.2026), Entscheidungen des Product Owners E1 bis E7 (02.10.2026), API-Design (Stand 02.10.2026), ADR-01 bis ADR-03, Aktivitätsdiagramm US-04 v1, Domänenmodell v1, Sprint-Planning-Protokoll Sprint 1, CONTRIBUTING.md |
 | **KI-Nutzung** | Entwurf mit KI-Unterstützung erstellt, vom Team geprüft; siehe KI-Log Nr. [OFFEN: Nummer] |
 
 Die Abnahmetestfälle für Sprint 1 stehen in [abnahmetestfaelle-sprint-1.md](abnahmetestfaelle-sprint-1.md).
@@ -33,13 +33,13 @@ Der Schwerpunkt liegt auf der Kernlogik der Kern-Story US-04 und der Portfolio-P
 
 | Komponente | Schicht (ADR-01) | Story | Was geprüft wird |
 |---|---|---|---|
-| `Portfolio` mit `validate()` und `getWeights()` | Logik | US-03, US-04 | Prüfregeln: Name, mindestens eine Anlage, keine doppelten Anlagen, jede Gewichtung > 0 %, Summe 100 % ± 0,01 Prozentpunkte; Umrechnung der Gewichtungen in Anteile in fester Reihenfolge (ADR-03) |
+| `Portfolio` mit `validate()` und `getWeights()` | Logik | US-03, US-04 | Prüfregeln: Name Pflicht mit höchstens 100 Zeichen, mindestens eine Anlage (keine Höchstzahl), keine doppelten Anlagen, jede Gewichtung > 0 % mit höchstens 2 Nachkommastellen, Summe 100 % ± 0,01 Prozentpunkte bei exakter Dezimalrechnung; Umrechnung der Gewichtungen in Anteile in fester Reihenfolge (ADR-03) |
 | `ParameterEstimator` | Logik | US-04 | Schätzung von Jahresrendite und Jahresvolatilität aus Kursreihen; Erkennung von weniger als 3 Jahren Kurshistorie |
 | `MonteCarloEngine` | Logik | US-04 | Pfadanzahl, Monatsschritte über den Anlagehorizont, Berücksichtigung von Startkapital und Sparrate, Reproduzierbarkeit bei gleichem Seed |
 | `MetricsCalculator` | Logik | US-04 | Aufbereitung des Ergebnisses, insbesondere 5., 50. und 95. Perzentil je Monat [OFFEN: Ob die Perzentile im `MetricsCalculator` oder in der `MonteCarloEngine` berechnet werden, legt das Klassendiagramm v1 (Docs #19) fest, das noch nicht im Repository liegt.] |
 | `SimulationService` (GRASP-Controller, ADR-02) | Logik | US-04 | Koordination der Schritte in der richtigen Reihenfolge, Seed-Erzeugung ohne Angabe, Fehlerfälle (Portfolio fehlt, Kursdaten nicht verfügbar, zu kurze Historie) |
-| `PortfolioService` | Logik | US-03 | Aufruf von `validate()` vor dem Speichern |
-| `MarketDataProvider` mit Cache und Fallback | Daten | US-02, US-04 | Verhalten bei Ausfall der Finanzdaten-API, Weiterverwendung von Kursdaten jünger als 24 h (NF-07) |
+| `PortfolioService` | Logik | US-03 | Aufruf von `validate()` vor dem Speichern; Ablehnung unbekannter `assetId` |
+| `MarketDataProvider` mit Cache und Fallback | Daten | US-02, US-04 | Verhalten bei Ausfall der Finanzdaten-API, Weiterverwendung von Kursdaten jünger als 24 h (NF-07). Primärer Anbieter im Betrieb ist Twelve Data; ein Fallback-Anbieter ist noch nicht entschieden. In allen Tests wird der `MockMarketDataProvider` verwendet. |
 | REST-Controller (`SimulationController`, Such- und Portfolio-Endpunkte) | Präsentation | US-02, US-03, US-04 | HTTP-Status, Fehlercodes und Fehlerformat laut API-Design |
 | Frontend-Prüflogik und Darstellung | Präsentation | US-02, US-03, US-04 | Mindestlänge des Suchbegriffs, Gewichtungssumme, Formatierung, Fehlermeldungen, Fächerdiagramm |
 
@@ -58,7 +58,7 @@ Der Schwerpunkt liegt auf der Kernlogik der Kern-Story US-04 und der Portfolio-P
 
 **Grenzwertanalyse.** An jeder Grenze wird der Wert knapp darunter, genau auf der Grenze und knapp darüber getestet, weil Fehler wie `<` statt `<=` dort auftreten. Beispiele: Pfadanzahl 999, 1.000, 50.000 und 50.001; Gewichtungssumme 99,98 %, 99,99 %, 100,00 %, 100,01 % und 100,02 %.
 
-Hinweis für die Umsetzung: Die Grenzwerte der Gewichtungssumme liegen genau auf der Toleranz von ± 0,01 Prozentpunkten. Bei Rechnung mit `double` ergibt z. B. `70 + 30.01` nicht exakt `100.01`, sodass ein gültiger Wert fälschlich abgelehnt werden kann. Die Unit-Tests von `Portfolio.validate()` decken diese Fälle gezielt ab.
+Exakte Dezimalrechnung: Die Grenzwerte der Gewichtungssumme liegen genau auf der Toleranz von ± 0,01 Prozentpunkten. Bei Rechnung mit `double` können Summen mit Nachkommastellen nicht exakt dargestellt werden; so ergibt die Prüfung `abs(70 + 30.01 - 100) <= 0.01` in `double` den Wert `false`, obwohl die Summe 100,01 % gültig ist. Deshalb ist festgelegt, dass das Backend Gewichtungen als exakte Dezimalzahlen (`BigDecimal`) verarbeitet und Gewichtungen höchstens 2 Nachkommastellen haben (PO-Entscheidung E2). Nachgewiesen wird das durch den Gleitkomma-Testfall AT-03-22 (69,99 % + 30,01 % wird als 100,00 % akzeptiert) und durch die Grenzwerte AT-03-09 bis AT-03-13; AT-03-12 (70 % + 30,01 %) ist dabei der Fall, der eine Rechnung mit `double` tatsächlich scheitern lässt. Alle diese Fälle und AT-03-21 werden auch als Unit-Tests von `Portfolio.validate()` umgesetzt.
 
 **Ableitung aus dem Aktivitätsdiagramm.** Für die Kern-Story US-04 wird aus dem Aktivitätsdiagramm (`diagramme/aktivitaetsdiagramm_us-04_v1.puml`) für jede Verzweigung mindestens ein Testfall abgeleitet, sodass jeder Pfad vom Start bis zu einem Endknoten mindestens einmal durchlaufen wird (Pfadabdeckung der Alternativszenarien):
 
@@ -68,7 +68,7 @@ Hinweis für die Umsetzung: Die Grenzwerte der Gewichtungssumme liegen genau auf
 | Portfolio laden | vorhanden / nicht vorhanden (HTTP 404) | AT-04-01, AT-04-06 |
 | Seed | ohne Seed (System erzeugt) / mit Seed | AT-04-01, AT-04-02 |
 | Kursdaten | verfügbar / nicht verfügbar (HTTP 503) | AT-04-01, AT-04-07 |
-| Kurshistorie je Anlage | ≥ 3 Jahre / < 3 Jahre (HTTP 422) | AT-04-12, AT-04-10, AT-04-11 |
+| Kurshistorie je Anlage | ≥ 3 Jahre / < 3 Jahre (HTTP 422) | AT-04-12, AT-04-10, AT-04-11, AT-04-37 |
 
 Der Cache-Fallback aus NF-07 ist im Aktivitätsdiagramm v1 nicht dargestellt; er wird zusätzlich durch AT-04-08 und AT-04-09 abgedeckt.
 
@@ -82,16 +82,17 @@ Alle automatisierten Tests verwenden den `MockMarketDataProvider`, der das Inter
 |---|---|---|
 | Anlage EUNL (`assetId` 17) | iShares Core MSCI World UCITS ETF, ISIN IE00B4L5Y983, XETRA, EUR (wie im API-Design); synthetische Kursreihe über 10 Jahre | Normalfälle Suche, Portfolio, Simulation |
 | Anlage IS3N (`assetId` 23) | iShares Core MSCI EM IMI (wie im API-Design); synthetische Kursreihe über 10 Jahre | Zweite Anlage für Portfolio 70 % / 30 % |
-| Anlage mit kurzer Historie | Kursreihe knapp unter 3 Jahren | Alternativszenario < 3 Jahre (AT-04-10, AT-04-11) |
+| Zwei Anlagen mit kurzer Historie | je eine Kursreihe knapp unter 3 Jahren | Alternativszenario < 3 Jahre mit einer und mit zwei betroffenen Anlagen (AT-04-10, AT-04-11, AT-04-37) |
 | Anlage mit genau 3 Jahren Historie | Kursreihe von genau 3 Jahren | Grenzwert (AT-04-12) |
 | Anlage mit konstantem Wachstum | Kursreihe ohne Schwankung | Test-Orakel: Volatilität 0, bekannte Rendite |
-| Mindestens 5 Anlagen mit 10 Jahren Historie | synthetische Kursreihen | Performancetest NF-01 |
+| 5 Anlagen mit 10 Jahren Historie | synthetische Kursreihen | Performancetest NF-01 mit 5 Anlagen (Messfall) |
+| Mehr als 25 Suchtreffer | mindestens 26 synthetische Anlagen, deren Name „MSCI“ enthält | Grenzwerte des Suchparameters `limit` (AT-02-14 bis AT-02-18) |
 | Beispielportfolios | „Mein Weltportfolio“ (EUNL 70 %, IS3N 30 %); Einzelanlage 100 %; Portfolio aus 5 Anlagen à 20 % | Simulation, Performance |
 | Fester Seed | `42` (wie im API-Design) | Reproduzierbare Ergebnisse |
 
 [OFFEN: Symbol, `assetId` und Zeitraum der Testanlagen mit kurzer und genau 3-jähriger Historie werden bei der Umsetzung des `MockMarketDataProvider` festgelegt und hier nachgetragen.]
 
-**Begründung.** Feste Kursreihen und ein fester Seed sorgen dafür, dass jeder Testlauf dieselben Ergebnisse liefert (NF-08) und dass Testergebnisse nicht von aktuellen Marktdaten abhängen. Weil der Mock keine Verbindung zur Finanzdaten-API benötigt, laufen die Tests ohne Internetzugang und ohne API-Key (NF-12, NF-06) und verbrauchen kein Kontingent der kostenlosen API.
+**Begründung.** Feste Kursreihen und ein fester Seed sorgen dafür, dass jeder Testlauf dieselben Ergebnisse liefert (NF-08) und dass Testergebnisse nicht von aktuellen Marktdaten abhängen. Die Testdaten bleiben auch nach der Auswahl von Twelve Data als primärem Anbieter synthetisch. Weil der Mock keine Verbindung zur Finanzdaten-API benötigt, laufen die Tests ohne Internetzugang und ohne API-Key (NF-12, NF-06) und verbrauchen kein Kontingent der kostenlosen API.
 
 ## 7. Testumgebung
 
@@ -136,7 +137,7 @@ Für die Kernlogik gilt zusätzlich der Zielwert der Testabdeckung aus Abschnitt
 
 | NFR | Anforderung | Art des Nachweises | Testfall-ID oder Prüfmethode | Sprint |
 |---|---|---|---|---|
-| NF-01 | Performance der Simulation: 10.000 Pfade, bis zu 5 Anlagen, Horizont bis 30 Jahre, serverseitig ≤ 3 s in 95 % von 20 Messläufen | Performancetest (Messung von `runtimeMs`) | AT-04-34 | 1 |
+| NF-01 | Performance der Simulation: 10.000 Pfade, mit 5 Anlagen (Messfall), Horizont bis 30 Jahre, serverseitig ≤ 3 s in 95 % von 20 Messläufen | Performancetest (Messung von `runtimeMs`) | AT-04-34 | 1 |
 | NF-02 | Performance der Suche: ≤ 1 s mit Cache-Treffer, ≤ 3 s ohne Cache | Zeitmessung im Abnahmetest | AT-02-11, AT-02-12 | 1 |
 | NF-03 | Passwörter nur gehasht gespeichert | Unit-Test und Prüfung der Datenbankinhalte | wird mit US-01 ergänzt | 2 |
 | NF-04 | Zugriff auf fremde Ressourcen liefert 404 | Integrations- und Abnahmetest | wird mit US-01 ergänzt | 2 |
@@ -179,4 +180,4 @@ Das Testkonzept wird zu Beginn jedes Sprints überprüft und bei Bedarf ergänzt
 
 - **Sprint 2:** Abnahme- und Integrationstests für die Anmeldung (US-01), einschließlich NF-03 (gehashte Passwörter) und NF-04 (fremde Ressourcen liefern 404). Für US-02 bis US-04 kommt die Vorbedingung „Nutzer ist angemeldet“ hinzu; bestehende Testfälle werden um den Fall ohne gültigen Token (`401 UNAUTHORIZED`) ergänzt. Tests für die Kennzahlen (US-05, Feld `metrics`).
 - **Sprint 3:** US-07 als zweite Kern-Story mit eigenen Unit-Tests, Abnahmetestfällen und Pfadabdeckung ihres Aktivitätsdiagramms; Speichern von Simulationen (US-08).
-- **Laufend:** Nachweis der übrigen NFRs (NF-05, NF-09, NF-13) laut Tabelle in Abschnitt 10; Aktualisierung der Testdaten, sobald die Finanzdaten-API ausgewählt ist (BE #16).
+- **Laufend:** Nachweis der übrigen NFRs (NF-05, NF-09, NF-13) laut Tabelle in Abschnitt 10; Ergänzung von Tests, sobald ein Fallback-Anbieter zu Twelve Data entschieden ist.
