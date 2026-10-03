@@ -48,28 +48,30 @@ Der Schwerpunkt liegt auf der Kernlogik der Kern-Story US-04 und der Portfolio-P
 |---|---|---|---|---|
 | **Unit-Tests** | Kernlogik isoliert prüfen, ohne Datenbank, ohne Web-Server und ohne Internet. Abhängigkeiten werden durch Mocks ersetzt. | Backend: JUnit 5, Mockito<br>Frontend: Jest | Entwickler der jeweiligen Komponente; Unit-Tests der Kernlogik laut Sprint Backlog: BE #32 (Portfolio), BE #38 (Suche), BE #41 (Simulationslogik) | Während der Umsetzung, vor dem Pull Request; automatisch in der CI bei jedem Pull Request |
 | **Integrationstests** | REST-Endpunkte einschließlich Validierung, Fehlerformat und Zusammenspiel Controller → Service prüfen; Marktdaten kommen aus dem `MockMarketDataProvider`. | Spring Boot Test mit `@WebMvcTest` und `MockMvc` | Entwickler des jeweiligen Endpunkts (BE #27, BE #33, BE #39/#40) | Mit Fertigstellung eines Endpunkts; automatisch in der CI bei jedem Pull Request |
-| **Abnahmetests** | Black-Box-Prüfung aus Nutzersicht gegen die Akzeptanzkriterien, die Alternativszenarien des Aktivitätsdiagramms und relevante Grenzwerte | Browser (Oberfläche) und ein HTTP-Client für direkte API-Aufrufe; Testfälle in `abnahmetestfaelle-sprint-<n>.md` | Product Owner (KujoBaraka), unterstützt von den Entwicklern | Nach Fertigstellung einer Story, spätestens vor dem Sprint Review |
-| **Nicht-funktionale Tests** | Nachweis der NFRs, in Sprint 1 vor allem Performance der Simulation (NF-01), Ausfallsicherheit (NF-07) und Reproduzierbarkeit (NF-08) | NF-01: wiederholte Messung über das Feld `runtimeMs` der Simulationsantwort; NF-08: JUnit-Test und Abnahmetest; übrige siehe Abschnitt 10 | Entwickler (Messung), Product Owner (Abnahme) | NF-08 und NF-12 automatisch in der CI; NF-01 und NF-07 vor dem Sprint Review |
+| **Abnahmetests** | Prüfung aus Nutzersicht gegen die Akzeptanzkriterien, die Alternativszenarien des Aktivitätsdiagramms und relevante Grenzwerte | Browser (Oberfläche) und ein HTTP-Client für direkte API-Aufrufe; automatisierte Tests für die als „automatisiert“ gekennzeichneten Testfälle; Testfälle in `abnahmetestfaelle-sprint-<n>.md` | Product Owner (KujoBaraka), unterstützt von den Entwicklern | Nach Fertigstellung einer Story, spätestens vor dem Sprint Review |
+| **Nicht-funktionale Tests** | Nachweis der NFRs, in Sprint 1 vor allem Performance der Simulation (NF-01), Ausfallsicherheit (NF-07) und Reproduzierbarkeit (NF-08) | NF-01: wiederholte Messung über das Feld `runtimeMs` der Simulationsantwort; NF-08: JUnit-Test; übrige siehe Abschnitt 10 | Entwickler (Messung), Product Owner (Abnahme) | NF-08 und NF-12 automatisch in der CI; NF-01 und NF-07 vor dem Sprint Review |
+
+**Durchführung der Abnahmetestfälle.** Grenzwerttestfälle, reine API-Fälle und Fälle, die einen gezielt manipulierten Mock erfordern, werden als automatisierte Unit- oder Integrationstests umgesetzt und bei jedem Pull Request in der CI-Pipeline ausgeführt. Manuelle Abnahmetests durch den Product Owner beschränken sich auf Normalfälle und Alternativszenarien aus Nutzersicht sowie auf Messungen, die nicht in der CI laufen können (NF-01, NF-02). Das senkt den manuellen Aufwand pro Sprint, macht die Ausführung reproduzierbar und erhöht die Testabdeckung (NF-11). Welche Durchführung für einen Testfall gilt, steht in der Spalte „Durchführung“ der Abnahmetestfälle. Grenzwerte desselben Eingabefelds werden in einem Testfall zusammengefasst und als parametrisierter Test umgesetzt.
 
 ## 5. Testmethoden
 
 **Äquivalenzklassen.** Jedes Eingabefeld wird in Klassen gültiger und ungültiger Werte zerlegt, die sich gleich verhalten sollen. Aus jeder Klasse wird mindestens ein Vertreter getestet. Beispiel Anlagehorizont: gültig sind ganze Zahlen von 1 bis 40; ungültig sind Werte kleiner 1, Werte größer 40, Kommazahlen und ein leeres Feld.
 
-**Grenzwertanalyse.** An jeder Grenze wird der Wert knapp darunter, genau auf der Grenze und knapp darüber getestet, weil Fehler wie `<` statt `<=` dort auftreten. Beispiele: Pfadanzahl 999, 1.000, 50.000 und 50.001; Gewichtungssumme 99,98 %, 99,99 %, 100,00 %, 100,01 % und 100,02 %.
+**Grenzwertanalyse.** An jeder Grenze wird der Wert knapp darunter, genau auf der Grenze und knapp darüber getestet, weil Fehler wie `<` statt `<=` dort auftreten. Beispiele: Pfadanzahl 999, 1.000, 50.000 und 50.001; Gewichtungssumme 99,98 %, 99,99 %, 100,01 % und 100,02 %.
 
-Exakte Dezimalrechnung: Die Grenzwerte der Gewichtungssumme liegen genau auf der Toleranz von ± 0,01 Prozentpunkten. Bei Rechnung mit `double` können Summen mit Nachkommastellen nicht exakt dargestellt werden; so ergibt die Prüfung `abs(70 + 30.01 - 100) <= 0.01` in `double` den Wert `false`, obwohl die Summe 100,01 % gültig ist. Deshalb ist festgelegt, dass das Backend Gewichtungen als exakte Dezimalzahlen (`BigDecimal`) verarbeitet und Gewichtungen höchstens 2 Nachkommastellen haben (PO-Entscheidung E2). Nachgewiesen wird das durch den Gleitkomma-Testfall AT-03-22 (69,99 % + 30,01 % wird als 100,00 % akzeptiert) und durch die Grenzwerte AT-03-09 bis AT-03-13; AT-03-12 (70 % + 30,01 %) ist dabei der Fall, der eine Rechnung mit `double` tatsächlich scheitern lässt. Alle diese Fälle und AT-03-21 werden auch als Unit-Tests von `Portfolio.validate()` umgesetzt.
+Exakte Dezimalrechnung: Die Grenzwerte der Gewichtungssumme liegen genau auf der Toleranz von ± 0,01 Prozentpunkten. Bei Rechnung mit `double` können Summen mit Nachkommastellen nicht exakt dargestellt werden; so ergibt die Prüfung `abs(70 + 30.01 - 100) <= 0.01` in `double` den Wert `false`, obwohl die Summe 100,01 % gültig ist. Deshalb ist festgelegt, dass das Backend Gewichtungen als exakte Dezimalzahlen (`BigDecimal`) verarbeitet und Gewichtungen höchstens 2 Nachkommastellen haben (PO-Entscheidung E2). Nachgewiesen wird das durch die Grenzwerte der Gewichtungssumme (AT-03-03, darunter 70 % + 30,01 %) und den Gleitkomma-Testfall in AT-03-05 (69,99 % + 30,01 % wird als 100,00 % akzeptiert). Beide werden als Unit-Tests von `Portfolio.validate()` umgesetzt.
 
 **Ableitung aus dem Aktivitätsdiagramm.** Für die Kern-Story US-04 wird aus dem Aktivitätsdiagramm (`diagramme/aktivitaetsdiagramm_us-04_v1.puml`) für jede Verzweigung mindestens ein Testfall abgeleitet, sodass jeder Pfad vom Start bis zu einem Endknoten mindestens einmal durchlaufen wird (Pfadabdeckung der Alternativszenarien):
 
 | Verzweigung im Aktivitätsdiagramm | Pfade | Abnahmetestfälle |
 |---|---|---|
-| Eingaben prüfen | gültig / ungültig (Rücksprung zur Eingabe, HTTP 400) | AT-04-01, AT-04-05, AT-04-13 bis AT-04-31 |
-| Portfolio laden | vorhanden / nicht vorhanden (HTTP 404) | AT-04-01, AT-04-06 |
+| Eingaben prüfen | gültig / ungültig (Rücksprung zur Eingabe, HTTP 400) | AT-04-01, AT-04-04, AT-04-10 bis AT-04-12 |
+| Portfolio laden | vorhanden / nicht vorhanden (HTTP 404) | AT-04-01, AT-04-05 |
 | Seed | ohne Seed (System erzeugt) / mit Seed | AT-04-01, AT-04-02 |
-| Kursdaten | verfügbar / nicht verfügbar (HTTP 503) | AT-04-01, AT-04-07 |
-| Kurshistorie je Anlage | ≥ 3 Jahre / < 3 Jahre (HTTP 422) | AT-04-12, AT-04-10, AT-04-11, AT-04-37 |
+| Kursdaten | verfügbar / nicht verfügbar (HTTP 503) | AT-04-01, AT-04-06 |
+| Kurshistorie je Anlage | ≥ 3 Jahre / < 3 Jahre (HTTP 422) | AT-04-08, AT-04-09 |
 
-Der Cache-Fallback aus NF-07 ist im Aktivitätsdiagramm v1 nicht dargestellt; er wird zusätzlich durch AT-04-08 und AT-04-09 abgedeckt.
+Der Cache-Fallback aus NF-07 ist im Aktivitätsdiagramm v1 nicht dargestellt; er wird zusätzlich durch AT-04-07 abgedeckt.
 
 **Test-Orakel für die Simulation.** Weil Simulationsergebnisse zufallsabhängig sind, werden in Unit-Tests Fälle mit bekanntem Ergebnis verwendet: Bei einer Volatilität von 0 sind alle Pfade gleich und der Endwert lässt sich aus Startkapital, Sparrate und Rendite exakt berechnen. Zusätzlich werden Eigenschaften geprüft, die immer gelten müssen, z. B. 5. Perzentil ≤ 50. Perzentil ≤ 95. Perzentil in jedem Monat.
 
@@ -81,11 +83,11 @@ Alle automatisierten Tests verwenden den `MockMarketDataProvider`, der das Inter
 |---|---|---|
 | Anlage EUNL (`assetId` 17) | iShares Core MSCI World UCITS ETF, ISIN IE00B4L5Y983, XETRA, EUR (wie im API-Design); synthetische Kursreihe über 10 Jahre | Normalfälle Suche, Portfolio, Simulation |
 | Anlage IS3N (`assetId` 23) | iShares Core MSCI EM IMI (wie im API-Design); synthetische Kursreihe über 10 Jahre | Zweite Anlage für Portfolio 70 % / 30 % |
-| Zwei Anlagen mit kurzer Historie | je eine Kursreihe knapp unter 3 Jahren | Alternativszenario < 3 Jahre mit einer und mit zwei betroffenen Anlagen (AT-04-10, AT-04-11, AT-04-37) |
-| Anlage mit genau 3 Jahren Historie | Kursreihe von genau 3 Jahren | Grenzwert (AT-04-12) |
+| Zwei Anlagen mit kurzer Historie | je eine Kursreihe knapp unter 3 Jahren | Alternativszenario < 3 Jahre mit zwei betroffenen Anlagen (AT-04-08) und Grenzwert (AT-04-09) |
+| Anlage mit genau 3 Jahren Historie | Kursreihe von genau 3 Jahren | Grenzwert (AT-04-09) |
 | Anlage mit konstantem Wachstum | Kursreihe ohne Schwankung | Test-Orakel: Volatilität 0, bekannte Rendite |
-| 5 Anlagen mit 10 Jahren Historie | synthetische Kursreihen | Performancetest NF-01 mit 5 Anlagen (Messfall) |
-| Mehr als 25 Suchtreffer | mindestens 26 synthetische Anlagen, deren Name „MSCI“ enthält | Grenzwerte des Suchparameters `limit` (AT-02-14 bis AT-02-18) |
+| 5 Anlagen mit 10 Jahren Historie | synthetische Kursreihen | Performancetest NF-01 mit 5 Anlagen (Messfall, AT-04-14) |
+| Mehr als 25 Suchtreffer | mindestens 26 synthetische Anlagen, deren Name „MSCI“ enthält | Grenzwerte des Suchparameters `limit` (AT-02-05) |
 | Beispielportfolios | „Mein Weltportfolio“ (EUNL 70 %, IS3N 30 %); Einzelanlage 100 %; Portfolio aus 5 Anlagen à 20 % | Simulation, Performance |
 | Fester Seed | `42` (wie im API-Design) | Reproduzierbare Ergebnisse |
 
@@ -101,7 +103,7 @@ Alle automatisierten Tests verwenden den `MockMarketDataProvider`, der das Inter
 | **CI-Pipeline (GitHub Actions)** | Backend: Build, Unit- und Integrationstests, Abdeckungsbericht mit JaCoCo; Frontend: Build und Jest-Tests. Ohne Internetzugriff auf die Finanzdaten-API und ohne API-Key. | Automatisch bei jedem Pull Request auf `main`; ein Merge ist nur bei erfolgreicher Pipeline möglich (CONTRIBUTING.md) |
 | **Abnahmeumgebung** | Vollständige Anwendung (Frontend, Backend, PostgreSQL), Backend mit `MockMarketDataProvider` | Vor dem Sprint Review |
 
-Für die Alternativszenarien muss der `MockMarketDataProvider` in der Abnahmeumgebung einen Ausfall der Finanzdaten-API (Verbindungsfehler und ausbleibende Antwort) sowie Cache-Einträge mit vorgegebenem Alter darstellen können. [OFFEN: Wie dieser Schalter umgesetzt wird (z. B. Konfigurationswert oder Testprofil) und ob die Abnahme lokal mit `docker compose up` oder auf dem Server stattfindet, ist mit BE #27, BE #39 und Docs #29 abzustimmen.]
+Für die manuell durchgeführten Alternativszenarien muss der `MockMarketDataProvider` in der Abnahmeumgebung einen Ausfall der Finanzdaten-API darstellen können. Fälle mit vorgegebenem Cache-Alter oder ausbleibender Antwort werden automatisiert getestet. [OFFEN: Wie der Schalter für den API-Ausfall umgesetzt wird (z. B. Konfigurationswert oder Testprofil) und wo die Abnahmeumgebung läuft (lokal oder auf Heroku), ist mit BE #27, BE #39 und Docs #29 abzustimmen.]
 
 ## 8. Ein- und Ausgangskriterien
 
@@ -114,6 +116,8 @@ Für die Alternativszenarien muss der `MockMarketDataProvider` in der Abnahmeumg
 **Ausgangskriterien (Story gilt als abgenommen)**
 
 Eine Story gilt als abgenommen, wenn alle ihre Abnahmetestfälle den Status `bestanden` haben und kein offener Fehler mit Priorität „hoch“ besteht. Damit ist der Punkt „die Abnahmetestfälle dokumentiert und bestanden sind“ der Definition of Done erfüllt. Die übrigen Punkte der Definition of Done (Code-Review, Unit-Tests in der CI, aktualisierte Diagramme, KI-Log) gelten unverändert.
+
+Ein automatisiert durchgeführter Abnahmetestfall gilt als `bestanden`, wenn alle ihm zugeordneten Tests im letzten CI-Lauf auf `main` erfolgreich waren.
 
 Für die Kernlogik gilt zusätzlich der Zielwert der Testabdeckung aus Abschnitt 9 (NF-11).
 
@@ -128,7 +132,7 @@ Für die Kernlogik gilt zusätzlich der Zielwert der Testabdeckung aus Abschnitt
 **Interpretation und Grenzen:**
 
 - Eine hohe Abdeckung zeigt nur, dass Code ausgeführt wurde, nicht dass das Ergebnis geprüft wurde. Ein Test ohne aussagekräftige Assertions erhöht die Abdeckung, findet aber keine Fehler. Deshalb wird im Code-Review darauf geachtet, dass jeder Test erwartete Werte prüft.
-- Fehlende Anforderungen erkennt die Metrik nicht: Code, der nie geschrieben wurde, kann nicht unabgedeckt sein. Diese Lücke schließen die Abnahmetestfälle und die Rückverfolgbarkeitsmatrix.
+- Fehlende Anforderungen erkennt die Metrik nicht: Code, der nie geschrieben wurde, kann nicht unabgedeckt sein. Diese Lücke schließen die Abnahmetestfälle, die über die Spalte „Bezug“ jedem Akzeptanzkriterium zugeordnet sind.
 - Der Gesamtwert wird nach Klassen aufgeschlüsselt betrachtet. Ein hoher Durchschnitt kann eine schwach getestete Kernklasse verdecken.
 - Konfigurations- und reine Datenklassen werden nicht in den Zielwert einbezogen, damit die Metrik die Kernlogik widerspiegelt.
 
@@ -136,26 +140,26 @@ Für die Kernlogik gilt zusätzlich der Zielwert der Testabdeckung aus Abschnitt
 
 | NFR | Anforderung | Art des Nachweises | Testfall-ID oder Prüfmethode | Sprint |
 |---|---|---|---|---|
-| NF-01 | Performance der Simulation: 10.000 Pfade, mit 5 Anlagen (Messfall), Horizont bis 40 Jahre, serverseitig ≤ 3 s in 95 % von 20 Messläufen | Performancetest (Messung von `runtimeMs`) | AT-04-34 | 1 |
-| NF-02 | Performance der Suche: ≤ 1 s mit Cache-Treffer, ≤ 3 s ohne Cache | Zeitmessung im Abnahmetest | AT-02-11, AT-02-12 | 1 |
+| NF-01 | Performance der Simulation: 10.000 Pfade, mit 5 Anlagen (Messfall), Horizont 30 Jahre, serverseitig ≤ 3 s in 95 % von 20 Messläufen | Performancetest (Messung von `runtimeMs`) | AT-04-14 | 1 |
+| NF-02 | Performance der Suche: ≤ 1 s mit Cache-Treffer, ≤ 3 s ohne Cache | Zeitmessung im Abnahmetest | AT-02-08 | 1 |
 | NF-03 | Passwörter nur gehasht gespeichert | Unit-Test und Prüfung der Datenbankinhalte | wird mit US-01 ergänzt | 2 |
 | NF-04 | Zugriff auf fremde Ressourcen liefert 404 | Integrations- und Abnahmetest | wird mit US-01 ergänzt | 2 |
-| NF-05 | Nur HTTPS erreichbar | Manuelle Prüfung: Aufruf per `http://` wird nicht unverschlüsselt beantwortet | Prüfung nach dem Server-Deployment (Docs #29) | ab Bereitstellung auf dem Server |
+| NF-05 | Nur HTTPS erreichbar | Manuelle Prüfung: Aufruf per `http://` wird nicht unverschlüsselt beantwortet | Prüfung nach dem Deployment (Docs #29) | ab Deployment |
 | NF-06 | API-Key nur als Umgebungsvariable im Backend | Review: kein Key in Repositories und im ausgelieferten Frontend-Code; `.env` in `.gitignore`; CI-Tests laufen ohne Key | Checkliste im Code-Review; NF-12-Prüfung | 1 |
-| NF-07 | Bei API-Ausfall Antwort ≤ 5 s mit verständlicher Meldung (HTTP 503); Kursdaten jünger als 24 h werden weiterverwendet | Abnahmetest mit simuliertem Ausfall; Unit-Test des Cache-Fallbacks | AT-02-09, AT-02-10, AT-02-13, AT-04-07, AT-04-08, AT-04-09, AT-04-35 | 1 |
-| NF-08 | Gleicher Seed und gleiche Eingaben ergeben identische Perzentile | Automatisierter Unit-Test (`MonteCarloEngine`) und Abnahmetest | AT-04-32, AT-04-33 | 1 |
+| NF-07 | Bei API-Ausfall Antwort ≤ 5 s mit verständlicher Meldung (HTTP 503); Kursdaten jünger als 24 h werden weiterverwendet | Abnahmetest mit simuliertem Ausfall; Unit-Test des Cache-Fallbacks | AT-02-07, AT-04-06, AT-04-07 | 1 |
+| NF-08 | Gleicher Seed und gleiche Eingaben ergeben identische Perzentile | Automatisierter Unit-Test (`MonteCarloEngine`) | AT-04-13 | 1 |
 | NF-09 | 3 von 3 Testpersonen erstellen ohne Hilfe in < 5 min ein Portfolio und simulieren es | Bedienbarkeitstest mit Testpersonen ohne Vorkenntnisse | [OFFEN: Termin und Ablauf des Bedienbarkeitstests] | [OFFEN] |
 | NF-10 | Alle Seiten ab 360 px Breite ohne horizontales Scrollen bedienbar | Manuelle Prüfung im Browser bei 360 px Breite | Sichtprüfung aller Seiten im Abnahmetest | ab 1 (je neue Seite) |
 | NF-11 | Zeilenabdeckung der Kernlogik ≥ 80 % in der CI | JaCoCo-Bericht | Abschnitt 9, Docs #24 | ab 1 |
 | NF-12 | Tests laufen mit `MockMarketDataProvider` ohne Internetzugang | CI-Lauf ohne API-Key und ohne Zugriff auf die Finanzdaten-API | grüner CI-Lauf | ab 1 |
-| NF-13 | Start aller Komponenten mit `docker compose up` | Manueller Start in sauberer Umgebung | Prüfung vor dem Sprint Review | ab Bereitstellung von `deployment/docker-compose.yml` |
-| NF-14 | Hinweis „Keine Anlageberatung“ auf jeder Ergebnisseite | Abnahmetest | AT-04-36 | 1 |
+| NF-13 | Start aller Komponenten mit `docker compose up` | Manueller Start in sauberer Umgebung | Prüfung vor dem Sprint Review [OFFEN: Anforderung an das Deployment bei Umstieg auf Heroku neu formulieren] | ab Deployment |
+| NF-14 | Hinweis „Keine Anlageberatung“ auf jeder Ergebnisseite | Abnahmetest | AT-04-15 | 1 |
 | NF-15 | Schnittstelle vollständig in `api/` beschrieben | Abgleich der Integrationstests und Abnahmetests mit dem API-Design | Review bei jeder Schnittstellenänderung | ab 1 |
 
 ## 11. Fehlermanagement
 
 1. Ein Fehler, der bei einem Test gefunden wird, wird als GitHub-Issue mit dem Label `bug` im betroffenen Repository (BE, FE oder Docs) angelegt.
-2. Das Issue enthält die Testfall-ID (z. B. AT-04-16), die Schritte zur Reproduktion, das erwartete und das tatsächliche Ergebnis und, falls hilfreich, einen Screenshot.
+2. Das Issue enthält die Testfall-ID (z. B. AT-04-10), die Schritte zur Reproduktion, das erwartete und das tatsächliche Ergebnis und, falls hilfreich, einen Screenshot.
 3. Die Priorität wird vom Product Owner festgelegt:
    - **hoch:** Ein Akzeptanzkriterium ist nicht erfüllt oder die Anwendung stürzt ab. Die Story kann nicht abgenommen werden.
    - **mittel:** Ein Akzeptanzkriterium ist erfüllt, aber z. B. eine Meldung ist missverständlich.
@@ -167,7 +171,7 @@ Für die Kernlogik gilt zusätzlich der Zielwert der Testabdeckung aus Abschnitt
 
 | Rolle / Person | Aufgaben im Test |
 |---|---|
-| Product Owner – Mert Eminel (KujoBaraka) | Sichtet die Abnahmetestfälle, führt die Abnahmetests durch, setzt den Status, priorisiert gefundene Fehler, nimmt Stories ab |
+| Product Owner – Mert Eminel (KujoBaraka) | Sichtet die Abnahmetestfälle, führt die manuellen Abnahmetests durch, setzt den Status, priorisiert gefundene Fehler, nimmt Stories ab |
 | Scrum Master – Carl Stibbe (carlstibbe) | Achtet auf die Einhaltung der Definition of Done; schreibt Tests zu eigenen Umsetzungs-Tasks (z. B. BE #39, FE #2, FE #3) |
 | Entwickler – Peter Orban (Pixxels02) | Unit-Tests für Portfolio, Suche und Simulationslogik (BE #32, BE #38, BE #41); CI-Pipelines; Messung und Interpretation der Testabdeckung (Docs #24) |
 | Entwickler – Paul Kaufmann (Paul02112004) | Testkonzept und Abnahmetestfälle (Docs #23); Tests zu eigenen Endpunkten (BE #27, BE #33); unterstützt den Product Owner bei der Abnahme |
