@@ -2,7 +2,7 @@
 
 **Projekt:** LookUpStock · **Issue:** Docs #16 · **Verantwortlich:** Mert Eminel (Product Owner)
 **Version:** 2 · **Stand:** 02.10.2026
-**Grundlagen:** NFR-Entwurf von Paul Kaufmann, Product Backlog, API-Design (Stand 30.09.2026, Token im JSON-Body), ADR-01 bis ADR-03, Testkonzept und Abnahmetestfälle Sprint 1, PO-Entscheidungen vom 02.10.2026
+**Grundlagen:** NFR-Entwurf von Paul Kaufmann, Product Backlog, API-Design (Stand 02.10.2026, Token im JSON-Body), ADR-01 bis ADR-03, Testkonzept und Abnahmetestfälle Sprint 1, PO-Entscheidungen vom 02.10.2026
 
 Die Nummerierung NF-01 bis NF-15 stammt aus dem Entwurf und bleibt unverändert, weil die ADRs bereits darauf verweisen. NF-16 wurde ergänzt.
 
