@@ -102,6 +102,7 @@ package "Logikschicht (ADR-01)" {
     + horizonYears: int
     + paths: int
     + seed: Long
+    + validate(): void
   }
   class EstimationResult <<geplant>> {
     + historyFrom: LocalDate
