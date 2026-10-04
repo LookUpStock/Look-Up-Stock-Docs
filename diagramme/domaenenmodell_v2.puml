@@ -1,6 +1,15 @@
-@startuml domaenenmodell_v1
-' Domänenmodell v1 – LookUpStock, Sprint 1 (US-02, US-03, US-04)
-' Issue #17 · KI-Log Nr. 16
+@startuml domaenenmodell_v2
+' Domänenmodell v2 – LookUpStock, Sprint 1 (US-02, US-03, US-04)
+' Issue #17 · Stand 02.10.2026
+' Grundlagen: Kurzformat-Tabellen v2, API-Design (Stand 02.10.2026),
+'             PO-Entscheidungen E1 bis E10
+' Änderungen gegenüber v1:
+'   - Schätzzeitraum von Schätzung an Simulation verschoben
+'     (API-Design: ein gemeinsames historyFrom/historyTo je Simulation)
+'   - Regel 3 Jahre Kurshistorie = mindestens 36 Monatswerte je Anlage (E8)
+'   - Regeln zum Portfolionamen ergänzt (E1, E9)
+'   - Gewichtung höchstens 2 Nachkommastellen (E2)
+' KI-Nutzung: siehe KI-Log (Einträge Domänenmodell v1 und v2)
 
 skinparam classAttributeIconSize 0
 skinparam shadowing false
@@ -21,7 +30,7 @@ hide circle
 hide methods
 hide empty members
 
-title Domänenmodell v1 – LookUpStock (Sprint 1: US-02, US-03, US-04)
+title Domänenmodell v2 – LookUpStock (Sprint 1: US-02, US-03, US-04)
 
 class Portfolio {
   name
@@ -50,6 +59,8 @@ class Kurswert {
 
 class Simulation {
   durchgeführtAm
+  schätzzeitraumVon
+  schätzzeitraumBis
 }
 
 class Simulationsparameter {
@@ -63,8 +74,6 @@ class Simulationsparameter {
 class Schätzung {
   jahresrendite
   jahresvolatilität
-  zeitraumVon
-  zeitraumBis
 }
 
 class Verlaufspunkt {
@@ -84,11 +93,23 @@ Simulation "1" -right- "1..*" Schätzung : basiert auf >
 Schätzung "0..*" -up- "1" Anlage : gilt für >
 Simulation "1" -down- "1..*" Verlaufspunkt : ergibt >
 
+note top of Portfolio
+  {name: Pflicht, höchstens 100 Zeichen}
+  {ein Name nur aus Leerzeichen gilt als leer}
+end note
+
 note top of Position
-  {gewichtung > 0 %}
+  {gewichtung > 0 %, höchstens
+   2 Nachkommastellen}
   {Summe der Gewichtungen je Portfolio
    = 100 % (Toleranz ± 0,01 Prozentpunkte)}
   {jede Anlage höchstens einmal je Portfolio}
+end note
+
+note bottom of Kurswert
+  {ein Kurswert je Monat (Monatsschlusskurs)}
+  {für eine Simulation sind je Anlage
+   mindestens 36 Monatswerte nötig}
 end note
 
 note left of Simulationsparameter
@@ -100,12 +121,16 @@ note left of Simulationsparameter
    erzeugt und dem Nutzer angezeigt}
 end note
 
+note bottom of Simulation
+  {Schätzzeitraum gilt gemeinsam
+   für alle Anlagen der Simulation}
+end note
+
 note bottom of Schätzung
   {genau eine Schätzung je Anlage
    des simulierten Portfolios}
   {wird aus den Kurswerten der Anlage
-   im Zeitraum ermittelt}
-  {Zeitraum umfasst mindestens 3 Jahre}
+   im Schätzzeitraum ermittelt}
 end note
 
 note right of Verlaufspunkt
@@ -119,9 +144,9 @@ end note
 legend bottom left
   <b>Legende</b>
   Konzeptionelles Modell nach Larman: Fachbegriffe, Attribute und Beziehungen, keine Operationen und keine technischen Klassen.
-  /attribut = abgeleiteter (berechneter) Wert · {…} = fachliche Regel (PO-Festlegungen vom 30.09.2026)
-  <b>Bewusst nicht enthalten (folgt in v2/v3):</b> Nutzer (US-01), Kennzahlen (US-05), Vergleich (US-07), gespeicherte Simulation (US-08).
-  Finanzdaten-API ist Akteur (Use-Case-Diagramm), kein Fachbegriff. Einzelne Simulationspfade werden im Glossar erklärt.
+  /attribut = abgeleiteter (berechneter) Wert · {…} = fachliche Regel (PO-Festlegungen vom 30.09.2026 und 02.10.2026)
+  <b>Bewusst nicht enthalten (folgt in späteren Versionen):</b> Nutzer (US-01), Zielbetrag und Kennzahlen (US-05), Vergleich (US-07), gespeicherte Simulation (US-08).
+  Finanzdaten-API ist Akteur (Use-Case-Diagramm), kein Fachbegriff. Cache ist eine technische Lösung und daher nicht enthalten. Einzelne Simulationspfade werden im Glossar erklärt.
 endlegend
 
 @enduml
