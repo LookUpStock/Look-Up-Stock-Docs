@@ -1,0 +1,167 @@
+@startuml sequenzdiagramm_us-04_v1
+' LookUpStock – Sequenzdiagramm zur Kern-Story US-04 mit GRASP-Kennzeichnung
+' Issue Docs #22 · Sprint 1 · Stand 04.10.2026
+' Grundlagen: Aktivitätsdiagramm US-04 v2, Klassendiagramm v1, ADR-01 bis ADR-03,
+'             API-Design (Stand 02.10.2026, POST /simulations), NF-07, PO-Entscheidungen E6, E8
+' Werkzeug: PlantUML
+
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign left
+skinparam responseMessageBelowArrow true
+skinparam ParticipantBackgroundColor #FFFFFF
+skinparam ParticipantBorderColor #333333
+skinparam ActorBorderColor #333333
+skinparam ActorBackgroundColor #FFFFFF
+skinparam SequenceLifeLineBorderColor #888888
+skinparam NoteBackgroundColor #FFF8DC
+skinparam NoteBorderColor #999999
+skinparam SequenceGroupBorderColor #666666
+
+title Sequenzdiagramm US-04 – Monte-Carlo-Simulation durchführen (v1, Sprint 1)
+
+actor Nutzer
+participant "Frontend\n(Browser)" as FE
+participant ":SimulationController" as SC
+participant ":SimulationService" as SS
+participant "parameters:\nSimulationParameters" as SP
+participant ":PortfolioService" as PS
+participant "portfolio:\nPortfolio" as P
+participant ":CachingMarketDataProvider" as CMP
+participant ":TwelveDataProvider" as TDP
+participant "Twelve Data\n«extern»" as TD
+participant ":ParameterEstimator" as PE
+participant ":MonteCarloEngine" as MCE
+participant ":MetricsCalculator" as MC
+
+autonumber
+
+Nutzer -> FE : Eingaben machen, „Simulation starten“
+activate FE
+FE -> SC : POST /api/v1/simulations\n{portfolioId, parameters}
+activate SC
+SC -> SS : simulate(portfolioId, parameters)
+activate SS
+note right of SS
+  <b>GRASP Controller (ADR-02)</b>
+  empfängt die Systemoperation und
+  delegiert jeden Schritt
+end note
+
+SS -> SP : validate()
+activate SP
+note right of SP
+  <b>GRASP Information Expert</b>
+  (wie Portfolio.validate(), ADR-03)
+  Horizont 1–40, ≥ 0, nicht beide 0,
+  Pfade 1.000–50.000, Seed ganzzahlig
+end note
+alt Eingaben ungültig
+  SP --> SS : ValidationException
+  SS --> SC : ValidationException
+  SC --> FE : 400 VALIDATION_ERROR
+  FE --> Nutzer : Fehlermeldung am Feld,\nEingaben bleiben erhalten
+end
+deactivate SP
+
+SS -> PS : findById(portfolioId)
+activate PS
+alt Portfolio nicht vorhanden
+  PS --> SS : NotFoundException
+  SS --> SC : NotFoundException
+  SC --> FE : 404 NOT_FOUND\n„Portfolio nicht gefunden.“
+end
+PS --> SS : portfolio
+deactivate PS
+
+opt ohne Seed
+  SS -> SS : generateSeed()
+end
+
+SS -> P : getWeights()
+activate P
+note right of P
+  <b>GRASP Information Expert (ADR-03)</b>
+  Portfolio kennt seine Positionen und
+  liefert die Anteile in fester Reihenfolge
+end note
+P --> SS : List<WeightedAsset>
+deactivate P
+
+loop für jede Anlage des Portfolios
+  SS -> CMP : getMonthlyPrices(asset)
+  activate CMP
+  note right of SS
+    <b>GRASP Low Coupling (ADR-01, NF-12)</b>
+    SimulationService kennt nur das
+    Interface MarketDataProvider
+  end note
+  alt Kursdaten im Cache und jünger als 24 h
+    CMP --> SS : List<PricePoint> (aus Cache)
+  else nicht im Cache oder älter als 24 h
+    CMP -> TDP : getMonthlyPrices(asset)
+    activate TDP
+    TDP -> TD : time_series (Monatswerte)
+    alt Twelve Data erreichbar
+      TD --> TDP : Kursdaten
+      TDP --> CMP : List<PricePoint>
+      CMP -> CMP : im Cache speichern
+      CMP --> SS : List<PricePoint>
+    else nicht erreichbar
+      TD --> TDP : Fehler / Zeitüberschreitung
+      TDP --> CMP : Fehler
+      CMP --> SS : UpstreamUnavailableException
+      SS --> SC : UpstreamUnavailableException
+      SC --> FE : 503 UPSTREAM_UNAVAILABLE (≤ 5 s)\n„Kursdaten sind gerade nicht verfügbar.“
+    end
+    deactivate TDP
+  end
+  deactivate CMP
+end
+
+SS -> PE : estimate(prices)
+activate PE
+alt mindestens eine Anlage < 36 Monatswerte (E8)
+  PE --> SS : InsufficientDataException\n(alle betroffenen Anlagen, E6)
+  SS --> SC : InsufficientDataException
+  SC --> FE : 422 INSUFFICIENT_DATA\n„Für folgende Anlagen liegen weniger als\n3 Jahre Kursdaten vor: …“
+end
+PE --> SS : EstimationResult\n(gemeinsamer Schätzzeitraum,\nRendite und Volatilität je Anlage)
+deactivate PE
+
+SS -> MCE : simulate(weights, estimation, parameters)
+activate MCE
+MCE --> SS : paths (Pfade × Monate)
+deactivate MCE
+
+SS -> MC : percentiles(paths)
+activate MC
+MC --> SS : List<TimelinePoint> (p5, p50, p95 je Monat)
+deactivate MC
+
+create participant ":SimulationResult" as SR
+SS -> SR : <<create>>
+note right of SR
+  <b>GRASP Creator</b>
+  SimulationService hat alle Daten
+  zur Initialisierung des Ergebnisses
+end note
+
+SS --> SC : SimulationResult
+deactivate SS
+SC --> FE : 200 OK\n{parameters (inkl. seed), estimates, timeline, runtimeMs}
+deactivate SC
+FE --> Nutzer : Fächerdiagramm (5., 50., 95. Perzentil)\nund verwendeter Seed
+deactivate FE
+
+legend bottom left
+  <b>Legende</b>
+  Rückgaben gestrichelt · Fehler werden als Exception an den REST-Controller gegeben; der GlobalExceptionHandler
+  wandelt sie in das Fehlerformat des API-Designs um (nicht dargestellt).
+  GRASP: Controller (ADR-02), Information Expert (ADR-03), Low Coupling (ADR-01, NF-12), Creator.
+  Simulation und Kursdatenabruf sind noch nicht implementiert; Klassen und Methoden entsprechen dem Klassendiagramm v1.
+  Nicht enthalten (Stand Sprint 1): Anmeldung (US-01), Kennzahlen (US-05), Speichern (US-08).
+endlegend
+
+@enduml
