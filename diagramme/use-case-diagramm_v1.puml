@@ -1,0 +1,75 @@
+@startuml use-case-diagramm_v1
+' LookUpStock – Use-Case-Diagramm v1
+' Issue Docs #15 · Sprint 1 · Stand 04.10.2026
+' Grundlagen: Product Backlog (US-01 bis US-10), Akteursbeschreibung (akteure.md),
+'             Kurzformat-Tabellen v2, API-Design (Stand 02.10.2026)
+' Werkzeug: PlantUML
+
+left to right direction
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+  ArrowColor #333333
+}
+skinparam rectangle {
+  BorderColor #333333
+}
+
+title Use-Case-Diagramm – LookUpStock (v1, Sprint 1)
+
+actor "Gast" as Gast
+actor "Registrierter\nNutzer" as Nutzer
+actor "Finanzdaten-API\n(Twelve Data)" as API <<System>>
+
+rectangle "LookUpStock" {
+  usecase "Registrieren\n(US-01)" as UC_Reg
+  usecase "An- und abmelden\n(US-01)" as UC_Login
+  usecase "Anlagen suchen\n(US-02)" as UC_Suche #DDEBF7
+  usecase "Beispielsimulation\nausprobieren\n(US-09)" as UC_Demo
+  usecase "Portfolio mit Gewichtungen\nerstellen\n(US-03)" as UC_Port #DDEBF7
+  usecase "Portfolios bearbeiten\nund löschen\n(US-06)" as UC_Edit
+  usecase "**Monte-Carlo-Simulation**\n**durchführen**\n(US-04, Kern-Story)" as UC_Sim #DDEBF7
+  usecase "Kennzahlen einsehen\n(US-05)" as UC_Kenn
+  usecase "**Anlagen und Portfolios**\n**vergleichen**\n(US-07, Kern-Story)" as UC_Verg
+  usecase "Mehr als zwei Portfolios\nvergleichen\n(US-10)" as UC_Mehr
+  usecase "Simulation oder\nVergleich speichern\n(US-08)" as UC_Save
+  usecase "Gespeicherte Simulationen\nund Vergleiche aufrufen\n(US-08)" as UC_Abruf
+}
+
+Gast -- UC_Reg
+Gast -- UC_Suche
+Gast -- UC_Demo
+
+Nutzer -- UC_Login
+Nutzer -- UC_Suche
+Nutzer -- UC_Port
+Nutzer -- UC_Edit
+Nutzer -- UC_Sim
+Nutzer -- UC_Verg
+Nutzer -- UC_Abruf
+
+UC_Sim ..> UC_Kenn : <<include>>
+UC_Sim <.. UC_Save : <<extend>>
+UC_Verg <.. UC_Save : <<extend>>
+UC_Verg ..> UC_Kenn : <<include>>
+UC_Verg <.. UC_Mehr : <<extend>>
+
+UC_Save -[hidden]- API
+UC_Suche -- API
+UC_Demo -- API
+UC_Sim -- API
+UC_Verg -- API
+
+legend bottom left
+  <b>Legende</b>
+  Blau hinterlegt = Sprint 1 (US-02, US-03, US-04) · fett = Kern-Story (mit Dozent abgestimmt, Aktivitäts- und Sequenzdiagramm)
+  <<include>> = wird immer mit ausgeführt · <<extend>> = optionale Erweiterung, nur auf Wunsch des Nutzers
+  <b>Sprint 1:</b> Die Anmeldung (US-01) folgt in Sprint 2. Bis dahin sind US-02 bis US-04 ohne Anmeldung nutzbar.
+  Akteursbeschreibung: anforderungen/akteure.md · Begriffe: anforderungen/glossar.md
+endlegend
+
+@enduml
