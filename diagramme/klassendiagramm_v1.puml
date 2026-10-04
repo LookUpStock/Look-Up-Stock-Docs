@@ -1,0 +1,225 @@
+@startuml klassendiagramm_v1
+' LookUpStock – Klassendiagramm v1 (Backend)
+' Issue Docs #19 · Sprint 1 · Stand 04.10.2026
+' Grundlagen: Backend-Code (main, Stand 04.10.2026: model, service, controller, repository),
+'             ADR-01 (Schichten), ADR-02 (Controller), ADR-03 (Information Expert),
+'             Testkonzept (Testobjekte), API-Design (Stand 02.10.2026), Domänenmodell v2
+' Werkzeug: PlantUML
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam linetype polyline
+skinparam nodesep 30
+skinparam ranksep 45
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+  ArrowColor #333333
+  BackgroundColor<<geplant>> #EEEEEE
+  BorderColor<<geplant>> #888888
+}
+skinparam package {
+  BorderColor #666666
+  FontStyle bold
+}
+hide circle
+hide empty members
+
+title Klassendiagramm v1 – LookUpStock Backend (Sprint 1: US-02, US-03, US-04)
+
+package "Präsentationsschicht (ADR-01)" {
+  class PortfolioController {
+    + create(request: PortfolioRequest): PortfolioResponse
+    + list(request: TokenRequest): PortfolioListResponse
+    + details(portfolioId: Long, request: TokenRequest): PortfolioResponse
+  }
+  class AssetController <<geplant>> {
+    + search(q: String, limit: int): AssetSearchResponse
+    + details(assetId: Long): AssetResponse
+  }
+  class SimulationController <<geplant>> {
+    + simulate(request: SimulationRequest): SimulationResponse
+  }
+}
+
+package "Logikschicht (ADR-01)" {
+  class PortfolioService {
+    + create(request: PortfolioRequest): Portfolio
+    + findAll(): List<Portfolio>
+    + findById(id: Long): Portfolio
+  }
+  class AssetService <<geplant>> {
+    + search(query: String, limit: int): List<Asset>
+    + findById(id: Long): Asset
+  }
+  class SimulationService <<geplant>> {
+    + simulate(portfolioId: Long, parameters: SimulationParameters): SimulationResult
+    - generateSeed(): long
+  }
+  class Portfolio {
+    - id: Long
+    - name: String
+    - createdAt: LocalDateTime
+    - updatedAt: LocalDateTime
+    + addPosition(asset: Asset, weight: BigDecimal): void
+    + validate(): void
+    + getWeights(): List<WeightedAsset>
+  }
+  class Position {
+    - id: Long
+    - weight: BigDecimal
+    + getAsset(): Asset
+    + getWeight(): BigDecimal
+  }
+  class Asset {
+    - id: Long
+    - symbol: String
+    - isin: String
+    - name: String
+    - exchange: String
+    - currency: String
+    - type: String
+    - micCode: String
+  }
+  class WeightedAsset <<record>> {
+    + asset: Asset
+    + share: BigDecimal
+  }
+  class ParameterEstimator <<geplant>> {
+    + estimate(prices: Map<Asset, List<PricePoint>>): EstimationResult
+  }
+  class MonteCarloEngine <<geplant>> {
+    + simulate(weights: List<WeightedAsset>, estimation: EstimationResult, parameters: SimulationParameters): double[][]
+  }
+  class MetricsCalculator <<geplant>> {
+    + percentiles(paths: double[][]): List<TimelinePoint>
+  }
+  class SimulationParameters <<geplant>> {
+    + startCapital: double
+    + monthlyContribution: double
+    + horizonYears: int
+    + paths: int
+    + seed: Long
+  }
+  class EstimationResult <<geplant>> {
+    + historyFrom: LocalDate
+    + historyTo: LocalDate
+    + estimates: List<Estimate>
+  }
+  class Estimate <<geplant>> {
+    + asset: Asset
+    + annualReturn: double
+    + annualVolatility: double
+  }
+  class SimulationResult <<geplant>> {
+    + portfolioId: Long
+    + parameters: SimulationParameters
+    + estimation: EstimationResult
+    + timeline: List<TimelinePoint>
+    + runtimeMs: long
+  }
+  class TimelinePoint <<geplant>> {
+    + month: int
+    + p5: double
+    + p50: double
+    + p95: double
+  }
+}
+
+package "Datenschicht (ADR-01)" {
+  interface PortfolioRepository <<JpaRepository>>
+  interface AssetRepository <<JpaRepository>>
+  interface MarketDataProvider <<interface>> {
+    + searchAssets(query: String, limit: int): List<Asset>
+    + getMonthlyPrices(asset: Asset): List<PricePoint>
+  }
+  class CachingMarketDataProvider <<geplant>> {
+    - maxAge: Duration = 24 h
+  }
+  class TwelveDataProvider <<geplant>>
+  class MockMarketDataProvider <<geplant>>
+  class PricePoint <<geplant>> {
+    + month: LocalDate
+    + close: double
+  }
+}
+
+' Schichten untereinander
+PortfolioService -[hidden]down- PortfolioRepository
+AssetService -[hidden]down- MarketDataProvider
+
+' Präsentation -> Logik
+PortfolioController --> PortfolioService
+AssetController --> AssetService
+SimulationController --> SimulationService
+
+' Portfolio (Ist-Stand)
+PortfolioService --> PortfolioRepository
+PortfolioService --> AssetRepository
+PortfolioService ..> Portfolio : <<create>>
+Portfolio "1" *-- "1..*" Position : enthält
+Position "0..*" --> "1" Asset : bezieht sich auf
+Portfolio ..> WeightedAsset : <<create>>
+WeightedAsset --> "1" Asset
+
+' Suche
+AssetService --> MarketDataProvider
+AssetService --> AssetRepository
+
+' Simulation (ADR-02: SimulationService als Controller)
+SimulationService --> PortfolioService
+SimulationService --> MarketDataProvider
+SimulationService --> ParameterEstimator
+SimulationService --> MonteCarloEngine
+SimulationService --> MetricsCalculator
+SimulationService ..> SimulationResult : <<create>>
+ParameterEstimator ..> EstimationResult : <<create>>
+EstimationResult "1" *-- "1..*" Estimate
+SimulationResult "1" *-- "1..*" TimelinePoint
+MetricsCalculator ..> TimelinePoint : <<create>>
+
+' Kursdaten (NF-07, NF-12)
+CachingMarketDataProvider ..|> MarketDataProvider
+TwelveDataProvider ..|> MarketDataProvider
+MockMarketDataProvider ..|> MarketDataProvider
+CachingMarketDataProvider o--> "1" MarketDataProvider : delegate
+
+note right of SimulationService
+  <b>GRASP Controller (ADR-02)</b>
+  koordiniert, rechnet nicht selbst:
+  Portfolio laden → Kursdaten beschaffen →
+  schätzen → simulieren → Perzentile berechnen
+end note
+
+note bottom of Portfolio
+  <b>GRASP Information Expert (ADR-03)</b>
+  validate(): Name Pflicht, max. 100 Zeichen, nicht nur Leerzeichen (E1, E9);
+  mind. eine Position; keine doppelte Anlage; Gewichtung > 0
+  mit max. 2 Nachkommastellen (E2); Summe 100 ± 0,01 (BigDecimal)
+  getWeights(): Anteile (z. B. 0,70) in fester Reihenfolge nach Asset-ID
+end note
+
+note bottom of ParameterEstimator
+  Prüft je Anlage mind. 36 Monatswerte (E8);
+  bei Unterschreitung Fehler mit allen
+  betroffenen Anlagen (E6, HTTP 422).
+  Gemeinsamer Schätzzeitraum für alle Anlagen.
+end note
+
+note bottom of CachingMarketDataProvider
+  Kursdaten jünger als 24 h aus dem Cache,
+  sonst Abruf über delegate (Twelve Data);
+  nicht erreichbar → HTTP 503 (NF-07)
+end note
+
+legend bottom left
+  <b>Legende</b>
+  Weiß = im Code vorhanden (Backend main, 04.10.2026) · Grau «geplant» = aus ADR-02, ADR-03, Testkonzept und API-Design abgeleitet, noch nicht implementiert
+  Die Perzentile berechnet der MetricsCalculator, nicht die MonteCarloEngine (High Cohesion: die Engine erzeugt nur die Pfade). Grundlage: ADR-02 und Testkonzept.
+  Nicht dargestellt: DTOs (…Request, …Response), Exceptions und GlobalExceptionHandler, Konfiguration (CorsConfig).
+  Nicht enthalten (folgt mit späteren Sprints): Nutzer und Anmeldung (US-01), Kennzahlen (US-05), Vergleich (US-07, Kern-Story), Speichern (US-08).
+endlegend
+
+@enduml

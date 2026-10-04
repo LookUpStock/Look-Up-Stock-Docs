@@ -1,0 +1,94 @@
+@startuml er-diagramm_v1
+' LookUpStock – ER-Diagramm v1 (PostgreSQL)
+' Issue Docs #19 · Sprint 1 · Stand 04.10.2026
+' Grundlagen: Flyway-Migrationen V1__portfolio_tabellen.sql und V2__asset_mic_code.sql
+'             (Backend main, Stand 04.10.2026), NF-07 (Cache), Domänenmodell v2
+' Notation: Krähenfuß (Information Engineering) · Werkzeug: PlantUML
+
+hide circle
+skinparam linetype ortho
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+  ArrowColor #333333
+  BackgroundColor<<geplant>> #EEEEEE
+  BorderColor<<geplant>> #888888
+}
+
+title ER-Diagramm v1 – LookUpStock (Sprint 1)
+
+entity "portfolio" as portfolio {
+  * id : BIGSERIAL <<PK>>
+  --
+  * name : VARCHAR(100)
+  * created_at : TIMESTAMP = now()
+  * updated_at : TIMESTAMP = now()
+}
+
+entity "position" as position {
+  * id : BIGSERIAL <<PK>>
+  --
+  * portfolio_id : BIGINT <<FK>>
+  * asset_id : BIGINT <<FK>>
+  * weight : NUMERIC(5,2)
+  ..
+  CHECK (weight > 0)
+  UNIQUE (portfolio_id, asset_id)
+}
+
+entity "asset" as asset {
+  * id : BIGSERIAL <<PK>>
+  --
+  * symbol : VARCHAR(20)
+  isin : VARCHAR(12)
+  * name : VARCHAR(255)
+  exchange : VARCHAR(50)
+  currency : VARCHAR(3)
+  type : VARCHAR(20)
+  mic_code : VARCHAR(10)
+  ..
+  UNIQUE (symbol, mic_code)
+}
+
+entity "price_point" as price_point <<geplant>> {
+  * id : BIGSERIAL <<PK>>
+  --
+  * asset_id : BIGINT <<FK>>
+  * month : DATE
+  * close : NUMERIC
+  * fetched_at : TIMESTAMP
+  ..
+  UNIQUE (asset_id, month)
+}
+
+portfolio ||--|{ position : "enthält\n(ON DELETE CASCADE)"
+asset ||--o{ position : "ist enthalten in"
+asset ||--o{ price_point : "hat Monatswerte"
+
+note right of position
+  weight in Prozent mit höchstens
+  2 Nachkommastellen (E2).
+  Summe = 100 ± 0,01 wird in
+  Portfolio.validate() geprüft,
+  nicht in der Datenbank.
+end note
+
+note right of price_point
+  Cache der Kursdaten (NF-07):
+  fetched_at = Abrufzeitpunkt bei
+  Twelve Data, Grundlage der 24-h-Regel.
+  Ein Datensatz je Anlage und Monat.
+end note
+
+legend bottom left
+  <b>Legende</b>
+  * = NOT NULL · PK = Primärschlüssel · FK = Fremdschlüssel
+  Weiß = in den Migrationen V1 und V2 vorhanden · Grau «geplant» = für Cache und Simulation nötig, noch keine Migration
+  Mindestens eine Position je Portfolio (|{) ist fachliche Regel aus Portfolio.validate(), die Datenbank erzwingt sie nicht.
+  Nicht enthalten (folgt mit späteren Sprints): Nutzerkonto (US-01), gespeicherte Simulationen und Vergleiche (US-08).
+endlegend
+
+@enduml
