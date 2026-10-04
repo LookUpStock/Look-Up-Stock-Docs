@@ -1,0 +1,121 @@
+@startuml aktivitaetsdiagramm_us-04_v2
+' LookUpStock – Aktivitätsdiagramm zur Kern-Story US-04
+' Issue #21 · Sprint 1 · Stand 04.10.2026
+' Grundlagen: Kurzformat-Tabelle US-04 v2 (kurzformat_sprint-1.md),
+'             API-Design (Stand 02.10.2026), POST /simulations,
+'             NFRs Version 2 (NF-07), PO-Entscheidungen E6 und E8
+' Änderungen gegenüber v1:
+'   - Cache-Zweig ergänzt: Kursdaten jünger als 24 h werden ohne Abruf
+'     bei Twelve Data verwendet (NF-07, Voraussetzung für NF-01)
+'   - 503 nur, wenn weder verwendbare Cache-Daten vorliegen noch
+'     Twelve Data erreichbar ist (innerhalb von 5 s)
+'   - Hinweis bei zu kurzer Kurshistorie nennt alle betroffenen Anlagen (E6),
+'     Grenze = 36 Monatswerte (E8)
+'   - Schätzung im gemeinsamen Schätzzeitraum (wie Domänenmodell v2)
+' Werkzeug: PlantUML
+
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam ActivityBackgroundColor #FFFFFF
+skinparam ActivityBorderColor #333333
+skinparam ActivityDiamondBackgroundColor #F5F5F5
+skinparam NoteBackgroundColor #FFF8DC
+skinparam NoteBorderColor #999999
+skinparam SwimlaneTitleFontStyle bold
+
+title Aktivitätsdiagramm US-04 – Monte-Carlo-Simulation durchführen (v2, Sprint 1)
+
+|Nutzer|
+start
+:Portfolio auswählen;
+
+repeat
+  :Startkapital, monatliche Sparrate und
+  Anlagehorizont eingeben;
+  :optional Pfadanzahl und Seed festlegen;
+  :Simulation starten;
+  |LookUpStock (System)|
+  :Eingaben prüfen;
+  note right
+    **Prüfregeln (PO-Festlegungen 3–6)**
+    • Startkapital und Sparrate: Pflicht, ≥ 0,
+      nicht beide 0
+    • Anlagehorizont: 1 bis 40 ganze Jahre
+    • Pfadanzahl (optional): 1.000 bis 50.000,
+      Standard 10.000
+    • Seed (optional): ganze Zahl
+  end note
+  backward :Fehlermeldung zum ungültigen Feld anzeigen
+  (HTTP 400 VALIDATION_ERROR);
+repeat while () is ([Eingaben ungültig]) not ([Eingaben gültig])
+
+:Portfolio laden;
+if () then ([vorhanden])
+else ([nicht vorhanden])
+  :Meldung „Portfolio nicht gefunden.“ anzeigen
+  (HTTP 404 NOT_FOUND);
+  stop
+endif
+
+if () then ([ohne Seed])
+  :Zufälligen Seed erzeugen;
+else ([mit Seed])
+endif
+
+:Kursdaten der enthaltenen
+Anlagen im Cache suchen;
+note right
+  **Cache-Regel (NF-07, API-Design)**
+  Kursdaten jünger als 24 h werden verwendet,
+  ältere nicht. Die Prüfung erfolgt je Anlage.
+end note
+
+if () then ([im Cache und jünger als 24 h])
+  :Kursdaten aus dem Cache verwenden;
+else ([nicht im Cache oder älter als 24 h])
+  :Historische Kursdaten
+  bei der Finanzdaten-API anfordern;
+  if () then ([nicht erreichbar])
+    :Meldung anzeigen:
+    „Kursdaten sind gerade nicht verfügbar.“
+    (HTTP 503 UPSTREAM_UNAVAILABLE, innerhalb von 5 s);
+    stop
+  else ([erreichbar])
+    |Finanzdaten-API (Twelve Data)|
+    :Kursdaten bereitstellen;
+    |LookUpStock (System)|
+    :Kursdaten im Cache speichern;
+  endif
+endif
+
+:Kurshistorie je Anlage prüfen;
+if () then ([alle Anlagen ≥ 36 Monatswerte])
+else ([mindestens eine Anlage < 36 Monatswerte])
+  :Meldung mit allen betroffenen Anlagen anzeigen:
+  „Für folgende Anlagen liegen weniger als
+  3 Jahre Kursdaten vor: …“
+  (HTTP 422 INSUFFICIENT_DATA);
+  stop
+endif
+
+:Rendite und Volatilität je Anlage
+im gemeinsamen Schätzzeitraum schätzen;
+:Wertverläufe in Monatsschritten simulieren
+(gewählte Pfadanzahl, Seed);
+:5., 50. und 95. Perzentil
+je Monat berechnen;
+:Fächerdiagramm und
+verwendeten Seed anzeigen;
+
+|Nutzer|
+:Ergebnis ansehen;
+stop
+
+legend bottom left
+  **Nicht enthalten (Stand Sprint 1):** Anmeldung (US-01, Sprint 2) · Zielbetrag und Kennzahlen (US-05, Sprint 2)
+  · Speichern der Simulation (US-08, Sprint 3) · Fallback-Anbieter (noch nicht entschieden)
+  Angaben „HTTP …“ = Antwort von POST /simulations laut API-Design (Stand 02.10.2026)
+endlegend
+
+@enduml
