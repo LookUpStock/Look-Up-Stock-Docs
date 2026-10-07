@@ -1,0 +1,127 @@
+@startuml domaenenmodell_v1
+' Domänenmodell v1 – LookUpStock, Sprint 1 (US-02, US-03, US-04)
+' Issue #17 · KI-Log Nr. 16
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype polyline
+skinparam nodesep 70
+skinparam ranksep 70
+skinparam defaultFontName Arial
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+  ArrowColor #333333
+}
+skinparam note {
+  BackgroundColor #FFFBE6
+  BorderColor #999999
+}
+hide circle
+hide methods
+hide empty members
+
+title Domänenmodell v1 – LookUpStock (Sprint 1: US-02, US-03, US-04)
+
+class Portfolio {
+  name
+  erstelltAm
+  geändertAm
+  /summeGewichtungen
+}
+
+class Position {
+  gewichtung
+}
+
+class Anlage {
+  name
+  ticker
+  isin
+  börse
+  währung
+  art
+}
+
+class Kurswert {
+  datum
+  schlusskurs
+}
+
+class Simulation {
+  durchgeführtAm
+}
+
+class Simulationsparameter {
+  startkapital
+  monatlicheSparrate
+  anlagehorizontJahre
+  pfadanzahl
+  seed
+}
+
+class Schätzung {
+  jahresrendite
+  jahresvolatilität
+  zeitraumVon
+  zeitraumBis
+}
+
+class Verlaufspunkt {
+  monat
+  p5
+  p50
+  p95
+}
+
+Portfolio "1" -right- "1..*" Position : enthält >
+Position "0..*" -right- "1" Anlage : bezieht sich auf >
+Anlage "1" -right- "0..*" Kurswert : hat >
+
+Simulation "0..*" -up- "1" Portfolio : simuliert >
+Simulation "1" -left- "1" Simulationsparameter : verwendet >
+Simulation "1" -right- "1..*" Schätzung : basiert auf >
+Schätzung "0..*" -up- "1" Anlage : gilt für >
+Simulation "1" -down- "1..*" Verlaufspunkt : ergibt >
+
+note top of Position
+  {gewichtung > 0 %}
+  {Summe der Gewichtungen je Portfolio
+   = 100 % (Toleranz ± 0,01 Prozentpunkte)}
+  {jede Anlage höchstens einmal je Portfolio}
+end note
+
+note left of Simulationsparameter
+  {anlagehorizontJahre: ganze Zahl, 1 bis 40}
+  {startkapital ≥ 0, monatlicheSparrate ≥ 0,
+   nicht beide 0}
+  {pfadanzahl: 1.000 bis 50.000, Standard 10.000}
+  {seed: optional; ohne Angabe vom System
+   erzeugt und dem Nutzer angezeigt}
+end note
+
+note bottom of Schätzung
+  {genau eine Schätzung je Anlage
+   des simulierten Portfolios}
+  {wird aus den Kurswerten der Anlage
+   im Zeitraum ermittelt}
+  {Zeitraum umfasst mindestens 3 Jahre}
+end note
+
+note right of Verlaufspunkt
+  {ein Verlaufspunkt je Monat,
+   von 0 bis anlagehorizontJahre × 12}
+  p5, p50, p95 = 5., 50. und 95. Perzentil
+  des Portfoliowerts über alle Pfade
+  (Grundlage des Fächerdiagramms)
+end note
+
+legend bottom left
+  <b>Legende</b>
+  Konzeptionelles Modell nach Larman: Fachbegriffe, Attribute und Beziehungen, keine Operationen und keine technischen Klassen.
+  /attribut = abgeleiteter (berechneter) Wert · {…} = fachliche Regel (PO-Festlegungen vom 30.09.2026)
+  <b>Bewusst nicht enthalten (folgt in v2/v3):</b> Nutzer (US-01), Kennzahlen (US-05), Vergleich (US-07), gespeicherte Simulation (US-08).
+  Finanzdaten-API ist Akteur (Use-Case-Diagramm), kein Fachbegriff. Einzelne Simulationspfade werden im Glossar erklärt.
+endlegend
+
+@enduml
