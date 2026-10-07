@@ -51,7 +51,7 @@ ki-log/               KI-Log und KI-Reflexion
 deployment/           docker-compose.yml und Server-Konfiguration
 ```
 
-Diagramme werden nicht überschrieben, sondern versioniert abgelegt (z. B. `klassendiagramm_v1.png`, `klassendiagramm_v2.png`), damit das iterative Wachstum und der Stand vor und nach dem Change Request nachvollziehbar bleiben.
+Diagramme werden nicht überschrieben, sondern versioniert abgelegt (z. B. `klassendiagramm_v1.png`, `klassendiagramm_v2.png`), damit das iterative Wachstum und der Stand vor und nach dem Change Request nachvollziehbar bleiben. Ersetzte Versionen werden im selben Pull Request nach diagramme/archiv/ verschoben; im Ordner diagramme/ liegt nur der aktuelle Stand.
 
 ## Branching-Strategie (GitHub Flow)
 
