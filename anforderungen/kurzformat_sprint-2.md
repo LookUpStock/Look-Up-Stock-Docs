@@ -4,14 +4,14 @@
 |---|---|
 | **Projekt** | LookUpStock |
 | **Sprint** | 2 (05.10.2026 – 11.10.2026) |
-| **Issue** | Docs #56 Kurzformat-Tabelle für US-01 |
+| **Issue** | Docs #56 Kurzformat-Tabelle für US-01; Docs #72 PO-Festlegungen zum Simulationsmodell |
 | **Verantwortlich** | Mert Eminel (KujoBaraka), Product Owner |
-| **Version** | 1 |
-| **Stand** | 07.10.2026 |
-| **Grundlagen** | Vorlage Use-Case-Kurzbeschreibung (Vorlesung, Folie 20), Akzeptanzkriterien aus dem Sprint-Planning-Protokoll Sprint 2 (Abschnitt 4), API-Design (Stand 02.10.2026, Abschnitt „Auth“), NFRs nach FURPS+ (NF-03, NF-04, NF-16), Akteursbeschreibung v1, Use-Case-Diagramm v1, Glossar |
+| **Version** | 2 |
+| **Stand** | 08.10.2026 |
+| **Grundlagen** | Vorlage Use-Case-Kurzbeschreibung (Vorlesung, Folie 20), Akzeptanzkriterien aus dem Sprint-Planning-Protokoll Sprint 2 (Abschnitt 4), API-Design (Stand 02.10.2026, Abschnitt „Auth“), NFRs nach FURPS+ (NF-03, NF-04, NF-16), Akteursbeschreibung v1, Use-Case-Diagramm v1, Glossar; für E15 bis E23 zusätzlich Kurzformat Sprint 1 (US-04, E8), Domänenmodell v3, ADR-02, ADR-03, NF-01, NF-08, NF-14 |
 | **KI-Nutzung** | Entwurf mit KI-Unterstützung erstellt und vom Product Owner geprüft, siehe KI-Log |
 
-Diese Datei setzt `kurzformat_sprint-1.md` fort. Die Tabellen aus Sprint 1 bleiben als Stand von Sprint 1 unverändert; wie sich US-02 bis US-04 durch die Anmeldung ändern, steht im Abschnitt „Auswirkungen von US-01 auf US-02 bis US-04“.
+Diese Datei setzt `kurzformat_sprint-1.md` fort. Die Festlegungen E15 bis E23 legen das Rechenmodell der Simulation (US-04) fest; die genauen Rechenregeln dazu stehen in `simulationsmodell.md`. Die Tabellen aus Sprint 1 bleiben als Stand von Sprint 1 unverändert; wie sich US-02 bis US-04 durch die Anmeldung ändern, steht im Abschnitt „Auswirkungen von US-01 auf US-02 bis US-04“.
 
 US-01 wird in zwei Tabellen beschrieben, weil die Story zwei Anwendungsfälle mit unterschiedlichen primären Akteuren umfasst. So ist es auch im Use-Case-Diagramm dargestellt: „Registrieren“ löst der Gast aus, „An- und abmelden“ der registrierte Nutzer.
 
@@ -76,6 +76,33 @@ Anlass: Abgleich der Akzeptanzkriterien von US-01 mit dem API-Design. Die Nummer
 
 ---
 
+## Festlegungen des Product Owners (08.10.2026) – Simulationsmodell
+
+Anlass: Rückfrage aus der Umsetzung der Monte-Carlo-Engine (BE #40). Die Kurzformat-Tabelle US-04, das Domänenmodell und das API-Design legen fest, *was* die Simulation liefert, aber nicht, *wie* gerechnet wird. Ohne diese Festlegungen müsste der Entwickler fachliche Annahmen selbst treffen. Die genauen Rechenregeln stehen in `simulationsmodell.md`.
+
+| Nr. | Story | Festlegung | Begründung |
+|---|---|---|---|
+| E15 | US-04 | Die Gewichtungen werden in der Simulation **jeden Monat auf die festgelegten Werte zurückgesetzt** (monatliches Rebalancing). Die Sparrate wird nach denselben Gewichtungen aufgeteilt. | Die vom Nutzer eingegebene Gewichtung gilt über den gesamten Anlagehorizont. Einfache, nachvollziehbare Rechnung und kurze Rechenzeit (NF-01). |
+| E16 | US-02, US-04 | Renditen werden in der **Handelswährung** der Anlage verwendet und nicht in Euro umgerechnet. Startkapital, Sparrate und Ergebnis werden in Euro angegeben. Unter dem Ergebnis steht der Hinweis „Wechselkursschwankungen werden nicht berücksichtigt.“ | Wechselkurse würden zusätzliche Abrufe bei der Finanzdaten-API und einen weiteren Cache erfordern. Bei Anlagen in Euro (z. B. EUNL) ist das Währungsrisiko bereits im Kurs enthalten. |
+| E17 | US-04 | Der **Schätzzeitraum** umfasst die letzten bis zu 120 Monatswerte (10 Jahre). Er gilt gemeinsam für alle Anlagen und ist so lang wie die kürzeste vorhandene Kurshistorie, höchstens 120 Monatswerte. Mindestens 36 Monatswerte je Anlage bleiben Pflicht (E8). | Längere Zeiträume ergeben stabilere Schätzungen; jüngere Anlagen ab 36 Monatswerten bleiben simulierbar. Ein gemeinsamer Zeitraum macht die Anlagen vergleichbar (Domänenmodell v3). |
+| E18 | US-04 | Der **Zusammenhang zwischen den Anlagen** (Korrelation) wird berücksichtigt: Aus den historischen Monatsrenditen der Anlagen wird mit den Gewichtungen eine Monatsrendite des Portfolios gebildet; Rendite und Volatilität des Portfolios werden aus dieser Reihe geschätzt. | Ohne Korrelation würde das Portfolio deutlich risikoärmer erscheinen, als es ist, und das Fächerdiagramm wäre zu schmal. Durch E15 ist dieser Weg ohne Matrizenrechnung möglich. |
+| E19 | US-04 | Die **Sparrate** wird am Ende jedes Monats eingezahlt, erstmals in Monat 1. Über den Anlagehorizont sind das Anlagehorizont × 12 Raten. Monat 0 enthält nur das Startkapital. | Eindeutige Regel für Berechnung und Test; entspricht dem Beispiel im API-Design (10.000 € + 240 × 200 € = 58.000 € Einzahlungen). |
+| E20 | US-04 | Die Kurshistorie wird als **Gesamtrendite** verwendet: Kurse sind um Splits und Dividenden bereinigt, Dividenden gelten als wiederangelegt. | Sonst würden ausschüttende Anlagen schlechter dargestellt als thesaurierende mit gleicher Entwicklung. |
+| E21 | US-04 | Die Simulation rechnet **nominal**, ohne Kosten, Steuern und Inflation. Unter dem Ergebnis steht der Hinweis „Die Werte sind nominal und berücksichtigen keine Kosten, Steuern und Inflation. Keine Anlageberatung.“ | Hält das Modell einfach; der Hinweis grenzt die Anwendung von einer Anlageberatung ab (NF-14). |
+| E22 | US-04 | Es werden nur **abgeschlossene Monate** verwendet; der laufende Monat zählt nicht zur Kurshistorie. | Ein unvollständiger Monat würde die Schätzung verfälschen. Entspricht dem Beispiel im API-Design (Historie bis 31.08. bei Abruf im September). |
+| E23 | US-04 | Die Monatsrenditen der Simulation sind **lognormalverteilt** (geometrische Brownsche Bewegung). Der Portfoliowert kann dadurch nicht negativ werden. | Übliches Standardmodell für Kursverläufe; gut erklärbar und testbar. |
+
+### Präzisierung der Akzeptanzkriterien US-04
+
+Ergänzt die Kriterien aus `kurzformat_sprint-1.md`; diese bleiben unverändert gültig.
+
+- Unter dem Ergebnis erscheinen die Hinweise aus E16 und E21. *(E16, E21)*
+- Die Summe der Einzahlungen beträgt Startkapital + Anlagehorizont × 12 × Sparrate. *(E19)*
+- Der Verlaufspunkt für Monat 0 hat in allen drei Perzentilen den Wert des Startkapitals. *(E19)*
+- Die angezeigten Schätzungen (Rendite und Volatilität je Anlage) und der Schätzzeitraum stammen aus demselben gemeinsamen Zeitraum von höchstens 120 Monatswerten. *(E17)*
+
+---
+
 ## Akzeptanzkriterien
 
 Zur Übernahme in das Story-Issue US-01 (Docs #9). Grundlage sind die Kriterien aus dem Sprint-Planning-Protokoll Sprint 2; Präzisierungen durch die Festlegungen E11 bis E14 sind gekennzeichnet.
@@ -103,3 +130,4 @@ Zur Übernahme in das Story-Issue US-01 (Docs #9). Grundlage sind die Kriterien 
 | 1 | 07.10.2026 | US-03, US-04 | Vorbedingung „Nutzer ist angemeldet“, Akteur „Registrierter Nutzer“, Zuordnung der Portfolios zum Nutzer | US-01, NF-04 |
 | 1 | 07.10.2026 | US-02 | Ausdrücklich ohne Anmeldung nutzbar | API-Design (öffentliche GET-Abfrage) |
 | 1 | 07.10.2026 | US-01 | Festlegungen E11 bis E14 | Abgleich mit dem API-Design |
+| 2 | 08.10.2026 | US-04 | Festlegungen E15 bis E23 zum Simulationsmodell (Rebalancing, Währung, Schätzzeitraum, Korrelation, Sparrate, Gesamtrendite, nominale Rechnung, abgeschlossene Monate, Verteilungsmodell); Präzisierung der Akzeptanzkriterien US-04; Verweis auf `simulationsmodell.md` | Rückfrage aus BE #40 (Monte-Carlo-Engine), Docs #72 |
