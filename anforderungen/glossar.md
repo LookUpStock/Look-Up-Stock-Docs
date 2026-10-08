@@ -3,11 +3,11 @@
 | | |
 |---|---|
 | **Projekt** | LookUpStock |
-| **Issue** | Docs #15 Akteure, Use-Case-Diagramm v1, Glossar |
+| **Issue** | Docs #57 (Version 2), Docs #15 (Version 1) |
 | **Verantwortlich** | Mert Eminel (KujoBaraka), Product Owner |
-| **Version** | 1 |
-| **Stand** | 04.10.2026 |
-| **Grundlagen** | Kurzformat-Tabellen v2, Domänenmodell v2, Aktivitätsdiagramm US-04 v2, NFRs Version 2, API-Design (Stand 02.10.2026), ADR-01 bis ADR-03, Testkonzept |
+| **Version** | 2 |
+| **Stand** | 08.10.2026 |
+| **Grundlagen** | Kurzformat-Tabellen Sprint 1 und Sprint 2, Domänenmodell v3, Aktivitätsdiagramm US-04 v2, NFRs Version 2, API-Design (Stand 02.10.2026), ADR-01 bis ADR-03, Testkonzept |
 | **KI-Nutzung** | Mit KI-Unterstützung erstellt und vom Product Owner geprüft, siehe KI-Log |
 
 Das Glossar erklärt Begriffe, die für eine einheitliche Beschreibung nötig sind. Es richtet sich an Entwickler, Fachnutzer und Fachfremde. Die Spalte „Im Code / in der API“ ordnet die deutschen Fachbegriffe den englischen Namen in Code und Schnittstelle zu, damit Dokumentation und Prototyp dieselbe Sprache sprechen. Das Glossar wächst mit jedem Sprint; Begriffe späterer Stories werden ergänzt, sobald sie festgelegt sind.
@@ -24,7 +24,7 @@ Das Glossar erklärt Begriffe, die für eine einheitliche Beschreibung nötig si
 | **Fächerdiagramm** | Diagramm, das die Bandbreite der simulierten Verläufe über den Anlagehorizont zeigt: einen ungünstigen (5. Perzentil), einen mittleren (50. Perzentil) und einen günstigen Verlauf (95. Perzentil). Die Fläche dazwischen weitet sich mit der Zeit wie ein Fächer. | `timeline` |
 | **Gewichtung** | Anteil einer Anlage am Portfolio in Prozent. Jede Gewichtung ist größer als 0 % und hat höchstens 2 Nachkommastellen; zusammen ergeben alle Gewichtungen 100 % (Toleranz ± 0,01 Prozentpunkte). In Ergebnissen wird der Anteil als Dezimalzahl angegeben (0,70 = 70 %). | `weight`, `getWeights()` |
 | **ISIN** | International Securities Identification Number: weltweit eindeutige, zwölfstellige Kennnummer eines Wertpapiers, z. B. IE00B4L5Y983. | `isin` |
-| **Kennzahlen** | Werte, die das Ergebnis einer Simulation zusammenfassen, z. B. Median-Endwert, Value at Risk, maximaler Drawdown und Wahrscheinlichkeit, ein Sparziel zu erreichen. Die einzelnen Kennzahlen werden mit US-05 (Sprint 2) festgelegt und dann hier erklärt. | `metrics` |
+| **Kennzahlen** | Werte, die das Ergebnis einer Simulation zusammenfassen, z. B. Median-Endwert, Value at Risk, maximaler Drawdown und Wahrscheinlichkeit, ein Sparziel zu erreichen. Die einzelnen Kennzahlen werden mit US-05 (Sprint 3) festgelegt und dann hier erklärt. | `metrics` |
 | **Kurshistorie** | Folge der historischen Monatswerte einer Anlage. Für eine Simulation sind je Anlage mindestens 3 Jahre nötig, also mindestens 36 Monatswerte (PO-Entscheidung E8). | – |
 | **Median** | Mittlerer Wert: Die Hälfte der simulierten Verläufe liegt darüber, die Hälfte darunter. Entspricht dem 50. Perzentil. | `p50` |
 | **Monatswert** | Schlusskurs einer Anlage am Ende eines Monats. LookUpStock rechnet mit Monatswerten, weil auch die Simulation in Monatsschritten rechnet. | – |
@@ -48,15 +48,19 @@ Das Glossar erklärt Begriffe, die für eine einheitliche Beschreibung nötig si
 
 | Begriff | Erklärung | Im Code / in der API |
 |---|---|---|
+| **Anmeldung** | Zeitraum, in dem ein registrierter Nutzer nach Eingabe von E-Mail-Adresse und Passwort geschützte Funktionen nutzen kann. Sie gilt 24 Stunden oder bis zum Abmelden (NF-16). Technisch wird sie durch einen Token nachgewiesen. | `POST /auth/login`, `/auth/logout` |
 | **API-Key** | Geheimer Zugangsschlüssel für die Finanzdaten-API. Er liegt nur im Backend und gelangt nie in den Browser oder ins Repository (NF-06). | Umgebungsvariable |
 | **Backend** | Serverseitiger Teil von LookUpStock: Prüfregeln, Simulation, Datenbank und Zugriff auf die Finanzdaten-API. | Repository `Look-Up-Stock-BackEnd` |
 | **Beispielsimulation** | Simulation mit vorgegebenen Beispielportfolios, die ein Gast ohne Konto ausprobieren kann. Ergebnisse werden nicht gespeichert (US-09). | `/demo/simulations` |
 | **Cache** | In der eigenen Datenbank gespeicherte Kursdaten und Suchergebnisse. Sie werden verwendet, solange sie jünger als 24 Stunden sind, auch wenn die Finanzdaten-API nicht erreichbar ist (NF-07). | Cache im `MarketDataProvider` |
 | **Finanzdaten-API** | Externer Dienst, der Stammdaten und historische Kursdaten liefert. Im Projekt ist das Twelve Data (PO-Entscheidung E7). | Interface `MarketDataProvider` |
 | **Frontend** | Teil von LookUpStock, der im Browser läuft: Suchfeld, Portfolio-Editor, Eingabemaske und Fächerdiagramm. | Repository `Look-Up-Stock-FrontEnd` |
-| **Gast** | Person ohne Anmeldung, siehe Akteursbeschreibung (`akteure.md`). | – |
+| **Gast** | Person ohne Nutzerkonto oder ohne gültige Anmeldung, siehe Akteursbeschreibung (`akteure.md`). | – |
+| **Geschützte Funktion** | Funktion, die nur mit gültiger Anmeldung nutzbar ist, z. B. Portfolio erstellen oder Simulation durchführen. Öffentlich sind nur Registrieren, Anmelden, Anlagen suchen und die Beispielsimulation. | Feld `token` im Request-Body |
 | **Mock** | Testattrappe, die eine echte Komponente nachahmt. Der Mock der Finanzdaten-API liefert feste, künstliche Kursreihen, damit Tests ohne Internet und mit immer gleichen Ergebnissen laufen (NF-12). | `MockMarketDataProvider` |
-| **Registrierter Nutzer** | Person mit Nutzerkonto, siehe Akteursbeschreibung (`akteure.md`). | – |
+| **Nutzerkonto** | Konto eines registrierten Nutzers, bestehend aus E-Mail-Adresse und Passwort. Die E-Mail-Adresse ist eindeutig, Groß- und Kleinschreibung spielen keine Rolle (E11). Das Passwort hat mindestens 8 Zeichen und wird nur als Hash gespeichert (NF-03). | `User`, Tabelle `app_user` |
+| **Passwort-Hash** | Aus dem Passwort berechneter Wert, aus dem sich das Passwort nicht zurückrechnen lässt. Bei der Anmeldung wird das eingegebene Passwort erneut gehasht und verglichen (NF-03). | BCrypt, `password_hash` |
+| **Registrierter Nutzer** | Person mit Nutzerkonto, siehe Akteursbeschreibung (`akteure.md`). Im Domänenmodell als „Nutzer“ bezeichnet. | `User` |
 | **Token** | Nachweis der Anmeldung, den das System nach dem Login ausgibt. Er wird bei geschützten Anfragen mitgeschickt und ist 24 Stunden gültig (NF-16). | `token` |
 | **Twelve Data** | Anbieter, der im Projekt als Finanzdaten-API genutzt wird. | – |
 
@@ -75,3 +79,10 @@ Das Glossar erklärt Begriffe, die für eine einheitliche Beschreibung nötig si
 | **Sprint** | Fester Arbeitszeitraum in Scrum, im Projekt eine Woche. Am Ende steht ein lauffähiges Zwischenergebnis. |
 | **Story Points** | Schätzung des relativen Aufwands einer User Story nach der Fibonacci-Folge (1, 2, 3, 5, 8). Sie geben die Komplexität im Vergleich zu anderen Stories an, nicht die Arbeitszeit. |
 | **User Story** | Anforderung aus Sicht des Nutzers nach dem Muster „Als … möchte ich …, um …“, nummeriert als US-01 bis US-10. |
+
+## Änderungshistorie
+
+| Version | Datum | Änderung | Anlass |
+|---|---|---|---|
+| 1 | 04.10.2026 | Erstfassung | Docs #15 |
+| 2 | 08.10.2026 | Neu: Anmeldung, Geschützte Funktion, Nutzerkonto, Passwort-Hash. Gast und registrierter Nutzer präzisiert. Kennzahlen: Sprint 3 statt Sprint 2 (US-05 verschoben) | Docs #57, US-01, Domänenmodell v3 |

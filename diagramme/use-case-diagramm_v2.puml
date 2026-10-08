@@ -1,0 +1,103 @@
+@startuml use-case-diagramm_v2
+' LookUpStock – Use-Case-Diagramm v2
+' Issue Docs #57 · Sprint 2 · Stand 08.10.2026
+' Grundlagen: Use-Case-Diagramm v1, Akteursbeschreibung v2 (akteure.md),
+'             Kurzformat-Tabellen Sprint 2 (US-01, E11 bis E14), Sprint-Planning-Protokoll Sprint 2,
+'             API-Design (Stand 02.10.2026, öffentliche und geschützte Endpunkte), NF-04, NF-16
+' Änderungen gegenüber v1:
+'   - Sprint-Markierung: US-01 kommt zu US-02 bis US-04 hinzu (Sprint 2)
+'   - Öffentliche und geschützte Anwendungsfälle unterschieden: Die Anmeldung (US-01)
+'     ist Vorbedingung der geschützten Anwendungsfälle und als Notiz dargestellt,
+'     bewusst nicht als <<include>> (Anmelden ist kein Teilschritt, sondern Voraussetzung)
+'   - Anlagen suchen bleibt öffentlich (Gast und registrierter Nutzer), siehe Kurzformat Sprint 2
+'   - Legende: Sprintzuordnung nach Sprint Planning 2 (US-05, US-06 nach Sprint 3 verschoben)
+'   - Unverändert: Akteure, Anwendungsfälle und <<include>>/<<extend>>-Beziehungen aus v1
+' Werkzeug: PlantUML
+
+left to right direction
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+  ArrowColor #333333
+}
+skinparam rectangle {
+  BorderColor #333333
+}
+skinparam note {
+  BackgroundColor #FFFBE6
+  BorderColor #999999
+}
+
+title Use-Case-Diagramm – LookUpStock (v2, Sprint 2)
+
+actor "Gast" as Gast
+actor "Registrierter\nNutzer" as Nutzer
+actor "Finanzdaten-API\n(Twelve Data)" as API <<System>>
+
+rectangle "LookUpStock" {
+  usecase "Registrieren\n(US-01)" as UC_Reg #DDEBF7
+  usecase "An- und abmelden\n(US-01)" as UC_Login #DDEBF7
+  usecase "Anlagen suchen\n(US-02)" as UC_Suche #DDEBF7
+  usecase "Beispielsimulation\nausprobieren\n(US-09)" as UC_Demo
+  usecase "Portfolio mit Gewichtungen\nerstellen\n(US-03)" as UC_Port #DDEBF7
+  usecase "Portfolios bearbeiten\nund löschen\n(US-06)" as UC_Edit
+  usecase "**Monte-Carlo-Simulation**\n**durchführen**\n(US-04, Kern-Story)" as UC_Sim #DDEBF7
+  usecase "Kennzahlen einsehen\n(US-05)" as UC_Kenn
+  usecase "**Anlagen und Portfolios**\n**vergleichen**\n(US-07, Kern-Story)" as UC_Verg
+  usecase "Mehr als zwei Portfolios\nvergleichen\n(US-10)" as UC_Mehr
+  usecase "Simulation oder\nVergleich speichern\n(US-08)" as UC_Save
+  usecase "Gespeicherte Simulationen\nund Vergleiche aufrufen\n(US-08)" as UC_Abruf
+}
+
+Gast -- UC_Reg
+Gast -- UC_Suche
+Gast -- UC_Demo
+
+Nutzer -- UC_Login
+Nutzer -- UC_Suche
+Nutzer -- UC_Port
+Nutzer -- UC_Edit
+Nutzer -- UC_Sim
+Nutzer -- UC_Verg
+Nutzer -- UC_Abruf
+
+UC_Sim ..> UC_Kenn : <<include>>
+UC_Sim <.. UC_Save : <<extend>>
+UC_Verg <.. UC_Save : <<extend>>
+UC_Verg ..> UC_Kenn : <<include>>
+UC_Verg <.. UC_Mehr : <<extend>>
+
+UC_Save -[hidden]- API
+UC_Suche -- API
+UC_Demo -- API
+UC_Sim -- API
+UC_Verg -- API
+
+note left of Gast
+  <b>Öffentlich:</b> Alle Anwendungsfälle
+  des Gasts sind ohne Anmeldung nutzbar.
+end note
+
+note left of Nutzer
+  <b>Geschützt:</b> Vorbedingung aller
+  Anwendungsfälle außer „Anlagen suchen“
+  und „Anmelden“: Nutzer ist angemeldet (US-01).
+  Er sieht und ändert nur seine eigenen
+  Daten (NF-04). Anmeldung 24 h gültig (NF-16).
+end note
+
+legend bottom left
+  <b>Legende</b>
+  Blau hinterlegt = Sprint 2 (US-01 neu; US-02, US-03, US-04 aus Sprint 1 übernommen) · fett = Kern-Story (mit Dozent abgestimmt, Aktivitäts- und Sequenzdiagramm)
+  <<include>> = wird immer mit ausgeführt · <<extend>> = optionale Erweiterung, nur auf Wunsch des Nutzers
+  <b>Anmeldung:</b> Alle Anwendungsfälle des registrierten Nutzers außer „Anlagen suchen“ und dem Anmelden selbst setzen eine gültige Anmeldung voraus. Die Anmeldung ist
+  Vorbedingung (siehe Kurzformat-Tabellen), kein <<include>>: Sie wird einmal durchgeführt und gilt dann für mehrere Anwendungsfälle.
+  <b>Sprintzuordnung:</b> Sprint 3: US-05, US-06, US-07, US-08 · Sprint 4: US-09, US-10 (laut Product Backlog; Änderungen durch den Change Request möglich)
+  Akteursbeschreibung: anforderungen/akteure.md · Begriffe: anforderungen/glossar.md · Vorversion: diagramme/archiv/use-case-diagramm_v1
+endlegend
+
+@enduml
