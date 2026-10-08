@@ -1,0 +1,189 @@
+@startuml domaenenmodell_v3
+' Domänenmodell v3 – LookUpStock, Sprint 2 (US-01, US-02, US-03, US-04)
+' Issue Docs #68 Domänenmodell v3 (Nutzer) · Stand 07.10.2026
+' Grundlagen: Domänenmodell v2, Kurzformat-Tabellen Sprint 2 (US-01, E11 bis E14),
+'             API-Design (Stand 02.10.2026, Abschnitt Auth), NF-03, NF-04, NF-16
+' Änderungen gegenüber v2:
+'   - Neuer Fachbegriff Nutzer (US-01) mit Beziehung "besitzt" zu Portfolio
+'   - Neuer Fachbegriff Anmeldung mit Gültigkeit von 24 Stunden (NF-16)
+'   - Regeln ergänzt: E-Mail eindeutig ohne Groß-/Kleinschreibung (E11),
+'     Passwort mindestens 8 Zeichen und nur als Hash gespeichert (NF-03),
+'     Portfolio nur für den besitzenden Nutzer sichtbar (NF-04)
+'   - Legende: Nutzer aus "Bewusst nicht enthalten" entfernt
+'   - Unverändert: alle Begriffe und Regeln zu Anlage, Portfolio und Simulation aus v2
+' KI-Nutzung: siehe KI-Log (Eintrag Domänenmodell v3)
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype polyline
+skinparam nodesep 70
+skinparam ranksep 70
+skinparam defaultFontName Arial
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+  ArrowColor #333333
+}
+skinparam note {
+  BackgroundColor #FFFBE6
+  BorderColor #999999
+}
+hide circle
+hide methods
+hide empty members
+
+title Domänenmodell v3 – LookUpStock (Sprint 2: US-01 bis US-04)
+
+class Nutzer #EAF4E4 {
+  email
+  passwort
+  registriertAm
+}
+
+class Anmeldung #EAF4E4 {
+  angemeldetAm
+  gültigBis
+  /istGültig
+}
+
+class Portfolio {
+  name
+  erstelltAm
+  geändertAm
+  /summeGewichtungen
+}
+
+class Position {
+  gewichtung
+}
+
+class Anlage {
+  name
+  ticker
+  isin
+  börse
+  währung
+  art
+}
+
+class Kurswert {
+  datum
+  schlusskurs
+}
+
+class Simulation {
+  durchgeführtAm
+  schätzzeitraumVon
+  schätzzeitraumBis
+}
+
+class Simulationsparameter {
+  startkapital
+  monatlicheSparrate
+  anlagehorizontJahre
+  pfadanzahl
+  seed
+}
+
+class Schätzung {
+  jahresrendite
+  jahresvolatilität
+}
+
+class Verlaufspunkt {
+  monat
+  p5
+  p50
+  p95
+}
+
+Nutzer "1" -left- "0..*" Anmeldung : hat >
+Nutzer "1" -down- "0..*" Portfolio : besitzt >
+
+Portfolio "1" -right- "1..*" Position : enthält >
+Position "0..*" -right- "1" Anlage : bezieht sich auf >
+Anlage "1" -right- "0..*" Kurswert : hat >
+
+Simulation "0..*" -up- "1" Portfolio : simuliert >
+Simulation "1" -left- "1" Simulationsparameter : verwendet >
+Simulation "1" -right- "1..*" Schätzung : basiert auf >
+Schätzung "0..*" -up- "1" Anlage : gilt für >
+Simulation "1" -down- "1..*" Verlaufspunkt : ergibt >
+
+note right of Nutzer
+  {email: Pflicht, gültiges Format (E12),
+   eindeutig ohne Unterscheidung von
+   Groß- und Kleinschreibung (E11)}
+  {passwort: mindestens 8 Zeichen,
+   nur als Hash gespeichert (NF-03)}
+end note
+
+note bottom of Anmeldung
+  {gültigBis = angemeldetAm + 24 Stunden (NF-16)}
+  {endet vorzeitig durch Abmelden}
+  /istGültig = noch nicht abgelaufen
+  und nicht abgemeldet
+end note
+
+note left of Portfolio
+  {name: Pflicht, höchstens 100 Zeichen}
+  {ein Name nur aus Leerzeichen gilt als leer}
+  {nur für den besitzenden Nutzer
+   sichtbar und änderbar (NF-04)}
+end note
+
+note top of Position
+  {gewichtung > 0 %, höchstens
+   2 Nachkommastellen}
+  {Summe der Gewichtungen je Portfolio
+   = 100 % (Toleranz ± 0,01 Prozentpunkte)}
+  {jede Anlage höchstens einmal je Portfolio}
+end note
+
+note bottom of Kurswert
+  {ein Kurswert je Monat (Monatsschlusskurs)}
+  {für eine Simulation sind je Anlage
+   mindestens 36 Monatswerte nötig}
+end note
+
+note left of Simulationsparameter
+  {anlagehorizontJahre: ganze Zahl, 1 bis 40}
+  {startkapital ≥ 0, monatlicheSparrate ≥ 0,
+   nicht beide 0}
+  {pfadanzahl: 1.000 bis 50.000, Standard 10.000}
+  {seed: optional; ohne Angabe vom System
+   erzeugt und dem Nutzer angezeigt}
+end note
+
+note bottom of Simulation
+  {Schätzzeitraum gilt gemeinsam
+   für alle Anlagen der Simulation}
+  {nur für eigene Portfolios (NF-04)}
+end note
+
+note bottom of Schätzung
+  {genau eine Schätzung je Anlage
+   des simulierten Portfolios}
+  {wird aus den Kurswerten der Anlage
+   im Schätzzeitraum ermittelt}
+end note
+
+note right of Verlaufspunkt
+  {ein Verlaufspunkt je Monat,
+   von 0 bis anlagehorizontJahre × 12}
+  p5, p50, p95 = 5., 50. und 95. Perzentil
+  des Portfoliowerts über alle Pfade
+  (Grundlage des Fächerdiagramms)
+end note
+
+legend bottom left
+  <b>Legende</b>
+  Konzeptionelles Modell nach Larman: Fachbegriffe, Attribute und Beziehungen, keine Operationen und keine technischen Klassen.
+  /attribut = abgeleiteter (berechneter) Wert · {…} = fachliche Regel · <back:#EAF4E4> grün </back> = neu in v3 (Sprint 2, US-01)
+  Anlagen sind nicht nutzerbezogen: Alle Nutzer greifen auf denselben Anlagenbestand zu; auch Gäste können suchen (US-02).
+  Eine Simulation gehört über ihr Portfolio indirekt zum Nutzer; sie wird in Sprint 2 noch nicht gespeichert.
+  <b>Bewusst nicht enthalten (folgt in späteren Versionen):</b> Zielbetrag und Kennzahlen (US-05), Vergleich (US-07), gespeicherte Simulation (US-08).
+  Finanzdaten-API ist Akteur (Use-Case-Diagramm), kein Fachbegriff. Token und Cache sind technische Lösungen und daher nicht enthalten.
+endlegend
+
+@enduml
