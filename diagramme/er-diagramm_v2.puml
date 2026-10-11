@@ -1,0 +1,159 @@
+@startuml er-diagramm_v2
+' LookUpStock – ER-Diagramm v2 (PostgreSQL)
+' Issue Docs #58 · Sprint 2 · Stand 11.10.2026
+' Grundlagen: Flyway-Migrationen V1__portfolio_tabellen.sql, V2__asset_mic_code.sql und
+'             V3__nutzer_und_token.sql (BE #30) und V4__portfolio_nutzer.sql (BE #54), Backend main, Stand 11.10.2026,
+'             ER-Diagramm v1, Domänenmodell v3, ADR-04, NF-03, NF-04, NF-07, NF-14, NF-16
+' Änderungen gegenüber v1:
+'   - Neu (Migration V3, vorhanden): Tabellen app_user und auth_token
+'   - Neu (Migration V4): Spalte portfolio.user_id als Fremdschlüssel auf app_user mit Index (NF-04)
+'   - Unverändert: asset (inkl. mic_code aus V2), position; price_point weiterhin geplant (Cache, NF-07)
+' Notation: Krähenfuß (Information Engineering) · Werkzeug: PlantUML
+
+hide circle
+skinparam linetype ortho
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+  ArrowColor #333333
+  BackgroundColor<<geplant>> #EEEEEE
+  BorderColor<<geplant>> #888888
+  BackgroundColor<<neu>> #EAF4E4
+}
+skinparam note {
+  BackgroundColor #FFFBE6
+  BorderColor #999999
+}
+hide stereotype
+
+title ER-Diagramm v2 – LookUpStock (Sprint 2)
+
+entity "app_user" as app_user <<neu>> {
+  * id : BIGSERIAL <<PK>>
+  --
+  * email : VARCHAR(255)
+  * password_hash : VARCHAR(100)
+  * created_at : TIMESTAMP = now()
+  ..
+  UNIQUE (email)
+}
+
+entity "auth_token" as auth_token <<neu>> {
+  * id : BIGSERIAL <<PK>>
+  --
+  * token : VARCHAR(64)
+  * user_id : BIGINT <<FK>>
+  * created_at : TIMESTAMP = now()
+  * expires_at : TIMESTAMP
+  ..
+  UNIQUE (token)
+  INDEX (user_id)
+}
+
+entity "portfolio" as portfolio {
+  * id : BIGSERIAL <<PK>>
+  --
+  * name : VARCHAR(100)
+  * user_id : BIGINT <<FK>> (neu, V4)
+  * created_at : TIMESTAMP = now()
+  * updated_at : TIMESTAMP = now()
+  ..
+  INDEX (user_id)
+}
+
+entity "position" as position {
+  * id : BIGSERIAL <<PK>>
+  --
+  * portfolio_id : BIGINT <<FK>>
+  * asset_id : BIGINT <<FK>>
+  * weight : NUMERIC(5,2)
+  ..
+  CHECK (weight > 0)
+  UNIQUE (portfolio_id, asset_id)
+}
+
+entity "asset" as asset {
+  * id : BIGSERIAL <<PK>>
+  --
+  * symbol : VARCHAR(20)
+  isin : VARCHAR(12)
+  * name : VARCHAR(255)
+  exchange : VARCHAR(50)
+  currency : VARCHAR(3)
+  type : VARCHAR(20)
+  mic_code : VARCHAR(10)
+  ..
+  UNIQUE (symbol, mic_code)
+}
+
+entity "price_point" as price_point <<geplant>> {
+  * id : BIGSERIAL <<PK>>
+  --
+  * asset_id : BIGINT <<FK>>
+  * month : DATE
+  * close : NUMERIC
+  * fetched_at : TIMESTAMP
+  ..
+  UNIQUE (asset_id, month)
+}
+
+app_user ||--o{ auth_token : "hat\n(ON DELETE CASCADE)"
+app_user ||--o{ portfolio : "besitzt\n(ON DELETE CASCADE)"
+portfolio ||--|{ position : "enthält\n(ON DELETE CASCADE)"
+asset ||--o{ position : "ist enthalten in"
+asset ||--o{ price_point : "hat Monatswerte"
+
+note right of app_user
+  "user" ist in PostgreSQL ein reserviertes
+  Wort, daher app_user.
+  E-Mail wird vor dem Speichern klein
+  geschrieben (E11), daher reicht UNIQUE.
+  password_hash: nur BCrypt-Hash (NF-03).
+  Nur E-Mail und Passwort-Hash als
+  personenbezogene Daten (NF-14 b).
+end note
+
+note right of auth_token
+  expires_at = Login + 24 h (NF-16).
+  Abmelden löscht den Datensatz;
+  abgelaufene Tokens werden bei der
+  Prüfung abgelehnt (401).
+end note
+
+note left of portfolio
+  user_id (Migration V4, BE #54):
+  Jedes Portfolio gehört genau einem
+  Nutzer; Abfragen filtern immer nach
+  user_id, fremde IDs → 404 (NF-04, ADR-04).
+  V4 löscht vorhandene Testportfolios,
+  weil sie keinen Besitzer hatten.
+end note
+
+note right of position
+  weight in Prozent mit höchstens
+  2 Nachkommastellen (E2).
+  Summe = 100 ± 0,01 wird in
+  Portfolio.validate() geprüft,
+  nicht in der Datenbank.
+end note
+
+note left of price_point
+  Cache der Kursdaten (NF-07):
+  fetched_at = Abrufzeitpunkt bei
+  Twelve Data, Grundlage der 24-h-Regel.
+  Ein Datensatz je Anlage und Monat.
+end note
+
+legend bottom left
+  <b>Legende</b>
+  * = NOT NULL · PK = Primärschlüssel · FK = Fremdschlüssel
+  Weiß = in den Migrationen V1 und V2 vorhanden · <back:#EAF4E4> Grün </back> = neu in v2 (Migration V3, BE #30) · portfolio.user_id neu (Migration V4, BE #54) · Grau «geplant» = noch keine Migration
+  Mindestens eine Position je Portfolio (|{) ist fachliche Regel aus Portfolio.validate(), die Datenbank erzwingt sie nicht.
+  Nicht enthalten (folgt mit späteren Sprints): gespeicherte Simulationen und Vergleiche (US-08).
+  Vorversion: diagramme/archiv/er-diagramm_v1
+endlegend
+
+@enduml

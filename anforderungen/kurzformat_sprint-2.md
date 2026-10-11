@@ -4,10 +4,10 @@
 |---|---|
 | **Projekt** | LookUpStock |
 | **Sprint** | 2 (05.10.2026 – 11.10.2026) |
-| **Issue** | Docs #56 Kurzformat-Tabelle für US-01; Docs #72 PO-Festlegungen zum Simulationsmodell |
+| **Issue** | Docs #56 Kurzformat-Tabelle für US-01; Docs #72 PO-Festlegungen zum Simulationsmodell; Docs #58 Anpassung an die umgesetzte Engine |
 | **Verantwortlich** | Mert Eminel (KujoBaraka), Product Owner |
-| **Version** | 2 |
-| **Stand** | 08.10.2026 |
+| **Version** | 3 |
+| **Stand** | 11.10.2026 |
 | **Grundlagen** | Vorlage Use-Case-Kurzbeschreibung (Vorlesung, Folie 20), Akzeptanzkriterien aus dem Sprint-Planning-Protokoll Sprint 2 (Abschnitt 4), API-Design (Stand 02.10.2026, Abschnitt „Auth“), NFRs nach FURPS+ (NF-03, NF-04, NF-16), Akteursbeschreibung v1, Use-Case-Diagramm v1, Glossar; für E15 bis E23 zusätzlich Kurzformat Sprint 1 (US-04, E8), Domänenmodell v3, ADR-02, ADR-03, NF-01, NF-08, NF-14 |
 | **KI-Nutzung** | Entwurf mit KI-Unterstützung erstellt und vom Product Owner geprüft, siehe KI-Log |
 
@@ -85,12 +85,12 @@ Anlass: Rückfrage aus der Umsetzung der Monte-Carlo-Engine (BE #40). Die Kurzfo
 | E15 | US-04 | Die Gewichtungen werden in der Simulation **jeden Monat auf die festgelegten Werte zurückgesetzt** (monatliches Rebalancing). Die Sparrate wird nach denselben Gewichtungen aufgeteilt. | Die vom Nutzer eingegebene Gewichtung gilt über den gesamten Anlagehorizont. Einfache, nachvollziehbare Rechnung und kurze Rechenzeit (NF-01). |
 | E16 | US-02, US-04 | Renditen werden in der **Handelswährung** der Anlage verwendet und nicht in Euro umgerechnet. Startkapital, Sparrate und Ergebnis werden in Euro angegeben. Unter dem Ergebnis steht der Hinweis „Wechselkursschwankungen werden nicht berücksichtigt.“ | Wechselkurse würden zusätzliche Abrufe bei der Finanzdaten-API und einen weiteren Cache erfordern. Bei Anlagen in Euro (z. B. EUNL) ist das Währungsrisiko bereits im Kurs enthalten. |
 | E17 | US-04 | Der **Schätzzeitraum** umfasst die letzten bis zu 120 Monatswerte (10 Jahre). Er gilt gemeinsam für alle Anlagen und ist so lang wie die kürzeste vorhandene Kurshistorie, höchstens 120 Monatswerte. Mindestens 36 Monatswerte je Anlage bleiben Pflicht (E8). | Längere Zeiträume ergeben stabilere Schätzungen; jüngere Anlagen ab 36 Monatswerten bleiben simulierbar. Ein gemeinsamer Zeitraum macht die Anlagen vergleichbar (Domänenmodell v3). |
-| E18 | US-04 | Der **Zusammenhang zwischen den Anlagen** (Korrelation) wird berücksichtigt: Aus den historischen Monatsrenditen der Anlagen wird mit den Gewichtungen eine Monatsrendite des Portfolios gebildet; Rendite und Volatilität des Portfolios werden aus dieser Reihe geschätzt. | Ohne Korrelation würde das Portfolio deutlich risikoärmer erscheinen, als es ist, und das Fächerdiagramm wäre zu schmal. Durch E15 ist dieser Weg ohne Matrizenrechnung möglich. |
+| E18 | US-04 | *(geändert am 11.10.2026)* Der **Zusammenhang zwischen den Anlagen** (Korrelation) wird **nicht** berücksichtigt: Rendite und Volatilität werden je Anlage geschätzt, die Monatsrenditen der Anlagen werden unabhängig voneinander simuliert und mit den Gewichtungen zur Monatsrendite des Portfolios zusammengefasst. | Angleichung an die umgesetzte Monte-Carlo-Engine (BE #40). Einfaches, je Anlage nachvollziehbares Modell, das mit den angezeigten Schätzungen je Anlage übereinstimmt. Bekannte Vereinfachung: Bei Anlagen, die sich meist gleichläufig bewegen, wird die Schwankung des Portfolios unterschätzt, bei gegenläufigen überschätzt (siehe `simulationsmodell.md`, Abschnitt 7). Ursprüngliche Fassung (08.10.2026): Korrelation über die historischen Monatsrenditen des Portfolios. |
 | E19 | US-04 | Die **Sparrate** wird am Ende jedes Monats eingezahlt, erstmals in Monat 1. Über den Anlagehorizont sind das Anlagehorizont × 12 Raten. Monat 0 enthält nur das Startkapital. | Eindeutige Regel für Berechnung und Test; entspricht dem Beispiel im API-Design (10.000 € + 240 × 200 € = 58.000 € Einzahlungen). |
 | E20 | US-04 | Die Kurshistorie wird als **Gesamtrendite** verwendet: Kurse sind um Splits und Dividenden bereinigt, Dividenden gelten als wiederangelegt. | Sonst würden ausschüttende Anlagen schlechter dargestellt als thesaurierende mit gleicher Entwicklung. |
 | E21 | US-04 | Die Simulation rechnet **nominal**, ohne Kosten, Steuern und Inflation. Unter dem Ergebnis steht der Hinweis „Die Werte sind nominal und berücksichtigen keine Kosten, Steuern und Inflation. Keine Anlageberatung.“ | Hält das Modell einfach; der Hinweis grenzt die Anwendung von einer Anlageberatung ab (NF-14). |
 | E22 | US-04 | Es werden nur **abgeschlossene Monate** verwendet; der laufende Monat zählt nicht zur Kurshistorie. | Ein unvollständiger Monat würde die Schätzung verfälschen. Entspricht dem Beispiel im API-Design (Historie bis 31.08. bei Abruf im September). |
-| E23 | US-04 | Die Monatsrenditen der Simulation sind **lognormalverteilt** (geometrische Brownsche Bewegung). Der Portfoliowert kann dadurch nicht negativ werden. | Übliches Standardmodell für Kursverläufe; gut erklärbar und testbar. |
+| E23 | US-04 | *(geändert am 11.10.2026)* Die Monatsrenditen der Simulation sind **normalverteilt** (Mittelwert und Standardabweichung aus der Schätzung je Anlage). Fällt der Portfoliowert rechnerisch unter 0, wird er auf 0 gesetzt; danach wird die Sparrate eingezahlt. | Angleichung an die umgesetzte Monte-Carlo-Engine (BE #40). Einfach zu erklären und zu testen; die Untergrenze verhindert negative Portfoliowerte. Ursprüngliche Fassung (08.10.2026): lognormalverteilte Monatsrenditen. |
 
 ### Präzisierung der Akzeptanzkriterien US-04
 
@@ -131,3 +131,4 @@ Zur Übernahme in das Story-Issue US-01 (Docs #9). Grundlage sind die Kriterien 
 | 1 | 07.10.2026 | US-02 | Ausdrücklich ohne Anmeldung nutzbar | API-Design (öffentliche GET-Abfrage) |
 | 1 | 07.10.2026 | US-01 | Festlegungen E11 bis E14 | Abgleich mit dem API-Design |
 | 2 | 08.10.2026 | US-04 | Festlegungen E15 bis E23 zum Simulationsmodell (Rebalancing, Währung, Schätzzeitraum, Korrelation, Sparrate, Gesamtrendite, nominale Rechnung, abgeschlossene Monate, Verteilungsmodell); Präzisierung der Akzeptanzkriterien US-04; Verweis auf `simulationsmodell.md` | Rückfrage aus BE #40 (Monte-Carlo-Engine), Docs #72 |
+| 3 | 11.10.2026 | US-04 | E18 (keine Korrelation) und E23 (normalverteilte Monatsrenditen mit Untergrenze 0) an die umgesetzte Monte-Carlo-Engine angepasst | PO-Entscheidung vom 11.10.2026 nach Abgleich mit BE #40 und BE #49 |
