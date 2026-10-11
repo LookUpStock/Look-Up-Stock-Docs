@@ -1,0 +1,346 @@
+@startuml klassendiagramm_v2
+' LookUpStock – Klassendiagramm v2 (Backend)
+' Issue Docs #58 · Sprint 2 · Stand 11.10.2026
+' Grundlagen: Backend-Code (main, Stand 11.10.2026: BE #30, #54, #40, #49 gemergt),
+'             Klassendiagramm v1, Domänenmodell v3, ADR-01 bis ADR-04, simulationsmodell.md (Version 2),
+'             Sprint-Planning-Protokoll Sprint 2 (BE #39, #50, #53 noch offen), API-Design (Stand 02.10.2026)
+' Änderungen gegenüber v1:
+'   - Neu (BE #30, ADR-04): AuthController, AuthService, User, AuthToken, UserRepository, AuthTokenRepository
+'   - Neu (BE #54, ADR-04): Portfolio gehört einem User (owner); PortfolioService und PortfolioRepository
+'     arbeiten nur mit Portfolios des angemeldeten Nutzers (NF-04); PortfolioController prüft den Token
+'   - Von «geplant» zu vorhanden (BE #40, #49): SimulationParameters, Estimate, EstimationResult,
+'     MonteCarloEngine, MetricsCalculator, TimelinePoint; außerdem AssetController.search, AssetService.search,
+'     TwelveDataProvider; MarketDataProvider an den Code angepasst (search liefert SearchHit)
+'   - Portfolio: Zeitstempel als Instant (UTC, laut API-Design)
+'   - Weiterhin geplant: SimulationController, SimulationService, SimulationResult (BE #50),
+'     ParameterEstimator, CachingMarketDataProvider, PricePoint (BE #39), MockMarketDataProvider (BE #53)
+' Werkzeug: PlantUML
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam linetype polyline
+skinparam nodesep 30
+skinparam ranksep 45
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+  ArrowColor #333333
+  BackgroundColor<<geplant>> #EEEEEE
+  BorderColor<<geplant>> #888888
+  BackgroundColor<<neu>> #EAF4E4
+}
+skinparam package {
+  BorderColor #666666
+  FontStyle bold
+}
+skinparam note {
+  BackgroundColor #FFFBE6
+  BorderColor #999999
+}
+hide circle
+hide empty members
+hide stereotype
+
+title Klassendiagramm v2 – LookUpStock Backend (Sprint 2: US-01 bis US-04)
+
+package "Präsentationsschicht (ADR-01)" as PL {
+  class AuthController <<neu>> {
+    + register(request: RegisterRequest): UserResponse
+    + login(request: LoginRequest): LoginResponse
+    + logout(request: LogoutRequest): void
+  }
+  class PortfolioController {
+    + create(request: PortfolioRequest): PortfolioResponse
+    + list(request: TokenRequest): PortfolioListResponse
+    + details(portfolioId: Long, request: TokenRequest): PortfolioResponse
+  }
+  class AssetController {
+    + search(q: String, limit: Integer): SearchResponse
+    + details(assetId: Long): AssetResponse «geplant»
+  }
+  class SimulationController <<geplant>> {
+    + simulate(request: SimulationRequest): SimulationResponse
+  }
+}
+
+package "Logikschicht (ADR-01)" as LL {
+  class AuthService <<neu>> {
+    ~ TOKEN_VALIDITY: Duration = 24 h
+    ~ MIN_PASSWORD_LENGTH: int = 8
+    ~ MAX_PASSWORD_BYTES: int = 72
+    - passwordEncoder: PasswordEncoder
+    - clock: Clock
+    + register(email: String, password: String): User
+    + login(email: String, password: String): LoginResponse
+    + logout(token: String): void
+    + authenticate(token: String): User
+    - normalize(email: String): String
+    - generateToken(): String
+  }
+  class PortfolioService {
+    + create(request: PortfolioRequest, owner: User): Portfolio
+    + findAll(owner: User): List<Portfolio>
+    + findById(id: Long, owner: User): Portfolio
+  }
+  class AssetService {
+    + search(query: String, limit: Integer): List<Asset>
+    + findById(id: Long): Asset «geplant»
+    - findOrCreate(hit: SearchHit): Asset
+  }
+  class SimulationService <<geplant>> {
+    + simulate(portfolioId: Long, parameters: SimulationParameters, owner: User): SimulationResult
+    - generateSeed(): long
+  }
+  class User <<neu>> {
+    - id: Long
+    - email: String
+    - passwordHash: String
+    - createdAt: Instant
+  }
+  class AuthToken <<neu>> {
+    - id: Long
+    - token: String
+    - createdAt: Instant
+    - expiresAt: Instant
+    + isExpired(now: Instant): boolean
+  }
+  class Portfolio {
+    - id: Long
+    - name: String
+    - createdAt: Instant
+    - updatedAt: Instant
+    + addPosition(asset: Asset, weight: BigDecimal): void
+    + validate(): void
+    + getWeights(): List<WeightedAsset>
+  }
+  class Position {
+    - id: Long
+    - weight: BigDecimal
+    + getAsset(): Asset
+    + getWeight(): BigDecimal
+  }
+  class Asset {
+    - id: Long
+    - symbol: String
+    - isin: String
+    - name: String
+    - exchange: String
+    - currency: String
+    - type: String
+    - micCode: String
+  }
+  class WeightedAsset <<record>> {
+    + asset: Asset
+    + share: BigDecimal
+  }
+  class ParameterEstimator <<geplant>> {
+    + estimate(prices: Map<Asset, List<PricePoint>>): EstimationResult
+  }
+  class MonteCarloEngine <<neu>> {
+    + simulate(weights: List<WeightedAsset>, estimation: EstimationResult, parameters: SimulationParameters): double[][]
+  }
+  class MetricsCalculator <<neu>> {
+    + percentiles(paths: double[][]): List<TimelinePoint>
+    - percentile(sorted: double[], q: double): double
+  }
+  class SimulationParameters <<neu>> {
+    + startCapital: Double
+    + monthlyContribution: Double
+    + horizonYears: Integer
+    + paths: Integer = 10000
+    + seed: Long
+    + validate(): void
+    + horizonMonths(): int
+    + withSeed(newSeed: long): SimulationParameters
+  }
+  class EstimationResult <<neu>> {
+    + historyFrom: LocalDate
+    + historyTo: LocalDate
+    + estimates: List<Estimate>
+    + findByAssetId(assetId: Long): Estimate
+  }
+  class Estimate <<neu>> {
+    + asset: Asset
+    + annualReturn: double
+    + annualVolatility: double
+  }
+  class SimulationResult <<geplant>> {
+    + portfolioId: Long
+    + parameters: SimulationParameters
+    + estimation: EstimationResult
+    + timeline: List<TimelinePoint>
+    + runtimeMs: long
+  }
+  class TimelinePoint <<neu>> {
+    + month: int
+    + p5: double
+    + p50: double
+    + p95: double
+  }
+}
+
+package "Datenschicht (ADR-01)" as DL {
+  interface UserRepository <<neu>> {
+    + findByEmail(email: String): Optional<User>
+    + existsByEmail(email: String): boolean
+  }
+  interface AuthTokenRepository <<neu>> {
+    + findByToken(token: String): Optional<AuthToken>
+    + deleteByToken(token: String): long
+  }
+  interface PortfolioRepository {
+    + findAllByOwnerOrderByCreatedAtDesc(owner: User): List<Portfolio>
+    + findByIdAndOwner(id: Long, owner: User): Optional<Portfolio>
+  }
+  interface AssetRepository {
+    + findBySymbolAndMicCode(symbol: String, micCode: String): Optional<Asset>
+  }
+  interface MarketDataProvider {
+    + search(query: String): List<SearchHit>
+    + getMonthlyPrices(asset: Asset): List<PricePoint> «geplant»
+  }
+  class TwelveDataProvider
+  class CachingMarketDataProvider <<geplant>> {
+    - maxAge: Duration = 24 h
+  }
+  class MockMarketDataProvider <<geplant>>
+  class SearchHit <<record>>
+  class PricePoint <<geplant>> {
+    + month: LocalDate
+    + close: double
+  }
+}
+
+' Schichten untereinander anordnen
+PL -[hidden]down- LL
+LL -[hidden]down- DL
+Asset -[hidden]down- UserRepository
+TimelinePoint -[hidden]down- MarketDataProvider
+
+' Präsentation -> Logik
+AuthController --> AuthService
+PortfolioController --> PortfolioService
+AssetController --> AssetService
+SimulationController --> SimulationService
+
+' Token-Prüfung in den geschützten Endpunkten (ADR-04; BE #54 umgesetzt, BE #50 geplant)
+PortfolioController ..> AuthService : authenticate(token)
+SimulationController ..> AuthService : authenticate(token)
+
+' Anmeldung (US-01, BE #30)
+AuthService --> UserRepository
+AuthService --> AuthTokenRepository
+AuthService ..> User : <<create>>
+AuthService ..> AuthToken : <<create>>
+AuthToken "0..*" --> "1" User : user
+
+' Portfolio
+PortfolioService --> PortfolioRepository
+PortfolioService --> AssetRepository
+PortfolioService ..> Portfolio : <<create>>
+Portfolio "0..*" --> "1" User : owner
+Portfolio "1" *-- "1..*" Position : enthält
+Position "0..*" --> "1" Asset : bezieht sich auf
+Portfolio ..> WeightedAsset : <<create>>
+WeightedAsset --> "1" Asset
+
+' Suche
+AssetService --> MarketDataProvider
+AssetService --> AssetRepository
+
+' Simulation (ADR-02: SimulationService als Controller)
+SimulationService --> PortfolioService
+SimulationService --> MarketDataProvider
+SimulationService --> ParameterEstimator
+SimulationService --> MonteCarloEngine
+SimulationService --> MetricsCalculator
+SimulationService ..> SimulationResult : <<create>>
+SimulationService ..> SimulationParameters : withSeed()
+MonteCarloEngine ..> EstimationResult
+MonteCarloEngine ..> SimulationParameters
+ParameterEstimator ..> EstimationResult : <<create>>
+EstimationResult "1" *-- "1..*" Estimate
+SimulationResult "1" *-- "1..*" TimelinePoint
+MetricsCalculator ..> TimelinePoint : <<create>>
+
+' Kursdaten (NF-07, NF-12)
+CachingMarketDataProvider ..|> MarketDataProvider
+TwelveDataProvider ..|> MarketDataProvider
+MockMarketDataProvider ..|> MarketDataProvider
+CachingMarketDataProvider o--> "1" MarketDataProvider : delegate
+TwelveDataProvider ..> SearchHit : <<create>>
+
+note right of AuthService
+  <b>Anmeldung (US-01)</b>
+  register: E-Mail klein geschrieben (E11), Format (E12),
+  Passwort ≥ 8 Zeichen, nur BCrypt-Hash speichern (NF-03)
+  login: gleiche Meldung bei falscher E-Mail und
+  falschem Passwort; Token 24 h gültig (NF-16)
+  authenticate: liefert den User zum Token oder 401
+  Uhr (Clock) austauschbar für Tests (AT-01-10)
+end note
+
+note bottom of PortfolioService
+  <b>Zugriffsschutz (NF-04, ADR-04, BE #54)</b>
+  arbeitet nur mit Portfolios des übergebenen
+  Nutzers (findByIdAndOwner);
+  fremde ID → NotFoundException (404)
+end note
+
+note bottom of MonteCarloEngine
+  <b>Simulationsmodell v2 (E15, E18, E23)</b>
+  je Anlage μ = annualReturn / 12, σ = annualVolatility / √12;
+  Zufallszahl je Anlage und Monat, unabhängig (keine Korrelation);
+  Gewichte jeden Monat zurückgesetzt (Rebalancing);
+  Wert = max(0, Wert · (1 + R)) + Sparrate am Monatsende
+end note
+
+note bottom of MetricsCalculator
+  p5, p50, p95 je Monat,
+  lineare Interpolation (QUANTIL.INKL)
+end note
+
+note right of SimulationService
+  <b>GRASP Controller (ADR-02)</b>
+  koordiniert, rechnet nicht selbst:
+  Portfolio des Nutzers laden → Kursdaten beschaffen →
+  schätzen → simulieren → Perzentile berechnen
+end note
+
+note bottom of Portfolio
+  <b>GRASP Information Expert (ADR-03)</b>
+  validate(): Name Pflicht, max. 100 Zeichen, nicht nur Leerzeichen (E1, E9);
+  mind. eine Position; keine doppelte Anlage; Gewichtung > 0
+  mit max. 2 Nachkommastellen (E2); Summe 100 ± 0,01 (BigDecimal)
+  getWeights(): Anteile (z. B. 0,70) in fester Reihenfolge nach Asset-ID
+end note
+
+note bottom of ParameterEstimator
+  Prüft je Anlage mind. 36 Monatswerte (E8);
+  bei Unterschreitung Fehler mit allen
+  betroffenen Anlagen (E6, HTTP 422).
+  Gemeinsamer Schätzzeitraum, max. 120 Monate (E17).
+  annualReturn = 12 · Mittelwert der Monatsrenditen,
+  annualVolatility = Std.-Abw. · √12 (Simulationsmodell v2)
+end note
+
+note bottom of CachingMarketDataProvider
+  Kursdaten jünger als 24 h aus dem Cache,
+  sonst Abruf über delegate (Twelve Data);
+  nicht erreichbar → HTTP 503 (NF-07)
+end note
+
+legend bottom left
+  <b>Legende</b>
+  Weiß = im Code vorhanden, bereits in v1 enthalten · <back:#EAF4E4> Grün </back> = in Sprint 2 umgesetzt (neu oder von «geplant» zu vorhanden; Backend main, 11.10.2026)
+  Grau «geplant» = noch nicht umgesetzt (BE #39 Kursdaten und Schätzung, BE #50 SimulationService, BE #53 Mock) · «geplant» hinter einer Methode = Klasse vorhanden, Methode folgt
+  Token-Prüfung (ADR-04): Die REST-Controller lesen den Token aus dem Request-Body und holen den Nutzer über AuthService.authenticate(token);
+  die Logikschicht bekommt nur den User, nie den Token. Die Suche (AssetController) bleibt öffentlich.
+  Nicht dargestellt: DTOs (…Request, …Response), Exceptions und GlobalExceptionHandler, Konfiguration (CorsConfig, ClockConfig, PasswordConfig), PingController.
+  Nicht enthalten (folgt mit späteren Sprints): Kennzahlen (US-05), Bearbeiten und Löschen (US-06), Vergleich (US-07, Kern-Story), Speichern (US-08).
+  Vorversion: diagramme/archiv/klassendiagramm_v1
+endlegend
+
+@enduml

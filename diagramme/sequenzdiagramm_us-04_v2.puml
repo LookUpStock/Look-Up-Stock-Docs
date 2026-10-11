@@ -1,0 +1,214 @@
+@startuml sequenzdiagramm_us-04_v2
+' LookUpStock – Sequenzdiagramm zur Kern-Story US-04 mit GRASP-Kennzeichnung
+' Issue Docs #59 · Sprint 2 · Stand 11.10.2026
+' Grundlagen: Sequenzdiagramm US-04 v1, Klassendiagramm v2, Aktivitätsdiagramm US-04 v2,
+'             ADR-01 bis ADR-04, simulationsmodell.md (Version 2), API-Design (Stand 02.10.2026, POST /simulations),
+'             Backend-Code main (Stand 11.10.2026: AuthService, PortfolioService, SimulationParameters,
+'             MonteCarloEngine, MetricsCalculator), NF-04, NF-07, PO-Entscheidungen E6, E8
+' Änderungen gegenüber v1:
+'   - Anmeldung (ADR-04): SimulationController prüft den Token über AuthService.authenticate(token);
+'     ungültiger oder abgelaufener Token → 401
+'   - SimulationService erhält den angemeldeten Nutzer und lädt das Portfolio über
+'     PortfolioService.findById(id, owner) → PortfolioRepository.findByIdAndOwner;
+'     fremdes oder unbekanntes Portfolio → 404 (NF-04)
+'   - Seed: SimulationParameters.withSeed(seed) statt Setzen im Service
+'   - Methodennamen und Rückgabetypen an den Code angepasst (BE #40, #49, #54)
+'   - GRASP-Kennzeichnung um High Cohesion (Engine/MetricsCalculator) ergänzt
+' Werkzeug: PlantUML
+
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign left
+skinparam responseMessageBelowArrow true
+skinparam ParticipantBackgroundColor #FFFFFF
+skinparam ParticipantBorderColor #333333
+skinparam ActorBorderColor #333333
+skinparam ActorBackgroundColor #FFFFFF
+skinparam SequenceLifeLineBorderColor #888888
+skinparam NoteBackgroundColor #FFF8DC
+skinparam NoteBorderColor #999999
+skinparam SequenceGroupBorderColor #666666
+
+title Sequenzdiagramm US-04 – Monte-Carlo-Simulation durchführen (v2, Sprint 2)
+
+actor "Registrierter\nNutzer" as Nutzer
+participant "Frontend\n(Browser)" as FE
+participant ":SimulationController" as SC
+participant ":AuthService" as AUTH
+participant ":SimulationService" as SS
+participant "parameters:\nSimulationParameters" as SP
+participant ":PortfolioService" as PS
+participant ":PortfolioRepository" as PR
+participant "portfolio:\nPortfolio" as P
+participant ":CachingMarketDataProvider" as CMP
+participant ":TwelveDataProvider" as TDP
+participant "Twelve Data\n«extern»" as TWD
+participant ":ParameterEstimator" as PE
+participant ":MonteCarloEngine" as MCE
+participant ":MetricsCalculator" as MC
+
+autonumber
+
+Nutzer -> FE : Portfolio wählen, Eingaben machen,\n„Simulation starten“
+activate FE
+FE -> SC : POST /api/v1/simulations\n{token, portfolioId, parameters}
+activate SC
+
+SC -> AUTH : authenticate(token)
+activate AUTH
+note right of AUTH
+  <b>ADR-04</b>
+  Token in auth_token suchen,
+  AuthToken.isExpired(now) prüfen
+  (<b>Information Expert</b>)
+end note
+alt Token fehlt, unbekannt oder abgelaufen
+  AUTH --> SC : UnauthorizedException
+  SC --> FE : 401 UNAUTHORIZED\n„Bitte melde dich an.“
+  FE --> Nutzer : Weiterleitung zur Anmeldung (E14)
+end
+AUTH --> SC : owner: User
+deactivate AUTH
+
+SC -> SS : simulate(portfolioId, parameters, owner)
+activate SS
+note right of SS
+  <b>GRASP Controller (ADR-02)</b>
+  empfängt die Systemoperation und
+  delegiert jeden Schritt; kennt keinen
+  Token, nur den Nutzer (ADR-04)
+end note
+
+SS -> SP : validate()
+activate SP
+note right of SP
+  <b>GRASP Information Expert</b>
+  (wie Portfolio.validate(), ADR-03)
+  Horizont 1–40, ≥ 0, nicht beide 0,
+  Pfade 1.000–50.000
+end note
+alt Eingaben ungültig
+  SP --> SS : ValidationException
+  SS --> SC : ValidationException
+  SC --> FE : 400 VALIDATION_ERROR
+  FE --> Nutzer : Fehlermeldung am Feld,\nEingaben bleiben erhalten
+end
+deactivate SP
+
+SS -> PS : findById(portfolioId, owner)
+activate PS
+PS -> PR : findByIdAndOwner(portfolioId, owner)
+activate PR
+PR --> PS : Optional<Portfolio>
+deactivate PR
+alt Portfolio nicht vorhanden oder gehört anderem Nutzer
+  PS --> SS : NotFoundException
+  SS --> SC : NotFoundException
+  SC --> FE : 404 NOT_FOUND\n„Portfolio nicht gefunden.“ (NF-04)
+end
+PS --> SS : portfolio
+deactivate PS
+
+opt ohne Seed
+  SS -> SS : generateSeed()
+  SS -> SP : withSeed(seed)
+  activate SP
+  SP --> SS : parameters (mit Seed)
+  deactivate SP
+end
+
+SS -> P : getWeights()
+activate P
+note right of P
+  <b>GRASP Information Expert (ADR-03)</b>
+  Portfolio kennt seine Positionen und
+  liefert die Anteile nach Asset-ID sortiert
+end note
+P --> SS : List<WeightedAsset>
+deactivate P
+
+loop für jede Anlage des Portfolios
+  SS -> CMP : getMonthlyPrices(asset)
+  activate CMP
+  note right of SS
+    <b>GRASP Low Coupling (ADR-01, NF-12)</b>
+    SimulationService kennt nur das
+    Interface MarketDataProvider
+  end note
+  alt Kursdaten im Cache und jünger als 24 h
+    CMP --> SS : List<PricePoint> (aus Cache)
+  else nicht im Cache oder älter als 24 h
+    CMP -> TDP : getMonthlyPrices(asset)
+    activate TDP
+    TDP -> TWD : time_series (interval=1month)
+    alt Twelve Data erreichbar
+      TWD --> TDP : Kursdaten
+      TDP --> CMP : List<PricePoint>
+      CMP -> CMP : im Cache speichern
+      CMP --> SS : List<PricePoint>
+    else nicht erreichbar
+      TWD --> TDP : Fehler / Zeitüberschreitung
+      TDP --> CMP : Fehler
+      CMP --> SS : UpstreamUnavailableException
+      SS --> SC : UpstreamUnavailableException
+      SC --> FE : 503 UPSTREAM_UNAVAILABLE (≤ 5 s)\n„Kursdaten sind gerade nicht verfügbar.“
+    end
+    deactivate TDP
+  end
+  deactivate CMP
+end
+
+SS -> PE : estimate(prices)
+activate PE
+alt mindestens eine Anlage < 36 Monatswerte (E8)
+  PE --> SS : InsufficientDataException\n(alle betroffenen Anlagen, E6)
+  SS --> SC : InsufficientDataException
+  SC --> FE : 422 INSUFFICIENT_DATA\n„Für folgende Anlagen liegen weniger als\n3 Jahre Kursdaten vor: …“
+end
+PE --> SS : EstimationResult\n(gemeinsamer Schätzzeitraum, max. 120 Monate;\nRendite und Volatilität je Anlage)
+deactivate PE
+
+SS -> MCE : simulate(weights, estimation, parameters)
+activate MCE
+note right of MCE
+  <b>GRASP High Cohesion</b>
+  Engine erzeugt nur die Pfade,
+  MetricsCalculator nur die Perzentile
+  (Simulationsmodell v2)
+end note
+MCE --> SS : double[][] (Pfade × Monate)
+deactivate MCE
+
+SS -> MC : percentiles(paths)
+activate MC
+MC --> SS : List<TimelinePoint> (p5, p50, p95 je Monat)
+deactivate MC
+
+create participant ":SimulationResult" as SR
+SS -> SR : <<create>>
+note right of SR
+  <b>GRASP Creator</b>
+  SimulationService hat alle Daten
+  zur Initialisierung des Ergebnisses
+end note
+
+SS --> SC : SimulationResult
+deactivate SS
+SC --> FE : 200 OK\n{parameters (inkl. seed), estimates, timeline, runtimeMs}
+deactivate SC
+FE --> Nutzer : Fächerdiagramm (5., 50., 95. Perzentil),\nverwendeter Seed und Hinweise (E16, E21)
+deactivate FE
+
+legend bottom left
+  <b>Legende</b>
+  Rückgaben gestrichelt · Fehler werden als Exception an den REST-Controller gegeben; der GlobalExceptionHandler
+  wandelt sie in das Fehlerformat des API-Designs um (nicht dargestellt).
+  GRASP: Controller (ADR-02), Information Expert (ADR-03, ADR-04), Low Coupling (ADR-01, NF-12), High Cohesion, Creator.
+  <b>Stand 11.10.2026:</b> Im Code vorhanden sind AuthService, PortfolioService, PortfolioRepository, Portfolio, SimulationParameters,
+  MonteCarloEngine und MetricsCalculator. Noch nicht umgesetzt (Vorlage für die Umsetzung): SimulationController und SimulationService (BE #50),
+  CachingMarketDataProvider, Monatswerte im TwelveDataProvider und ParameterEstimator (BE #39). Klassen und Methoden wie im Klassendiagramm v2.
+  Nicht enthalten: Kennzahlen (US-05), Speichern (US-08). Vorversion: diagramme/archiv/sequenzdiagramm_us-04_v1
+endlegend
+
+@enduml
