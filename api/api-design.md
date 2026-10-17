@@ -790,7 +790,7 @@ Regeln: <code>startCapital</code> und <code>monthlyContribution</code> ≥ 0, ni
 }
 </pre>
 <code>timeline</code> enthält einen Punkt pro Monat (Monat 0 bis <code>horizonYears</code> × 12); hier gekürzt auf drei Punkte.<br>
-<code>metrics</code> wird ab US-05 (Sprint 2) befüllt.<br>
+<code>metrics</code> enthält Einzahlungen, Endwert-Perzentile, Value at Risk (95 %) und den Median des maximalen Drawdowns. <code>targetProbability</code> bleibt null, solange kein Sparziel vorgegeben wird.<br>
 <b>400 Bad Request</b> (Anlagehorizont außerhalb von 1 bis 40 Jahren)
 <pre>
 {
