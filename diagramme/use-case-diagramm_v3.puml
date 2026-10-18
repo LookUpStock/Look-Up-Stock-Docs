@@ -1,0 +1,104 @@
+@startuml use-case-diagramm_v3
+' LookUpStock – Use-Case-Diagramm v3
+' Issue Docs #98 · Sprint 3 · Stand 18.10.2026
+' Grundlagen: Use-Case-Diagramm v2, Akteursbeschreibung v2 (akteure.md),
+'             Kurzformat-Tabellen Sprint 3 (US-05 bis US-08, E24 bis E34), Sprint-Planning-Protokoll Sprint 3,
+'             API-Design (Portfolios, Simulationen, Vergleiche), NF-04
+' Änderungen gegenüber v2:
+'   - Sprint-Markierung: US-05 bis US-08 (Sprint 3) grün hervorgehoben, US-01 bis US-04 (Sprint 1 und 2) blau
+'   - US-08 aufgeteilt: „Simulation speichern“ (Sprint 3) und „Vergleich speichern“ (Sprint 4, E34);
+'     „Gespeicherte Simulationen aufrufen und löschen“ statt „… und Vergleiche aufrufen“
+'   - Neues <<include>>: Beim Aufrufen einer gespeicherten Simulation werden ihre Kennzahlen angezeigt (US-05, E32)
+'   - Namen an die Kurzformat-Tabellen Sprint 3 angeglichen („Portfolio bearbeiten und löschen“, „Kennzahlen anzeigen“)
+'   - Unverändert: Akteure, öffentliche und geschützte Anwendungsfälle, übrige Beziehungen aus v2
+' Werkzeug: PlantUML
+
+left to right direction
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+  ArrowColor #333333
+}
+skinparam rectangle {
+  BorderColor #333333
+}
+skinparam note {
+  BackgroundColor #FFFBE6
+  BorderColor #999999
+}
+
+title Use-Case-Diagramm – LookUpStock (v3, Sprint 3)
+
+actor "Gast" as Gast
+actor "Registrierter\nNutzer" as Nutzer
+actor "Finanzdaten-API\n(Twelve Data)" as API <<System>>
+
+rectangle "LookUpStock" {
+  usecase "Registrieren\n(US-01)" as UC_Reg #DDEBF7
+  usecase "An- und abmelden\n(US-01)" as UC_Login #DDEBF7
+  usecase "Anlagen suchen\n(US-02)" as UC_Suche #DDEBF7
+  usecase "Beispielsimulation\nausprobieren\n(US-09)" as UC_Demo
+  usecase "Portfolio mit Gewichtungen\nerstellen\n(US-03)" as UC_Port #DDEBF7
+  usecase "Portfolio bearbeiten\nund löschen\n(US-06)" as UC_Edit #E2F0D9
+  usecase "**Monte-Carlo-Simulation**\n**durchführen**\n(US-04, Kern-Story)" as UC_Sim #DDEBF7
+  usecase "Kennzahlen anzeigen\n(US-05)" as UC_Kenn #E2F0D9
+  usecase "**Anlagen und Portfolios**\n**vergleichen**\n(US-07, Kern-Story)" as UC_Verg #E2F0D9
+  usecase "Mehr als zwei Portfolios\nvergleichen\n(US-10)" as UC_Mehr
+  usecase "Simulation speichern\n(US-08)" as UC_Save #E2F0D9
+  usecase "Vergleich speichern\n(US-08, ab Sprint 4)" as UC_SaveV
+  usecase "Gespeicherte Simulationen\naufrufen und löschen\n(US-08)" as UC_Abruf #E2F0D9
+}
+
+Gast -- UC_Reg
+Gast -- UC_Suche
+Gast -- UC_Demo
+
+Nutzer -- UC_Login
+Nutzer -- UC_Suche
+Nutzer -- UC_Port
+Nutzer -- UC_Edit
+Nutzer -- UC_Sim
+Nutzer -- UC_Verg
+Nutzer -- UC_Abruf
+
+UC_Sim ..> UC_Kenn : <<include>>
+UC_Verg ..> UC_Kenn : <<include>>
+UC_Abruf ..> UC_Kenn : <<include>>
+UC_Sim <.. UC_Save : <<extend>>
+UC_Verg <.. UC_SaveV : <<extend>>
+UC_Verg <.. UC_Mehr : <<extend>>
+
+UC_Save -[hidden]- API
+UC_Suche -- API
+UC_Demo -- API
+UC_Sim -- API
+UC_Verg -- API
+
+note left of Gast
+  <b>Öffentlich:</b> Alle Anwendungsfälle
+  des Gasts sind ohne Anmeldung nutzbar.
+end note
+
+note left of Nutzer
+  <b>Geschützt:</b> Vorbedingung aller
+  Anwendungsfälle außer „Anlagen suchen“
+  und „Anmelden“: Nutzer ist angemeldet (US-01).
+  Er sieht und ändert nur seine eigenen
+  Daten (NF-04). Anmeldung 24 h gültig (NF-16).
+end note
+
+legend bottom left
+  <b>Legende</b>
+  <back:#E2F0D9> Grün </back> = Sprint 3 (US-05 bis US-08) · <back:#DDEBF7> Blau </back> = Sprint 1 und 2 (US-01 bis US-04) · weiß = Sprint 4 · fett = Kern-Story (mit Dozent abgestimmt, Aktivitäts- und Sequenzdiagramm)
+  <<include>> = wird immer mit ausgeführt · <<extend>> = optionale Erweiterung, nur auf Wunsch des Nutzers
+  <b>Anmeldung:</b> Alle Anwendungsfälle des registrierten Nutzers außer „Anlagen suchen“ und dem Anmelden selbst setzen eine gültige Anmeldung voraus. Die Anmeldung ist
+  Vorbedingung (siehe Kurzformat-Tabellen), kein <<include>>: Sie wird einmal durchgeführt und gilt dann für mehrere Anwendungsfälle.
+  <b>Sprintzuordnung:</b> Sprint 3: US-05, US-07 (zugesagt), US-06, US-08 (Stretch) · Sprint 4: US-09, US-10, Vergleich speichern (E34) (laut Sprint-Planning-Protokoll Sprint 3; Änderungen durch den Change Request möglich)
+  Akteursbeschreibung: anforderungen/akteure.md · Begriffe: anforderungen/glossar.md · Vorversion: diagramme/archiv/use-case-diagramm_v2
+endlegend
+
+@enduml

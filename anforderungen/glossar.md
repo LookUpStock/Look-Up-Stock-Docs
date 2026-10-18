@@ -3,11 +3,11 @@
 | | |
 |---|---|
 | **Projekt** | LookUpStock |
-| **Issue** | Docs #15 (Version 1), Docs #57 (Version 2), Docs #72 (Version 3), Docs #58 (Version 4) |
+| **Issue** | Docs #15 (Version 1), Docs #57 (Version 2), Docs #72 (Version 3), Docs #58 (Version 4), Docs #83 (Version 5) |
 | **Verantwortlich** | Mert Eminel (KujoBaraka), Product Owner |
-| **Version** | 4 |
-| **Stand** | 11.10.2026 |
-| **Grundlagen** | Kurzformat-Tabellen Sprint 1 und Sprint 2 (Version 3, E11 bis E23), Domänenmodell v3, Aktivitätsdiagramm US-04 v2, NFRs Version 3, API-Design (Stand 02.10.2026), ADR-01 bis ADR-04, Testkonzept, `simulationsmodell.md` (Version 2) |
+| **Version** | 5 |
+| **Stand** | 18.10.2026 |
+| **Grundlagen** | Kurzformat-Tabellen Sprint 1 und Sprint 2 (Version 3, E11 bis E23), Domänenmodell v3, Aktivitätsdiagramm US-04 v2, NFRs Version 3, API-Design (Stand 02.10.2026), ADR-01 bis ADR-04, Testkonzept, `simulationsmodell.md` (Version 2), Kurzformat-Tabellen Sprint 3 (E24 bis E34), ADR-05 |
 | **KI-Nutzung** | Mit KI-Unterstützung erstellt und vom Product Owner geprüft, siehe KI-Log |
 
 Das Glossar erklärt Begriffe, die für eine einheitliche Beschreibung nötig sind. Es richtet sich an Entwickler, Fachnutzer und Fachfremde. Die Spalte „Im Code / in der API“ ordnet die deutschen Fachbegriffe den englischen Namen in Code und Schnittstelle zu, damit Dokumentation und Prototyp dieselbe Sprache sprechen. Das Glossar wächst mit jedem Sprint; Begriffe späterer Stories werden ergänzt, sobald sie festgelegt sind.
@@ -22,14 +22,16 @@ Das Glossar erklärt Begriffe, die für eine einheitliche Beschreibung nötig si
 | **Börse** | Handelsplatz, an dem eine Anlage gehandelt wird, z. B. XETRA. | `exchange` |
 | **ETF** | Exchange Traded Fund: ein börsengehandelter Fonds, der meist einen Index nachbildet, z. B. den MSCI World. | `type` |
 | **Einzahlungen** | Summe aus Startkapital und allen Sparraten über den Anlagehorizont: Startkapital + Anlagehorizont × 12 × Sparrate (E19). | `totalContributions` |
+| **Endwert** | Portfoliowert am Ende des Anlagehorizonts. Angezeigt wird er im ungünstigen (5. Perzentil), mittleren (Median) und günstigen Verlauf (95. Perzentil); die Werte stimmen mit dem letzten Verlaufspunkt des Fächerdiagramms überein (E24). | `p5EndValue`, `medianEndValue`, `p95EndValue` |
 | **Fächerdiagramm** | Diagramm, das die Bandbreite der simulierten Verläufe über den Anlagehorizont zeigt: einen ungünstigen (5. Perzentil), einen mittleren (50. Perzentil) und einen günstigen Verlauf (95. Perzentil). Die Fläche dazwischen weitet sich mit der Zeit wie ein Fächer. | `timeline` |
 | **Gesamtrendite** | Wertentwicklung einschließlich Dividenden, die als wiederangelegt gelten. Die Kurshistorie ist dafür um Splits und Dividenden bereinigt (E20). | – |
 | **Gewichtung** | Anteil einer Anlage am Portfolio in Prozent. Jede Gewichtung ist größer als 0 % und hat höchstens 2 Nachkommastellen; zusammen ergeben alle Gewichtungen 100 % (Toleranz ± 0,01 Prozentpunkte). In Ergebnissen wird der Anteil als Dezimalzahl angegeben (0,70 = 70 %). In der Simulation gilt die Gewichtung über den gesamten Anlagehorizont (siehe Rebalancing). | `weight`, `getWeights()` |
 | **Handelswährung** | Währung, in der eine Anlage an ihrer Börse gehandelt wird, z. B. EUR an XETRA oder USD an der NASDAQ. Renditen werden in der Handelswährung verwendet und nicht in Euro umgerechnet; Wechselkursschwankungen werden nicht berücksichtigt (E16). | `currency` |
 | **ISIN** | International Securities Identification Number: weltweit eindeutige, zwölfstellige Kennnummer eines Wertpapiers, z. B. IE00B4L5Y983. | `isin` |
-| **Kennzahlen** | Werte, die das Ergebnis einer Simulation zusammenfassen, z. B. Median-Endwert, Value at Risk, maximaler Drawdown und Wahrscheinlichkeit, ein Sparziel zu erreichen. Die einzelnen Kennzahlen werden mit US-05 (Sprint 3) festgelegt und dann hier erklärt. | `metrics` |
+| **Kennzahlen** | Werte, die das Ergebnis einer Simulation zum Ende des Anlagehorizonts zusammenfassen (US-05, E24): Einzahlungen, Endwert im ungünstigen, mittleren und günstigen Verlauf, Value at Risk (95 %), maximaler Drawdown im Median und, falls ein Zielbetrag angegeben ist, die Zielwahrscheinlichkeit. Sie stehen unter dem Fächerdiagramm. | `metrics` |
 | **Kurshistorie** | Folge der historischen Monatswerte einer Anlage. Für eine Simulation sind je Anlage mindestens 3 Jahre nötig, also mindestens 36 Monatswerte (PO-Entscheidung E8). | – |
 | **Korrelation** | Maß dafür, wie stark sich die Kurse zweier Anlagen gemeinsam bewegen. Die Simulation berücksichtigt sie **nicht**: Jede Anlage wird unabhängig von den anderen simuliert (E18). Bei Anlagen, die sich meist gleichläufig bewegen, wird die Schwankung des Portfolios dadurch unterschätzt. | – |
+| **Maximaler Drawdown** | Größter zwischenzeitlicher Rückgang des Portfoliowerts von einem bisherigen Höchststand, in Prozent. Beispiel: Steigt das Portfolio auf 120.000 € und fällt danach auf 90.000 €, beträgt der Drawdown 25 %. Er wird für jeden Simulationspfad bestimmt; angezeigt wird der Median über alle Pfade. Die laufenden Einzahlungen sind enthalten und mildern Rückgänge ab (E26). | `maxDrawdownMedian` |
 | **Median** | Mittlerer Wert: Die Hälfte der simulierten Verläufe liegt darüber, die Hälfte darunter. Entspricht dem 50. Perzentil. | `p50` |
 | **Monatswert** | Schlusskurs einer Anlage am Ende eines Monats, bereinigt um Splits und Dividenden (E20). LookUpStock rechnet mit Monatswerten, weil auch die Simulation in Monatsschritten rechnet. Nur abgeschlossene Monate zählen; der laufende Monat wird nicht verwendet (E22). | – |
 | **Monte-Carlo-Simulation** | Verfahren, das sehr viele mögliche Zukunftsverläufe mit Zufallszahlen erzeugt. Grundlage sind die aus der Vergangenheit geschätzte Rendite und Volatilität. Statt einer einzigen Prognose zeigt das Ergebnis, wie breit die möglichen Entwicklungen streuen. | `MonteCarloEngine` |
@@ -46,9 +48,12 @@ Das Glossar erklärt Begriffe, die für eine einheitliche Beschreibung nötig si
 | **Sparrate** | Betrag in Euro, der jeden Monat zusätzlich in das Portfolio eingezahlt wird, jeweils am Monatsende, erstmals in Monat 1 (E19). | `monthlyContribution` |
 | **Startkapital** | Betrag in Euro, der zu Beginn einmalig angelegt wird. Startkapital und Sparrate dürfen nicht beide 0 sein. | `startCapital` |
 | **Ticker** | Kurzes Börsenkürzel einer Anlage, z. B. EUNL. | `symbol` |
-| **Vergleich** | Gegenüberstellung von zwei oder mehr Anlagen oder Portfolios unter gleichen Eingaben. Alle Varianten werden mit denselben Zufallszahlen berechnet, damit Unterschiede auf die Zusammensetzung zurückgehen und nicht auf Zufall (Kern-Story US-07). | `comparisons` |
+| **Vergleich** | Gegenüberstellung von zwei Einträgen unter gleichen Eingaben (Kern-Story US-07); ein Eintrag ist ein eigenes Portfolio oder eine einzelne Anlage, die wie ein Portfolio mit 100 % gerechnet wird (E30). Beide Einträge werden mit denselben Zufallszahlen und einem gemeinsamen Schätzzeitraum berechnet, damit Unterschiede auf die Zusammensetzung zurückgehen und nicht auf Zufall oder unterschiedliche Daten (E29). Zusätzlich wird angezeigt, mit welcher Wahrscheinlichkeit der erste Eintrag am Ende mehr wert ist als der zweite (E31). Mit US-10 werden bis zu vier Einträge möglich. | `comparisons`, `ComparisonService`, `probabilityAOutperformsB` |
 | **Verlaufspunkt** | Werte des 5., 50. und 95. Perzentils für einen Monat. Ein Fächerdiagramm besteht aus einem Verlaufspunkt je Monat, von Monat 0 bis zum Ende des Anlagehorizonts. | Eintrag in `timeline` |
+| **Value at Risk (95 %)** | Betrag, um den der Endwert im ungünstigen Verlauf (5. Perzentil) unter den Einzahlungen liegt. Beispiel: 58.000 € eingezahlt, ungünstiger Endwert 52.000 €, Value at Risk 6.000 €. Liegt der ungünstige Endwert über den Einzahlungen, beträgt er 0 €. Vereinfachte Form des Value at Risk aus dem Risikomanagement, bezogen auf die eingezahlten Euro (E25). | `valueAtRisk95` |
 | **Volatilität** | Maß dafür, wie stark der Kurs einer Anlage schwankt, als Jahreswert geschätzt aus der Kurshistorie im Schätzzeitraum. Hohe Volatilität bedeutet eine breitere Bandbreite möglicher Ergebnisse. | `annualVolatility` |
+| **Zielbetrag** | Freiwillig angegebener Betrag in Euro, den der Nutzer am Ende des Anlagehorizonts erreichen möchte, z. B. 100.000 €. Er muss größer als 0 sein (E27). | `targetAmount` |
+| **Zielwahrscheinlichkeit** | Anteil der Simulationspfade, deren Endwert mindestens den Zielbetrag erreicht. Ohne Zielbetrag wird sie nicht angezeigt (E27). | `targetProbability` |
 
 ## Anwendung und Technik
 
@@ -61,6 +66,7 @@ Das Glossar erklärt Begriffe, die für eine einheitliche Beschreibung nötig si
 | **Cache** | In der eigenen Datenbank gespeicherte Kursdaten und Suchergebnisse. Sie werden verwendet, solange sie jünger als 24 Stunden sind, auch wenn die Finanzdaten-API nicht erreichbar ist (NF-07). | Cache im `MarketDataProvider` |
 | **Finanzdaten-API** | Externer Dienst, der Stammdaten und historische Kursdaten liefert. Im Projekt ist das Twelve Data (PO-Entscheidung E7). | Interface `MarketDataProvider` |
 | **Frontend** | Teil von LookUpStock, der im Browser läuft: Suchfeld, Portfolio-Editor, Eingabemaske und Fächerdiagramm. | Repository `Look-Up-Stock-FrontEnd` |
+| **Gespeicherte Simulation** | Simulation, die ein registrierter Nutzer unter einem Namen mit höchstens 100 Zeichen gespeichert hat (US-08). Gespeichert werden Parameter, Schätzungen, Verlauf und Kennzahlen; beim Aufrufen wird das Ergebnis unverändert angezeigt, ohne Neuberechnung (E32). Wird das zugehörige Portfolio gelöscht, wird sie mitgelöscht (E28). | `SavedSimulation`, Tabelle `simulation` |
 | **Gast** | Person ohne Nutzerkonto oder ohne gültige Anmeldung, siehe Akteursbeschreibung (`akteure.md`). | – |
 | **Geschützte Funktion** | Funktion, die nur mit gültiger Anmeldung nutzbar ist, z. B. Portfolio erstellen oder Simulation durchführen. Öffentlich sind nur Registrieren, Anmelden, Anlagen suchen und die Beispielsimulation. | Feld `token` im Request-Body |
 | **Mock** | Testattrappe, die eine echte Komponente nachahmt. Der Mock der Finanzdaten-API liefert feste, künstliche Kursreihen, damit Tests ohne Internet und mit immer gleichen Ergebnissen laufen (NF-12). | `MockMarketDataProvider` |
@@ -94,3 +100,4 @@ Das Glossar erklärt Begriffe, die für eine einheitliche Beschreibung nötig si
 | 2 | 08.10.2026 | Neu: Anmeldung, Geschützte Funktion, Nutzerkonto, Passwort-Hash. Gast und registrierter Nutzer präzisiert. Kennzahlen: Sprint 3 statt Sprint 2 (US-05 verschoben) | Docs #57, US-01, Domänenmodell v3 |
 | 3 | 08.10.2026 | Neu: Einzahlungen, Gesamtrendite, Handelswährung, Korrelation, Nominal, Rebalancing. Ergänzt: Gewichtung, Monatswert, Rendite, Schätzzeitraum, Simulationspfad, Sparrate, Volatilität. Kennzahlen: US-05 liegt in Sprint 3 | PO-Festlegungen E15 bis E23 (Docs #72) |
 | 4 | 11.10.2026 | Einträge aus Version 2 (Anmeldung, Geschützte Funktion, Nutzerkonto, Passwort-Hash, Gast, Registrierter Nutzer) wiederhergestellt, die beim Zusammenführen von Version 3 verloren gegangen waren. Korrelation und Simulationspfad an die geänderten Festlegungen E18 und E23 angepasst | Docs #58, PO-Entscheidung vom 11.10.2026 |
+| 5 | 18.10.2026 | Neu: Endwert, Maximaler Drawdown, Value at Risk (95 %), Zielbetrag, Zielwahrscheinlichkeit, Gespeicherte Simulation. Kennzahlen ausformuliert. Vergleich an US-07 angepasst (zwei Einträge, einzelne Anlage, gemeinsamer Schätzzeitraum, Wahrscheinlichkeit für den ersten Eintrag) | Docs #83, Festlegungen E24 bis E34 |
