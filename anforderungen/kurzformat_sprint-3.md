@@ -6,8 +6,8 @@
 | **Sprint** | 3 (12.10.2026 – 18.10.2026) |
 | **Issue** | Docs #83 Kurzformat-Tabelle US-05 und PO-Festlegungen zu den Kennzahlen; Docs #86 Kurzformat-Tabelle US-06; Docs #89 Kurzformat-Tabelle US-07; Docs #95 Kurzformat-Tabelle US-08 |
 | **Verantwortlich** | Mert Eminel (KujoBaraka), Product Owner |
-| **Version** | 1 |
-| **Stand** | 18.10.2026 |
+| **Version** | 2 |
+| **Stand** | 18.10.2026 (Version 2 nach der Abnahme) |
 | **Grundlagen** | Vorlage Use-Case-Kurzbeschreibung (Vorlesung, Folie 20), Akzeptanzkriterien aus dem Sprint-Planning-Protokoll Sprint 3 (Abschnitt 4), API-Design (Abschnitte Portfolios, Simulationen, Vergleiche; Stand 17.10.2026), ADR-05, Akteursbeschreibung v2, Kurzformat-Tabellen Sprint 1 und Sprint 2 (E1 bis E23), NFRs (NF-01, NF-04, NF-08), Umsetzung im Backend: BE #68 (Simulationen speichern), BE #69 (Vergleich), BE #70 (Portfolio ändern und löschen), BE #71 (Kennzahlen) |
 | **KI-Nutzung** | Entwurf mit KI-Unterstützung erstellt und vom Product Owner geprüft, siehe KI-Log |
 
@@ -59,7 +59,7 @@ Alle vier Stories setzen eine gültige Anmeldung voraus (geschützte Anwendungsf
 | **Akteure** | Registrierter Nutzer (primär), Finanzdaten-API Twelve Data (sekundär) |
 | **Eingehende Information** | • Zwei Einträge, jeweils ein eigenes Portfolio oder eine Anlage aus der Anlagensuche (US-02)<br>• Optional je Eintrag eine Bezeichnung<br>• Gemeinsame Parameter wie bei US-04: Startkapital, Sparrate (in Euro, nicht beide 0), Anlagehorizont (1 bis 40 Jahre), Anzahl der Pfade (1.000 bis 50.000, Standard 10.000), optional Seed und Zielbetrag |
 | **Vorbedingungen** | • Der Nutzer ist angemeldet.<br>• Für jeden Eintrag ist ein eigenes Portfolio vorhanden (US-03) oder eine Anlage über die Anlagensuche gefunden (US-02). |
-| **Nachbedingungen** | • Beide Verläufe (Median und Bandbreite p5 bis p95) stehen in einem Diagramm; die Kennzahlen aus US-05 stehen nebeneinander in einer Tabelle.<br>• Jeder Eintrag trägt seine Bezeichnung; ohne Eingabe den Namen des Portfolios bzw. der Anlage.<br>• Der verwendete Seed und der gemeinsame Schätzzeitraum werden angezeigt (E29).<br>• Die Wahrscheinlichkeit, dass der erste Eintrag am Ende mehr wert ist als der zweite, wird angezeigt (E31).<br>• Gleiche Eingaben und gleicher Seed ergeben identische Ergebnisse (NF-08).<br>• Ungültige Parameter werden mit denselben Meldungen wie bei US-04 abgelehnt (400).<br>• Liegen für eine oder mehrere Anlagen weniger als 36 Monatswerte vor, nennt der Hinweis alle betroffenen Anlagen (422, E6, E8); sind die Kursdaten nicht abrufbar, erscheint „Kursdaten sind gerade nicht verfügbar.“ (503).<br>• Ein fremdes oder nicht vorhandenes Portfolio wird wie ein nicht vorhandenes behandelt (404, NF-04). |
+| **Nachbedingungen** | • Für jeden Eintrag steht ein Fächerdiagramm (Median und Bandbreite p5 bis p95); beide Diagramme und die Kennzahlen aus US-05 stehen nebeneinander (E35).<br>• Jeder Eintrag trägt seine Bezeichnung; ohne Eingabe den Namen des Portfolios bzw. der Anlage.<br>• Der verwendete Seed und der gemeinsame Schätzzeitraum werden angezeigt (E29).<br>• Die Wahrscheinlichkeit, dass der erste Eintrag am Ende mehr wert ist als der zweite, wird angezeigt (E31).<br>• Gleiche Eingaben und gleicher Seed ergeben identische Ergebnisse (NF-08).<br>• Ungültige Parameter werden mit denselben Meldungen wie bei US-04 abgelehnt (400).<br>• Liegen für eine oder mehrere Anlagen weniger als 36 Monatswerte vor, nennt der Hinweis alle betroffenen Anlagen (422, E6, E8); sind die Kursdaten nicht abrufbar, erscheint „Kursdaten sind gerade nicht verfügbar.“ (503).<br>• Ein fremdes oder nicht vorhandenes Portfolio wird wie ein nicht vorhandenes behandelt (404, NF-04). |
 | **Essenzielle Schritte** | • Zwei Einträge auswählen und optional bezeichnen<br>• Gemeinsame Parameter eingeben<br>• Eingaben prüfen<br>• Kursdaten bereitstellen und Rendite und Volatilität für alle Anlagen in einem gemeinsamen Schätzzeitraum schätzen<br>• Beide Einträge mit denselben Zufallszahlen simulieren<br>• Verläufe und Kennzahlen gegenüberstellen |
 
 Der Ablauf mit Alternativszenarien ist im Aktivitätsdiagramm US-07 (Docs #90) dargestellt, die beteiligten Klassen im Sequenzdiagramm US-07 (Docs #91).
@@ -83,7 +83,7 @@ Der Ablauf mit Alternativszenarien ist im Aktivitätsdiagramm US-07 (Docs #90) d
 
 ## Festlegungen des Product Owners (18.10.2026)
 
-Anlass: Abgleich der Akzeptanzkriterien aus dem Sprint-Planning-Protokoll Sprint 3 mit der Umsetzung im Backend (BE #68 bis #71) und dem API-Design. Die Nummerierung setzt E1 bis E23 fort. Die Festlegungen übernehmen die umgesetzten Regeln (siehe Einleitung).
+Anlass: Abgleich der Akzeptanzkriterien aus dem Sprint-Planning-Protokoll Sprint 3 mit der Umsetzung im Backend (BE #68 bis #71) und dem API-Design; E35 aus der Abnahme am 18.10.2026. Die Nummerierung setzt E1 bis E23 fort. Die Festlegungen übernehmen die umgesetzten Regeln (siehe Einleitung).
 
 | Nr. | Story | Festlegung | Begründung |
 |---|---|---|---|
@@ -98,6 +98,7 @@ Anlass: Abgleich der Akzeptanzkriterien aus dem Sprint-Planning-Protokoll Sprint
 | E32 | US-08 | Gespeichert wird **beim Berechnen**: Der Nutzer gibt einen Namen an, das System rechnet mit den Eingaben und dem Seed der angezeigten Simulation und speichert Parameter, Schätzungen, Verlauf und Kennzahlen. Beim Aufrufen wird das gespeicherte Ergebnis unverändert angezeigt. | Entspricht dem API-Design (`save: true` mit `name`, 201). Mit demselben Seed entsteht dasselbe Ergebnis (NF-08). Das gespeicherte Ergebnis bleibt erhalten, auch wenn sich Kursdaten oder Portfolio später ändern. Umgesetzt in BE #68. |
 | E33 | US-07 | Der Vergleich von zwei Einträgen mit je 10.000 Pfaden ist mit je 5 Anlagen und 40 Jahren Anlagehorizont in **höchstens 6 Sekunden** berechnet; gemessen wird `runtimeMs` wie bei NF-01. | Ersetzt den Platzhalter „[PO: Sekunden]“ im Sprint-Planning-Protokoll. Zwei Einträge verdoppeln etwa den Rechenaufwand gegenüber NF-01 (3 Sekunden); die Schätzung erfolgt nur einmal (ADR-05). |
 | E34 | US-08 | **Vergleiche speichern** (`POST /comparisons` mit `save`) folgt in Sprint 4 zusammen mit US-10. | Laut Sprint-Planning-Protokoll Sprint 3 bei Engpass nach Sprint 4; im Backend noch nicht umgesetzt (`save` wird noch nicht ausgewertet). |
+| E35 | US-07 | *(18.10.2026, nach der Abnahme)* Im Vergleich werden die Verläufe **in zwei Fächerdiagrammen nebeneinander** dargestellt, je Eintrag eines mit Median und Bandbreite p5 bis p95, darunter jeweils die Kennzahlen. Es wird kein gemeinsames Diagramm verlangt. | Bewusste Entscheidung von Product Owner und Team bei der Abnahme: Jede Bandbreite bleibt einzeln lesbar, die Fächer überdecken sich nicht. Ersetzt die Vorgabe „beide Verläufe in einem Diagramm“ aus dem Sprint-Planning-Protokoll. Empfehlung: beide Diagramme mit derselben Y-Achse darstellen, damit die Höhen vergleichbar sind (Abnahmeprotokoll Sprint 3, Hinweis H1). |
 
 ---
 
@@ -113,7 +114,7 @@ Anlass: Abgleich der Akzeptanzkriterien aus dem Sprint-Planning-Protokoll Sprint
 
 ## Akzeptanzkriterien
 
-Zur Übernahme in die Story-Issues US-05 (Docs #6), US-06 (Docs #5), US-07 (Docs #3) und US-08 (Docs #4). Grundlage sind die Kriterien aus dem Sprint-Planning-Protokoll Sprint 3; Präzisierungen durch die Festlegungen E24 bis E34 sind gekennzeichnet. Für alle vier Stories gilt: Ohne gültige Anmeldung 401.
+Zur Übernahme in die Story-Issues US-05 (Docs #6), US-06 (Docs #5), US-07 (Docs #3) und US-08 (Docs #4). Grundlage sind die Kriterien aus dem Sprint-Planning-Protokoll Sprint 3; Präzisierungen durch die Festlegungen E24 bis E35 sind gekennzeichnet. Für alle vier Stories gilt: Ohne gültige Anmeldung 401.
 
 **US-05 Kennzahlen anzeigen**
 
@@ -136,7 +137,7 @@ Zur Übernahme in die Story-Issues US-05 (Docs #6), US-06 (Docs #5), US-07 (Docs
 - Jeder Eintrag bekommt eine Bezeichnung; ohne Eingabe wird der Portfolio- bzw. Anlagename verwendet.
 - Beide Einträge werden mit denselben Parametern, demselben Seed und einem gemeinsamen Schätzzeitraum berechnet; Seed und Schätzzeitraum werden angezeigt. *(E29)*
 - Gleiche Eingaben und gleicher Seed führen zu identischen Ergebnissen (NF-08).
-- Das Ergebnis zeigt beide Verläufe (Median und Bandbreite p5 bis p95) in einem Diagramm, die Kennzahlen aus US-05 nebeneinander in einer Tabelle und die Wahrscheinlichkeit, dass der erste Eintrag am Ende mehr wert ist als der zweite. *(E31)*
+- Das Ergebnis zeigt je Eintrag ein Fächerdiagramm (Median und Bandbreite p5 bis p95) nebeneinander, die Kennzahlen aus US-05 nebeneinander und die Wahrscheinlichkeit, dass der erste Eintrag am Ende mehr wert ist als der zweite. *(E31, E35)*
 - Ungültige Parameter werden wie bei US-04 mit derselben Meldung abgelehnt (400).
 - Fehlen für einen Eintrag Kursdaten (weniger als 36 Monatswerte), werden alle betroffenen Anlagen genannt (422, E6); sind die Kursdaten nicht abrufbar, erscheint „Kursdaten sind gerade nicht verfügbar.“ (503).
 - Ein fremdes Portfolio wird wie ein nicht vorhandenes behandelt (404, NF-04).
@@ -158,3 +159,4 @@ Zur Übernahme in die Story-Issues US-05 (Docs #6), US-06 (Docs #5), US-07 (Docs
 | Version | Datum | Story | Änderung | Anlass |
 |---|---|---|---|---|
 | 1 | 18.10.2026 | US-05 bis US-08 | Neu: Kurzformat-Tabellen, Festlegungen E24 bis E34, Auswirkungen auf US-03 und US-04, Akzeptanzkriterien zur Übernahme in die Story-Issues | Docs #83, #86, #89, #95; Sprint-Planning-Protokoll Sprint 3; Abgleich mit BE #68 bis #71 |
+| 2 | 18.10.2026 | US-07 | Festlegung E35: zwei Fächerdiagramme nebeneinander statt eines gemeinsamen Diagramms; Nachbedingung und Akzeptanzkriterium angepasst | Abnahme Sprint 3 (Docs #101), Entscheidung von Product Owner und Team |
