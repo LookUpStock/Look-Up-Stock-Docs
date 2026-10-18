@@ -1,0 +1,274 @@
+@startuml domaenenmodell_v4
+' Domänenmodell v4 – LookUpStock, Sprint 3 (US-01 bis US-08)
+' Issue Docs #98 Domänenmodell v4 und Use-Case-Diagramm v3 · Stand 18.10.2026
+' Grundlagen: Domänenmodell v3, Kurzformat-Tabellen Sprint 3 (US-05 bis US-08, E24 bis E34),
+'             ADR-05, API-Design (Simulationen, Vergleiche), Glossar Version 5, NF-04, NF-08
+' Änderungen gegenüber v3:
+'   - Neuer Fachbegriff Kennzahlen (US-05, E24 bis E27) mit abgeleiteter Zielwahrscheinlichkeit
+'   - Simulationsparameter um den optionalen Zielbetrag ergänzt (E27)
+'   - Neue Fachbegriffe Vergleich und Vergleichseintrag (US-07, E29 bis E31): ein Vergleich besteht
+'     aus zwei Einträgen; jeder Eintrag wird als eigene Simulation berechnet (wie ADR-05)
+'   - Simulation simuliert ein Portfolio oder, nur im Vergleich, eine einzelne Anlage (E30)
+'     (Multiplizität am Portfolio-Ende von „simuliert“ daher 1 → 0..1)
+'   - Neuer Fachbegriff Gespeicherte Simulation (US-08, E28, E32)
+'   - Portfolio: geändertAm wird beim Bearbeiten aktualisiert; Regel zum Löschen (US-06, E28)
+'   - Legende: Kennzahlen, Vergleich und gespeicherte Simulation aus „Bewusst nicht enthalten“ entfernt
+'   - Unverändert: Nutzer, Anmeldung, Position, Anlage, Kurswert, Schätzung, Verlaufspunkt aus v3
+' KI-Nutzung: siehe KI-Log (Eintrag Domänenmodell v4)
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype polyline
+skinparam nodesep 70
+skinparam ranksep 70
+skinparam defaultFontName Arial
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+  ArrowColor #333333
+}
+skinparam note {
+  BackgroundColor #FFFBE6
+  BorderColor #999999
+}
+hide circle
+hide methods
+hide empty members
+
+title Domänenmodell v4 – LookUpStock (Sprint 3: US-01 bis US-08)
+
+class Nutzer {
+  email
+  passwort
+  registriertAm
+}
+
+class Anmeldung {
+  angemeldetAm
+  gültigBis
+  /istGültig
+}
+
+class Portfolio {
+  name
+  erstelltAm
+  geändertAm
+  /summeGewichtungen
+}
+
+class Position {
+  gewichtung
+}
+
+class Anlage {
+  name
+  ticker
+  isin
+  börse
+  währung
+  art
+}
+
+class Kurswert {
+  datum
+  schlusskurs
+}
+
+class Simulation {
+  durchgeführtAm
+  schätzzeitraumVon
+  schätzzeitraumBis
+}
+
+class "Gespeicherte Simulation" as GespeicherteSimulation #EAF4E4 {
+  name
+  gespeichertAm
+}
+
+class Simulationsparameter {
+  startkapital
+  monatlicheSparrate
+  anlagehorizontJahre
+  pfadanzahl
+  seed
+  <color:#2E7D32>zielbetrag</color>
+}
+
+class Schätzung {
+  jahresrendite
+  jahresvolatilität
+}
+
+class Verlaufspunkt {
+  monat
+  p5
+  p50
+  p95
+}
+
+class Kennzahlen #EAF4E4 {
+  summeEinzahlungen
+  endwertP5
+  endwertMedian
+  endwertP95
+  valueAtRisk95
+  maxDrawdownMedian
+  /zielwahrscheinlichkeit
+}
+
+class Vergleich #EAF4E4 {
+  durchgeführtAm
+  /wahrscheinlichkeitErsterHöher
+}
+
+class Vergleichseintrag #EAF4E4 {
+  bezeichnung
+  position
+}
+
+' Nutzer und Portfolios
+Nutzer "1" -right- "0..*" Anmeldung : hat >
+Nutzer "1" -down- "0..*" Portfolio : besitzt >
+
+Portfolio "1" -right- "1..*" Position : enthält >
+Position "0..*" -right- "1" Anlage : bezieht sich auf >
+Anlage "1" -right- "0..*" Kurswert : hat >
+
+' Simulation (US-04, US-05, US-08)
+Portfolio "0..1" -down- "0..*" Simulation : < simuliert
+Anlage "0..1" -- "0..*" Simulation : < simuliert
+Simulation "1" -right- "1..*" Schätzung : basiert auf >
+Anlage "1" -down- "0..*" Schätzung : < gilt für
+Simulation "1" -down- "1" Simulationsparameter : verwendet >
+Simulation "1" -down- "1..*" Verlaufspunkt : ergibt >
+Simulation "1" -down- "1" Kennzahlen : liefert >
+GespeicherteSimulation "0..1" -right- "1" Simulation : bewahrt auf >
+
+' Vergleich (US-07)
+Vergleich "1" *-down- "2" Vergleichseintrag : besteht aus >
+Vergleichseintrag "1" -- "1" Simulation : wird berechnet durch >
+Position -down[hidden]- Vergleich
+
+note left of Nutzer
+  {email: Pflicht, gültiges Format (E12),
+   eindeutig ohne Unterscheidung von
+   Groß- und Kleinschreibung (E11)}
+  {passwort: mindestens 8 Zeichen,
+   nur als Hash gespeichert (NF-03)}
+end note
+
+note right of Anmeldung
+  {gültigBis = angemeldetAm + 24 Stunden (NF-16)}
+  {endet vorzeitig durch Abmelden}
+  /istGültig = noch nicht abgelaufen
+  und nicht abgemeldet
+end note
+
+note left of Portfolio
+  {name: Pflicht, höchstens 100 Zeichen}
+  {ein Name nur aus Leerzeichen gilt als leer}
+  {nur für den besitzenden Nutzer
+   sichtbar, änderbar und löschbar (NF-04)}
+  <color:#2E7D32>{beim Bearbeiten gelten dieselben Regeln</color>
+  <color:#2E7D32> wie beim Erstellen; geändertAm wird aktualisiert}</color>
+  <color:#2E7D32>{beim Löschen werden die gespeicherten</color>
+  <color:#2E7D32> Simulationen des Portfolios mitgelöscht (E28)}</color>
+end note
+
+note top of Position
+  {gewichtung > 0 %, höchstens
+   2 Nachkommastellen}
+  {Summe der Gewichtungen je Portfolio
+   = 100 % (Toleranz ± 0,01 Prozentpunkte)}
+  {jede Anlage höchstens einmal je Portfolio}
+end note
+
+note right of Kurswert
+  {ein Kurswert je Monat (Monatsschlusskurs)}
+  {für eine Simulation sind je Anlage
+   mindestens 36 Monatswerte nötig}
+end note
+
+note bottom of Simulationsparameter
+  {anlagehorizontJahre: ganze Zahl, 1 bis 40}
+  {startkapital ≥ 0, monatlicheSparrate ≥ 0,
+   nicht beide 0}
+  {pfadanzahl: 1.000 bis 50.000, Standard 10.000}
+  {seed: optional; ohne Angabe vom System
+   erzeugt und dem Nutzer angezeigt}
+  <color:#2E7D32>{zielbetrag: optional, > 0 (E27)}</color>
+end note
+
+note right of Simulation
+  <color:#2E7D32>{simuliert genau ein eigenes Portfolio oder,</color>
+  <color:#2E7D32> nur im Vergleich, genau eine Anlage</color>
+  <color:#2E7D32> (xor; Anlage = Portfolio mit 100 %, E30)}</color>
+  {Schätzzeitraum gilt gemeinsam
+   für alle Anlagen der Simulation}
+  {nur für eigene Portfolios (NF-04)}
+end note
+
+note bottom of Schätzung
+  {genau eine Schätzung je simulierter Anlage}
+  {wird aus den Kurswerten der Anlage
+   im Schätzzeitraum ermittelt}
+end note
+
+note bottom of Verlaufspunkt
+  {ein Verlaufspunkt je Monat,
+   von 0 bis anlagehorizontJahre × 12}
+  p5, p50, p95 = 5., 50. und 95. Perzentil
+  des Portfoliowerts über alle Pfade
+  (Grundlage des Fächerdiagramms)
+end note
+
+note bottom of Kennzahlen
+  <b>Werte zum Ende des Anlagehorizonts (E24)</b>
+  summeEinzahlungen = startkapital +
+  anlagehorizontJahre × 12 × monatlicheSparrate (E19)
+  valueAtRisk95 = max(0, summeEinzahlungen − endwertP5) (E25)
+  maxDrawdownMedian = Median des größten Rückgangs
+  vom Höchststand je Pfad (E26)
+  /zielwahrscheinlichkeit = Anteil der Pfade mit
+  Endwert ≥ zielbetrag; nur mit Zielbetrag (E27)
+end note
+
+note bottom of GespeicherteSimulation
+  {name: Pflicht, höchstens 100 Zeichen}
+  {zeigt beim Aufrufen dieselben Werte
+   wie beim Speichern, ohne Neuberechnung (E32)}
+  {nur für den besitzenden Nutzer
+   sichtbar und löschbar (NF-04)}
+end note
+
+note left of Vergleich
+  {genau zwei Einträge (US-07);
+   bis zu vier mit US-10}
+  {die Simulationen aller Einträge verwenden
+   dieselben Parameterwerte, denselben Seed
+   und einen gemeinsamen Schätzzeitraum
+   für alle Anlagen (E29, NF-08)}
+  /wahrscheinlichkeitErsterHöher = Anteil der
+  Pfade, in denen Eintrag 1 am Ende mehr wert
+  ist als Eintrag 2 (E31)
+  {wird in Sprint 3 nicht gespeichert (E34)}
+end note
+
+note left of Vergleichseintrag
+  {bezeichnung: ohne Eingabe Name des
+   simulierten Portfolios bzw. der Anlage}
+  {position: 1 oder 2 (Reihenfolge)}
+end note
+
+legend bottom left
+  <b>Legende</b>
+  Konzeptionelles Modell nach Larman: Fachbegriffe, Attribute und Beziehungen, keine Operationen und keine technischen Klassen.
+  /attribut = abgeleiteter (berechneter) Wert · {…} = fachliche Regel · <back:#EAF4E4> grün hinterlegt </back> = neuer Fachbegriff in v4 · <color:#2E7D32>grüne Schrift</color> = in v4 ergänztes Attribut oder ergänzte Regel (Sprint 3, US-05 bis US-08)
+  Anlagen sind nicht nutzerbezogen: Alle Nutzer greifen auf denselben Anlagenbestand zu; auch Gäste können suchen (US-02).
+  Simulation und gespeicherte Simulation gehören über ihr Portfolio indirekt zum Nutzer. Ein Vergleich kann auch nur aus Anlagen bestehen; er wird vom angemeldeten Nutzer durchgeführt und in Sprint 3 nicht gespeichert.
+  <b>Bewusst nicht enthalten (folgt in späteren Versionen):</b> gespeicherter Vergleich (US-08, Sprint 4), mehr als zwei Vergleichseinträge (US-10), Beispielsimulation (US-09).
+  Finanzdaten-API ist Akteur (Use-Case-Diagramm), kein Fachbegriff. Token und Cache sind technische Lösungen und daher nicht enthalten.
+  Vorversion: diagramme/archiv/domaenenmodell_v3
+endlegend
+
+@enduml

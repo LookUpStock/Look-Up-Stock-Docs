@@ -3,14 +3,14 @@
 | | |
 |---|---|
 | **Projekt** | LookUpStock |
-| **Issue** | Docs #57 Akteurbeschreibung und Use-Case-Diagramm v2 (Version 1: Docs #15) |
+| **Issue** | Docs #57 Akteurbeschreibung und Use-Case-Diagramm v2 (Version 1: Docs #15); Docs #98 Verweis auf Use-Case-Diagramm v3 (Version 3) |
 | **Verantwortlich** | Mert Eminel (KujoBaraka), Product Owner |
-| **Version** | 2 |
-| **Stand** | 08.10.2026 |
+| **Version** | 3 |
+| **Stand** | 18.10.2026 |
 | **Grundlagen** | Vision und Product Backlog (US-01 bis US-10), Kurzformat-Tabellen Sprint 1 und Sprint 2, Domänenmodell v3, API-Design (Stand 02.10.2026), NFRs Version 2 |
 | **KI-Nutzung** | Mit KI-Unterstützung erstellt und vom Product Owner geprüft, siehe KI-Log |
 
-Die Tabelle folgt der Vorlage aus der Vorlesung (Folie 19) und ist um die Art des Akteurs und die zugehörigen Anwendungsfälle ergänzt. Primäre Akteure lösen Anwendungsfälle selbst aus, sekundäre Akteure werden vom System für einen Anwendungsfall benötigt. Das zugehörige Diagramm liegt in `diagramme/use-case-diagramm_v2.puml`.
+Die Tabelle folgt der Vorlage aus der Vorlesung (Folie 19) und ist um die Art des Akteurs und die zugehörigen Anwendungsfälle ergänzt. Primäre Akteure lösen Anwendungsfälle selbst aus, sekundäre Akteure werden vom System für einen Anwendungsfall benötigt. Das zugehörige Diagramm liegt in `diagramme/use-case-diagramm_v3.puml`.
 
 | Akteur | Art | Beschreibung | Anwendungsfälle |
 |---|---|---|---|
@@ -37,3 +37,4 @@ Im Domänenmodell (v3) entspricht dem registrierten Nutzer der Fachbegriff **Nut
 |---|---|---|---|
 | 1 | 04.10.2026 | Erstfassung mit Gast, registriertem Nutzer und Finanzdaten-API | Docs #15 |
 | 2 | 08.10.2026 | Gast: Registrierung mit E-Mail und Passwort, Weiterleitung zur Anmeldung bei geschützten Funktionen. Registrierter Nutzer: Anmeldung mit E-Mail und Passwort, 24 Stunden gültig (NF-16). Neuer Abschnitt „Öffentliche und geschützte Anwendungsfälle“. Hinweis zu Sprint 1 entfernt, da US-01 umgesetzt ist. Verweis auf Use-Case-Diagramm v2 und Domänenmodell v3 | Docs #57, US-01 in Sprint 2 |
+| 3 | 18.10.2026 | Verweis auf das Use-Case-Diagramm v3 aktualisiert (v2 liegt jetzt in `diagramme/archiv/`); Akteure und Anwendungsfälle unverändert | Docs #98 |
