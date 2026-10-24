@@ -1,0 +1,265 @@
+@startuml sequenzdiagramm_us-07_v2
+' LookUpStock – Sequenzdiagramm zur Kern-Story US-07 mit GRASP-Kennzeichnung
+' Issue Docs #130 · Sprint 4 · Stand 24.10.2026 (v1: Docs #91, Sprint 3)
+' Grundlagen: ADR-05, Aktivitätsdiagramm US-07 v2, Kurzformat-Tabelle US-07 Version 2 (kurzformat_sprint-3.md),
+'             API-Design (POST /comparisons), Sequenzdiagramm US-04 v2,
+'             Backend-Code main (Stand 18.10.2026: ComparisonController, ComparisonService, SimulationService.run
+'             und ensureSeed, ParameterEstimator, PriceHistoryService, PriceCache, MetricsCalculator; BE #69),
+'             Frontend-Code main (Stand 24.10.2026: comparison.js renderResults, chart.js renderFanChart),
+'             NF-04, NF-07, NF-08, PO-Festlegungen E6, E8, E29 bis E31, E35, Abnahmeprotokoll Sprint 3 (H1)
+' Änderungen gegenüber v1:
+'   - Ergebnisdarstellung im Frontend nach E35: renderResults erzeugt je Eintrag eine Karte mit
+'     eigenem Fächerdiagramm (renderFanChart) und den Kennzahlen darunter, statt beider Verläufe
+'     in einem Diagramm
+'   - gemeinsame Y-Achse für beide Diagramme (H1, Akzeptanzkriterium Sprint 4, Umsetzung FE #35)
+'   - Legende: US-10 auf Won't, Vergleich speichern nach Sprint 5 (Sprint-Planning-Protokoll Sprint 4)
+' Backend-Ablauf unverändert. Unterschiede zu US-04 siehe v1 (Archiv).
+' Werkzeug: PlantUML
+
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign left
+skinparam responseMessageBelowArrow true
+skinparam ParticipantBackgroundColor #FFFFFF
+skinparam ParticipantBorderColor #333333
+skinparam ActorBorderColor #333333
+skinparam ActorBackgroundColor #FFFFFF
+skinparam SequenceLifeLineBorderColor #888888
+skinparam NoteBackgroundColor #FFF8DC
+skinparam NoteBorderColor #999999
+skinparam SequenceGroupBorderColor #666666
+
+title Sequenzdiagramm US-07 – Anlagen und Portfolios vergleichen (v2, Sprint 4)
+
+actor "Registrierter\nNutzer" as Nutzer
+participant "Frontend\n(Browser)" as FE
+participant ":ComparisonController" as CC
+participant ":AuthService" as AUTH
+participant ":ComparisonService" as CS
+participant "parameters:\nSimulationParameters" as SP
+participant ":PortfolioService" as PS
+participant "portfolio:\nPortfolio" as P
+participant ":AssetRepository" as AR
+participant ":SimulationService" as SS
+participant ":ParameterEstimator" as PE
+participant ":PriceHistoryService" as PHS
+participant ":PriceCache" as PC
+participant ":TwelveDataProvider" as TDP
+participant "Twelve Data\n«extern»" as TWD
+participant ":MonteCarloEngine" as MCE
+participant ":MetricsCalculator" as MC
+
+autonumber
+
+Nutzer -> FE : zwei Einträge wählen, optional bezeichnen,\nParameter eingeben, „Vergleichen“
+activate FE
+FE -> CC : POST /api/v1/comparisons\n{token, items[2] (label, portfolioId oder assetId), parameters}
+activate CC
+
+CC -> AUTH : authenticate(token)
+activate AUTH
+alt Token fehlt, unbekannt oder abgelaufen
+  AUTH --> CC : UnauthorizedException
+  CC --> FE : 401 UNAUTHORIZED\n„Bitte melde dich an.“
+  FE --> Nutzer : Weiterleitung zur Anmeldung (E14)
+end
+AUTH --> CC : owner: User
+deactivate AUTH
+
+CC -> CS : compare(entries, parameters, owner)
+activate CS
+note right of CS
+  <b>GRASP Controller (ADR-05)</b>
+  empfängt die Systemoperation
+  „Vergleichen“ und koordiniert den
+  Ablauf; der ComparisonController
+  übersetzt nur HTTP
+end note
+
+CS -> CS : validateEntries(entries)
+alt nicht genau zwei Einträge oder Eintrag ohne bzw. mit beiden IDs
+  CS --> CC : ValidationException
+  CC --> FE : 400 VALIDATION_ERROR\n„Bitte genau zwei Einträge zum Vergleich auswählen.“
+end
+
+CS -> SP : validate()
+activate SP
+note right of SP
+  <b>GRASP Information Expert</b>
+  dieselben Prüfregeln wie bei US-04,
+  zusätzlich Zielbetrag > 0 (E27)
+end note
+alt Parameter ungültig
+  SP --> CS : ValidationException
+  CS --> CC : ValidationException
+  CC --> FE : 400 VALIDATION_ERROR
+  FE --> Nutzer : Fehlermeldung am Feld
+end
+deactivate SP
+
+loop für jeden der zwei Einträge
+  alt Eintrag mit portfolioId
+    CS -> PS : findById(portfolioId, owner)
+    activate PS
+    alt Portfolio nicht vorhanden oder gehört anderem Nutzer
+      PS --> CS : NotFoundException
+      CS --> CC : NotFoundException
+      CC --> FE : 404 NOT_FOUND\n„Portfolio nicht gefunden.“ (NF-04)
+    end
+    PS --> CS : portfolio
+    deactivate PS
+    CS -> P : getWeights()
+    activate P
+    note right of P
+      <b>GRASP Information Expert (ADR-03)</b>
+      Portfolio liefert seine Anteile
+    end note
+    P --> CS : List<WeightedAsset>
+    deactivate P
+  else Eintrag mit assetId
+    CS -> AR : findById(assetId)
+    activate AR
+    alt Anlage nicht vorhanden
+      AR --> CS : Optional.empty
+      CS --> CC : NotFoundException
+      CC --> FE : 404 NOT_FOUND\n„Anlage nicht gefunden.“
+    end
+    AR --> CS : asset
+    deactivate AR
+    CS -> CS : WeightedAsset(asset, 1)\n(Anlage = Portfolio mit 100 %, E30)
+  end
+  CS -> CS : labelOrDefault(label, Name)\n(ohne Bezeichnung: Name des Portfolios bzw. der Anlage)
+end
+
+CS -> SS : ensureSeed(parameters)
+activate SS
+note right of SS
+  <b>GRASP Low Coupling / High Cohesion</b>
+  Seed-Regel und Simulation eines Eintrags
+  liegen nur im SimulationService und werden
+  von US-04 und US-07 gemeinsam genutzt
+end note
+opt ohne Seed
+  SS -> SP : withSeed(seed)
+  activate SP
+  SP --> SS : parameters (mit Seed)
+  deactivate SP
+end
+SS --> CS : effective (ein Seed für beide Einträge, NF-08)
+deactivate SS
+
+CS -> PE : estimate(assets)\n(alle Anlagen beider Einträge ohne Doppelte)
+activate PE
+loop für jede Anlage
+  PE -> PHS : getMonthlyPrices(asset)
+  activate PHS
+  note right of PHS
+    <b>GRASP Pure Fabrication</b>
+    fachfremde Hilfsklassen für Abruf
+    und Cache der Kursdaten (NF-07)
+  end note
+  PHS -> PC : load(assetId)
+  activate PC
+  PC --> PHS : Optional<CachedPrices>
+  deactivate PC
+  alt im Cache und jünger als 24 h
+    PHS --> PE : List<PricePoint> (aus Cache)
+  else nicht im Cache oder älter als 24 h
+    PHS -> TDP : getHistoricalPrices(symbol, micCode, "1month", 120)
+    activate TDP
+    note right of TDP
+      <b>GRASP Low Coupling (ADR-01, NF-12)</b>
+      PriceHistoryService kennt nur das
+      Interface MarketDataProvider
+    end note
+    TDP -> TWD : time_series (interval=1month)
+    alt Twelve Data erreichbar
+      TWD --> TDP : Kursdaten
+      TDP --> PHS : List<PricePoint>
+      deactivate TDP
+      PHS -> PC : replace(assetId, prices, now)\n(Kurse auf 6 Nachkommastellen gerundet, F4)
+      PHS --> PE : List<PricePoint>
+    else nicht erreichbar
+      TWD --> TDP : Fehler / Zeitüberschreitung
+      TDP --> PHS : UpstreamUnavailableException
+      PHS --> PE : UpstreamUnavailableException
+      PE --> CS : UpstreamUnavailableException
+      CS --> CC : UpstreamUnavailableException
+      CC --> FE : 503 UPSTREAM_UNAVAILABLE\n„Kursdaten sind gerade nicht verfügbar.“
+    end
+  end
+  deactivate PHS
+end
+alt Anlage ohne Kurse oder < 36 Monatswerte (E6, E8)\noder gemeinsamer Schätzzeitraum < 36 Monatswerte (E29)
+  PE --> CS : InsufficientDataException (alle betroffenen Anlagen)
+  CS --> CC : InsufficientDataException
+  CC --> FE : 422 INSUFFICIENT_DATA\n„Für folgende Anlagen liegen weniger als\n3 Jahre Kursdaten vor: …“
+end
+PE --> CS : estimation: EstimationResult\n(gemeinsamer Schätzzeitraum, max. 120 Monate;\nRendite und Volatilität je Anlage)
+deactivate PE
+
+loop für jeden der zwei Einträge
+  CS -> SS : run(weights, estimation, effective)
+  activate SS
+  SS -> MCE : simulate(weights, estimation, effective)
+  activate MCE
+  note right of MCE
+    neues Random(seed) je Aufruf:
+    beide Einträge erhalten
+    dieselben Zufallszahlen (NF-08)
+  end note
+  MCE --> SS : double[][] (Pfade × Monate)
+  deactivate MCE
+  SS -> MC : percentiles(paths)
+  activate MC
+  MC --> SS : List<TimelinePoint>
+  SS -> MC : metrics(paths, effective)
+  MC --> SS : Metrics (E24 bis E27)
+  deactivate MC
+  SS --> CS : SimulationRun (timeline, metrics, endValues)
+  deactivate SS
+end
+
+CS -> CS : shareOfPathsWhereAIsHigher(endValues₁, endValues₂)\n(Wahrscheinlichkeit Eintrag 1 > Eintrag 2, E31)
+
+create participant ":ComparisonResult" as CR
+CS -> CR : <<create>>
+note right of CR
+  <b>GRASP Creator</b>
+  ComparisonService hält alle Daten:
+  Parameter, Schätzung, je Eintrag
+  Bezeichnung, Verlauf und Kennzahlen
+end note
+
+CS --> CC : ComparisonResult
+deactivate CS
+CC --> FE : 200 OK\n{parameters (inkl. seed), estimates (historyFrom, historyTo),\nresults[2] (label, timeline, metrics), pairwise, runtimeMs}
+deactivate CC
+FE -> FE : renderResults(data)
+note right of FE
+  <b>Darstellung nach E35</b>
+  je Eintrag ein eigenes Fächerdiagramm,
+  nebeneinander statt in einem gemeinsamen
+  Diagramm; gemeinsame Y-Achse (H1, FE #35)
+end note
+FE -> FE : gemeinsame Y-Achse bestimmen\n(Maximum über beide Einträge, H1)
+loop für jeden der zwei Einträge (results[i])
+  FE -> FE : renderFanChart(chart, timeline)\n(Median und Bandbreite p5 bis p95, Überschrift = label)
+  FE -> FE : Kennzahlen (metrics) unter dem Diagramm einfügen\n(Zielwahrscheinlichkeit nur mit Zielbetrag)
+end
+FE --> Nutzer : zwei Fächerdiagramme nebeneinander mit gleicher Y-Achse,\ndarunter jeweils die Kennzahlen; Seed, Schätzzeitraum\nund Wahrscheinlichkeit Eintrag 1 > Eintrag 2 (E29, E31, E35)
+deactivate FE
+
+legend bottom left
+  <b>Legende</b>
+  Rückgaben gestrichelt · Fehler werden als Exception an den REST-Controller gegeben; der GlobalExceptionHandler
+  wandelt sie in das Fehlerformat des API-Designs um (nicht dargestellt). Der ComparisonController wandelt die Parameter
+  vorher in SimulationParameters um (Kommazahl bei Horizont, Pfaden oder Seed: 400, nicht dargestellt).
+  GRASP: Controller (ADR-05), Information Expert (ADR-03), Creator, Low Coupling (ADR-01, NF-12), High Cohesion, Pure Fabrication.
+  <b>Stand 24.10.2026:</b> alle dargestellten Backend-Klassen und -Methoden sind im Code umgesetzt (BE #69); im Frontend sind
+  renderResults und renderFanChart umgesetzt, gemeinsame Y-Achse (FE #35), Anzeige von Seed und Schätzzeitraum (FE #31) und Zielbetrag (FE #30) sind offen.
+  Nicht enthalten: Vergleich speichern (E34, nach Sprint 5 verschoben), mehr als zwei Einträge (US-10, Won't laut Sprint-Planning Sprint 4).
+endlegend
+
+@enduml

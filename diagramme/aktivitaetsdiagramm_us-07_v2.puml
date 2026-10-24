@@ -1,0 +1,192 @@
+@startuml aktivitaetsdiagramm_us-07_v2
+' LookUpStock – Aktivitätsdiagramm zur Kern-Story US-07
+' Issue Docs #130 · Sprint 4 · Stand 24.10.2026 (v1: Docs #90, Sprint 3)
+' Grundlagen: Kurzformat-Tabelle US-07 Version 2 (kurzformat_sprint-3.md),
+'             API-Design, POST /comparisons, ADR-05,
+'             PO-Festlegungen E6, E8, E17, E27, E29 bis E31, E35,
+'             Abnahmeprotokoll Sprint 3 (H1), Sprint-Planning-Protokoll Sprint 4,
+'             NFRs NF-04, NF-07, NF-08,
+'             Umsetzung ComparisonService (BE #69)
+' Änderungen gegenüber v1:
+'   - Ergebnisdarstellung nach E35: je Eintrag ein Fächerdiagramm (Median und
+'     Bandbreite p5 bis p95) nebeneinander statt beider Verläufe in einem Diagramm,
+'     darunter jeweils die Kennzahlen aus US-05
+'   - gemeinsame Y-Achse für beide Diagramme (H1, Akzeptanzkriterium Sprint 4)
+'   - Zielwahrscheinlichkeit nur mit Zielbetrag bei den Kennzahlen (Sprint 4, B1)
+'   - Legende: US-10 auf Won't, Vergleich speichern nach Sprint 5
+'     (Sprint-Planning-Protokoll Sprint 4)
+' Ablauf bis zur Berechnung unverändert. Unterschiede zu US-04 siehe v1 (Archiv).
+' Werkzeug: PlantUML
+
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam ActivityBackgroundColor #FFFFFF
+skinparam ActivityBorderColor #333333
+skinparam ActivityDiamondBackgroundColor #F5F5F5
+skinparam NoteBackgroundColor #FFF8DC
+skinparam NoteBorderColor #999999
+skinparam SwimlaneTitleFontStyle bold
+
+title Aktivitätsdiagramm US-07 – Anlagen und Portfolios vergleichen (v2, Sprint 4)
+
+|Nutzer|
+start
+
+repeat
+  :Zwei Einträge auswählen
+  (je ein eigenes Portfolio oder eine Anlage aus der Suche);
+  :optional je Eintrag eine Bezeichnung eingeben;
+  :Startkapital, monatliche Sparrate und
+  Anlagehorizont eingeben;
+  :optional Pfadanzahl, Seed und Zielbetrag festlegen;
+  :Vergleich starten;
+  |LookUpStock (System)|
+  :Eingaben prüfen;
+  note right
+    **Prüfregeln**
+    • genau zwei Einträge, jeder mit genau einem
+      Portfolio oder einer Anlage
+    • Parameter wie bei US-04: Startkapital und
+      Sparrate Pflicht, ≥ 0, nicht beide 0;
+      Anlagehorizont 1 bis 40 ganze Jahre;
+      Pfadanzahl 1.000 bis 50.000 (Standard 10.000);
+      Seed ganze Zahl
+    • Zielbetrag (optional) größer als 0 (E27)
+  end note
+  backward :Fehlermeldung zum ungültigen Feld anzeigen
+  (HTTP 400 VALIDATION_ERROR);
+repeat while () is ([Eingaben ungültig]) not ([Eingaben gültig])
+
+repeat
+  if () then ([Eintrag ist Portfolio])
+    :Portfolio laden;
+    if () then ([eigenes Portfolio vorhanden])
+    else ([nicht vorhanden oder fremd])
+      :Meldung „Portfolio nicht gefunden.“ anzeigen
+      (HTTP 404 NOT_FOUND, NF-04);
+      stop
+    endif
+  else ([Eintrag ist Anlage])
+    :Anlage laden;
+    if () then ([vorhanden])
+      :Anlage als Portfolio mit 100 %
+      Gewichtung behandeln (E30);
+    else ([nicht vorhanden])
+      :Meldung „Anlage nicht gefunden.“ anzeigen
+      (HTTP 404 NOT_FOUND);
+      stop
+    endif
+  endif
+  if () then ([Bezeichnung angegeben])
+  else ([keine Bezeichnung])
+    :Name des Portfolios bzw.
+    der Anlage als Bezeichnung verwenden;
+  endif
+repeat while () is ([weiterer Eintrag]) not ([beide Einträge geladen])
+
+if () then ([ohne Seed])
+  :Zufälligen Seed erzeugen;
+else ([mit Seed])
+endif
+note right
+  **Ein Seed für beide Einträge (NF-08)**
+  Beide Einträge werden mit denselben
+  Zufallszahlen simuliert.
+end note
+
+:Kursdaten aller Anlagen beider Einträge
+im Cache suchen (jede Anlage nur einmal);
+note right
+  **Cache-Regel (NF-07)**
+  Kursdaten jünger als 24 h werden verwendet,
+  ältere nicht. Die Prüfung erfolgt je Anlage.
+end note
+
+if () then ([im Cache und jünger als 24 h])
+  :Kursdaten aus dem Cache verwenden;
+else ([nicht im Cache oder älter als 24 h])
+  :Historische Kursdaten
+  bei der Finanzdaten-API anfordern;
+  if () then ([nicht erreichbar])
+    :Meldung anzeigen:
+    „Kursdaten sind gerade nicht verfügbar.“
+    (HTTP 503 UPSTREAM_UNAVAILABLE);
+    stop
+  else ([erreichbar])
+    |Finanzdaten-API (Twelve Data)|
+    :Kursdaten bereitstellen;
+    |LookUpStock (System)|
+    :Kursdaten im Cache speichern;
+  endif
+endif
+
+:Kurshistorie je Anlage prüfen;
+if () then ([alle Anlagen ≥ 36 Monatswerte])
+else ([Anlage ohne Kurse\noder < 36 Monatswerte])
+  :Meldung mit allen betroffenen Anlagen anzeigen:
+  „Für folgende Anlagen liegen weniger als
+  3 Jahre Kursdaten vor: …“ bzw.
+  „… liefert der Kursdatenanbieter keine Kurse: …“
+  (HTTP 422 INSUFFICIENT_DATA, E6, E8);
+  stop
+endif
+
+:Gemeinsamen Schätzzeitraum bestimmen
+(spätester Beginn bis frühestes Ende,
+höchstens 120 Monatswerte);
+if () then ([≥ 36 Monatswerte])
+else ([< 36 Monatswerte])
+  :Meldung „Für folgende Anlagen liegen weniger als
+  3 Jahre Kursdaten vor: …“ mit den Anlagen,
+  deren Historie am spätesten beginnt
+  (HTTP 422 INSUFFICIENT_DATA, E29);
+  stop
+endif
+
+:Rendite und Volatilität je Anlage
+im gemeinsamen Schätzzeitraum schätzen;
+:Beide Einträge mit gleichem Seed
+in Monatsschritten simulieren;
+:Je Eintrag 5., 50. und 95. Perzentil je Monat
+und Kennzahlen berechnen (E24 bis E26);
+if () then ([Zielbetrag angegeben])
+  :Je Eintrag Wahrscheinlichkeit berechnen,
+  den Zielbetrag zu erreichen (E27);
+else ([kein Zielbetrag])
+endif
+:Wahrscheinlichkeit berechnen, dass Eintrag 1
+am Ende mehr wert ist als Eintrag 2 (E31);
+:Gemeinsame Y-Achse festlegen
+(Maximum über beide Einträge, H1);
+:Je Eintrag ein Fächerdiagramm
+(Median und Bandbreite p5 bis p95)
+nebeneinander anzeigen, beschriftet
+mit der Bezeichnung (E35);
+note right
+  **Darstellung (E35)**
+  Zwei Diagramme nebeneinander statt
+  eines gemeinsamen: Jede Bandbreite
+  bleibt einzeln lesbar, die Fächer
+  überdecken sich nicht.
+  Gleiche Y-Achse, damit die Höhen
+  vergleichbar sind (H1).
+end note
+:Unter jedem Diagramm die Kennzahlen
+des Eintrags anzeigen (Zielwahrscheinlichkeit
+nur, wenn ein Zielbetrag angegeben ist);
+:Seed, gemeinsamen Schätzzeitraum und
+Wahrscheinlichkeit „Eintrag 1 am Ende
+mehr wert als Eintrag 2“ anzeigen;
+
+|Nutzer|
+:Ergebnisse vergleichen;
+stop
+
+legend bottom left
+  **Vorbedingung, nicht im Diagramm:** gültige Anmeldung (sonst HTTP 401, wie bei US-04)
+  **Nicht enthalten:** Vergleich speichern (E34, nach Sprint 5 verschoben) · mehr als zwei Einträge (US-10, Won't laut Sprint-Planning Sprint 4)
+  Angaben „HTTP …“ = Antwort von POST /comparisons laut API-Design
+endlegend
+
+@enduml
