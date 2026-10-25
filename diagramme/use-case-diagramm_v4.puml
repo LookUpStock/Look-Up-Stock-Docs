@@ -1,0 +1,130 @@
+@startuml use-case-diagramm_v4
+' LookUpStock – Use-Case-Diagramm v4
+' Issue Docs #141 · Sprint 4 · Stand 25.10.2026
+' Grundlagen: Use-Case-Diagramm v3, Akteursbeschreibung v4 (akteure.md),
+'             Change Request CR-01 (change-request.md), Kurzformat-Tabellen Sprint 4 (US-11, US-12, E36 bis E43),
+'             Sprint-Planning-Protokoll Sprint 4 (US-10 Won't), Abnahmeprotokoll Sprint 3, NF-04
+' Änderungen gegenüber v3:
+'   - Change Request CR-01 (Ereigniskarte Nr. 8): neuer Akteur Geschäftsführung als Spezialisierung des
+'     registrierten Nutzers; neue Anwendungsfälle „Nutzungskennzahlen anzeigen“ (US-11) und
+'     „Nutzungskennzahlen exportieren“ (US-12, <<extend>>); „Monatsbericht automatisch erhalten“ (US-13) als Won't
+'   - US-10 „Mehr als zwei Portfolios vergleichen“ als nicht umgesetzt (Won't) gekennzeichnet (Sprint-Planning-Protokoll Sprint 4)
+'   - „Vergleich speichern“ (Rest von US-08) als nicht umgesetzt (Won't) gekennzeichnet (E43, ersetzt E34)
+'   - Farben nach Status statt nach Sprint: abgenommen, in Arbeit (Sprint 4), neu durch CR-01 (Sprint 5), Won't
+'   - Unverändert: Gast, registrierter Nutzer, Finanzdaten-API und ihre Beziehungen aus v3
+' Werkzeug: PlantUML
+
+left to right direction
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+  ArrowColor #333333
+  BackgroundColor<<Won't>> #F2F2F2
+  BorderColor<<Won't>> #999999
+  FontColor<<Won't>> #888888
+  StereotypeFontColor<<Won't>> #888888
+}
+skinparam rectangle {
+  BorderColor #333333
+}
+skinparam note {
+  BackgroundColor #FFFBE6
+  BorderColor #999999
+}
+
+title Use-Case-Diagramm – LookUpStock (v4, Sprint 4, nach Change Request CR-01)
+
+actor "Gast" as Gast
+actor "Registrierter\nNutzer" as Nutzer
+actor "Geschäftsführung" as GF
+actor "Finanzdaten-API\n(Twelve Data)" as API <<System>>
+
+rectangle "LookUpStock" {
+  usecase "Registrieren\n(US-01)" as UC_Reg #DDEBF7
+  usecase "An- und abmelden\n(US-01)" as UC_Login #DDEBF7
+  usecase "Anlagen suchen\n(US-02)" as UC_Suche #DDEBF7
+  usecase "Beispielsimulation\nausprobieren\n(US-09)" as UC_Demo #E2F0D9
+  usecase "Portfolio mit Gewichtungen\nerstellen\n(US-03)" as UC_Port #DDEBF7
+  usecase "Portfolio bearbeiten\nund löschen\n(US-06)" as UC_Edit #DDEBF7
+  usecase "**Monte-Carlo-Simulation**\n**durchführen**\n(US-04, Kern-Story)" as UC_Sim #DDEBF7
+  usecase "Kennzahlen anzeigen\n(US-05)" as UC_Kenn #E2F0D9
+  usecase "**Anlagen und Portfolios**\n**vergleichen**\n(US-07, Kern-Story)" as UC_Verg #E2F0D9
+  usecase "Mehr als zwei Portfolios\nvergleichen\n(US-10)" as UC_Mehr <<Won't>>
+  usecase "Simulation speichern\n(US-08)" as UC_Save #DDEBF7
+  usecase "Vergleich speichern\n(US-08, E43)" as UC_SaveV <<Won't>>
+  usecase "Gespeicherte Simulationen\naufrufen und löschen\n(US-08)" as UC_Abruf #DDEBF7
+  usecase "Nutzungskennzahlen\nanzeigen\n(US-11)" as UC_Report #FCE4D6
+  usecase "Nutzungskennzahlen\nexportieren\n(US-12)" as UC_Export #FCE4D6
+  usecase "Monatsbericht automatisch\nerhalten\n(US-13)" as UC_Bericht <<Won't>>
+}
+
+Nutzer <|-- GF
+
+Gast -- UC_Reg
+Gast -- UC_Suche
+Gast -- UC_Demo
+
+Nutzer -- UC_Login
+Nutzer -- UC_Suche
+Nutzer -- UC_Port
+Nutzer -- UC_Edit
+Nutzer -- UC_Sim
+Nutzer -- UC_Verg
+Nutzer -- UC_Abruf
+
+GF -- UC_Report
+GF .. UC_Bericht
+
+UC_Sim ..> UC_Kenn : <<include>>
+UC_Verg ..> UC_Kenn : <<include>>
+UC_Abruf ..> UC_Kenn : <<include>>
+UC_Sim <.. UC_Save : <<extend>>
+UC_Verg <.. UC_SaveV : <<extend>>
+UC_Verg <.. UC_Mehr : <<extend>>
+UC_Report <.. UC_Export : <<extend>>
+
+UC_Save -[hidden]- API
+UC_Suche -- API
+UC_Demo -- API
+UC_Sim -- API
+UC_Verg -- API
+
+note left of Gast
+  <b>Öffentlich:</b> Alle Anwendungsfälle
+  des Gasts sind ohne Anmeldung nutzbar.
+end note
+
+note left of Nutzer
+  <b>Geschützt:</b> Vorbedingung aller
+  Anwendungsfälle außer „Anlagen suchen“
+  und „Anmelden“: Nutzer ist angemeldet (US-01).
+  Er sieht und ändert nur seine eigenen
+  Daten (NF-04). Anmeldung 24 h gültig (NF-16).
+end note
+
+note left of GF
+  <b>Change Request CR-01</b> (Ereigniskarte Nr. 8)
+  Nutzerkonto mit der Rolle Geschäftsführung;
+  erbt alle Anwendungsfälle des registrierten
+  Nutzers. Auswertungen nur mit der Rolle,
+  sonst 403 (E40, NF-04 b). Kennzahlen aus
+  anonymen Nutzungsereignissen (E36).
+end note
+
+legend bottom left
+  <b>Legende</b>
+  <back:#DDEBF7> Blau </back> = umgesetzt und abgenommen (Sprint 2 und 3) · <back:#E2F0D9> Grün </back> = in Arbeit (Sprint 4: US-05, US-07 nach den Befunden aus Sprint 3, US-09 Stretch)
+  <back:#FCE4D6> Orange </back> = neu durch Change Request CR-01, Umsetzung in Sprint 5 · <back:#F2F2F2> Grau «Won't» </back> = wird nicht umgesetzt (US-10, Vergleich speichern E43, US-13)
+  fett = Kern-Story (mit Dozent abgestimmt, Aktivitäts- und Sequenzdiagramm) · gestrichelte Linie zu US-13 = Akteur wäre beteiligt, Anwendungsfall wird nicht umgesetzt
+  <<include>> = wird immer mit ausgeführt · <<extend>> = optionale Erweiterung, nur auf Wunsch des Akteurs · Pfeil mit Dreieck = Spezialisierung (Geschäftsführung ist ein registrierter Nutzer)
+  <b>Anmeldung:</b> Alle Anwendungsfälle des registrierten Nutzers und der Geschäftsführung außer „Anlagen suchen“ und dem Anmelden selbst setzen eine gültige Anmeldung voraus.
+  Die Anmeldung ist Vorbedingung (siehe Kurzformat-Tabellen), kein <<include>>: Sie wird einmal durchgeführt und gilt dann für mehrere Anwendungsfälle.
+  <b>Gegenüberstellung vorher/nachher:</b> anforderungen/change-request.md, Abschnitt 8 · Vorversion: diagramme/archiv/use-case-diagramm_v3
+  Akteursbeschreibung: anforderungen/akteure.md · Begriffe: anforderungen/glossar.md
+endlegend
+
+@enduml

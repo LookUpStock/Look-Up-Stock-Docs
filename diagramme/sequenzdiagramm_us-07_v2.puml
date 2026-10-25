@@ -259,7 +259,7 @@ legend bottom left
   GRASP: Controller (ADR-05), Information Expert (ADR-03), Creator, Low Coupling (ADR-01, NF-12), High Cohesion, Pure Fabrication.
   <b>Stand 24.10.2026:</b> alle dargestellten Backend-Klassen und -Methoden sind im Code umgesetzt (BE #69); im Frontend sind
   renderResults und renderFanChart umgesetzt, gemeinsame Y-Achse (FE #35), Anzeige von Seed und Schätzzeitraum (FE #31) und Zielbetrag (FE #30) sind offen.
-  Nicht enthalten: Vergleich speichern (E34, nach Sprint 5 verschoben), mehr als zwei Einträge (US-10, Won't laut Sprint-Planning Sprint 4).
+  Nicht enthalten: Vergleich speichern (Won't, E43 ersetzt E34), mehr als zwei Einträge (US-10, Won't laut Sprint-Planning Sprint 4).
 endlegend
 
 @enduml
