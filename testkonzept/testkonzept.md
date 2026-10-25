@@ -3,13 +3,13 @@
 | | |
 |---|---|
 | **Projekt** | LookUpStock |
-| **Sprint** | 3 (12.10.2026 – 18.10.2026), Version 3 |
-| **Issue** | Docs #100 Fortschreibung des Testkonzepts (Version 3); Docs #61 (Version 2); Docs #23 Testkonzept v1 (Version 1) |
-| **Verantwortlich** | Version 1: Paul Kaufmann (Paul02112004); Version 2 und 3: Mert Eminel (KujoBaraka) |
-| **Stand** | 18.10.2026 |
-| **Grundlagen** | Kurzformat-Tabellen Sprint 1 mit Akzeptanzkriterien (Stand 30.09.2026), Entscheidungen des Product Owners E1 bis E7 (02.10.2026), API-Design (Stand 02.10.2026), ADR-01 bis ADR-03, Aktivitätsdiagramm US-04 v2, Domänenmodell v3, Sprint-Planning-Protokolle Sprint 1 und 2, CONTRIBUTING.md; ab Version 2 zusätzlich Kurzformat-Tabellen Sprint 2 (US-01, E11 bis E14), PO-Entscheidungen E8 bis E10, NFRs Version 3 und die Backend-Umsetzung BE #30; ab Version 3 zusätzlich Kurzformat-Tabellen Sprint 3 (US-05 bis US-08, E24 bis E34), Aktivitätsdiagramm US-07 v1, ADR-05, Abnahmeprotokoll Sprint 2 und die Backend-Umsetzung BE #67 bis #71 |
+| **Sprint** | 4 (19.10.2026 – 25.10.2026), Version 4 |
+| **Issue** | Docs #135 Fortschreibung des Testkonzepts (Version 4); Docs #100 (Version 3); Docs #61 (Version 2); Docs #23 Testkonzept v1 (Version 1) |
+| **Verantwortlich** | Version 1: Paul Kaufmann (Paul02112004); Version 2 und 3: Mert Eminel (KujoBaraka); Version 4: Peter Orban (Pixxels02) |
+| **Stand** | 25.10.2026 |
+| **Grundlagen** | Kurzformat-Tabellen Sprint 1 mit Akzeptanzkriterien (Stand 30.09.2026), Entscheidungen des Product Owners E1 bis E7 (02.10.2026), API-Design (Stand 02.10.2026), ADR-01 bis ADR-03, Aktivitätsdiagramm US-04 v2, Domänenmodell v3, Sprint-Planning-Protokolle Sprint 1 und 2, CONTRIBUTING.md; ab Version 2 zusätzlich Kurzformat-Tabellen Sprint 2 (US-01, E11 bis E14), PO-Entscheidungen E8 bis E10, NFRs Version 3 und die Backend-Umsetzung BE #30; ab Version 3 zusätzlich Kurzformat-Tabellen Sprint 3 (US-05 bis US-08, E24 bis E34), Aktivitätsdiagramm US-07 v1, ADR-05, Abnahmeprotokoll Sprint 2 und die Backend-Umsetzung BE #67 bis #71 ; ab Version 4 zusätzlich Sprint-Planning-Protokoll Sprint 4, Abnahmeprotokoll Sprint 3 (B1 bis B7, H1), ADR-06, API-Design (Stand 25.10.2026), Diagramme US-07 v2 und die Backend-Umsetzung BE #87 bis #93 und #97
 
-Die Abnahmetestfälle stehen je Sprint in einer eigenen Datei: [Sprint 1](abnahmetestfaelle-sprint-1.md), [Sprint 2](abnahmetestfaelle-sprint-2.md), [Sprint 3](abnahmetestfaelle-sprint-3.md). Die Änderungen gegenüber den Vorversionen stehen am Ende dieses Dokuments.
+Die Abnahmetestfälle stehen je Sprint in einer eigenen Datei: [Sprint 1](abnahmetestfaelle-sprint-1.md), [Sprint 2](abnahmetestfaelle-sprint-2.md), [Sprint 3](abnahmetestfaelle-sprint-3.md), [Sprint 4](abnahmetestfaelle-sprint-4.md). Die Änderungen gegenüber den Vorversionen stehen am Ende dieses Dokuments.
 
 ---
 
@@ -39,13 +39,14 @@ Der Schwerpunkt liegt auf der Kernlogik der Kern-Stories US-04 und US-07 und der
 | `MetricsCalculator` | Logik | US-04, US-05 | 5., 50. und 95. Perzentil je Monat (`percentiles()`, BE #49); Kennzahlen zum Ende des Anlagehorizonts (`metrics()`, BE #71): Einzahlungen, Endwerte, Value at Risk, maximaler Drawdown, Zielwahrscheinlichkeit (E24 bis E27) |
 | `SimulationService` (GRASP-Controller, ADR-02) | Logik | US-04, US-07 | Koordination der Schritte in der richtigen Reihenfolge, Seed-Erzeugung ohne Angabe (`ensureSeed`), Fehlerfälle (Portfolio fehlt, Kursdaten nicht verfügbar, zu kurze Historie); `run()` simuliert einen Satz Gewichtungen und wird vom Vergleich wiederverwendet (ADR-05) |
 | `ComparisonService` (GRASP-Controller, ADR-05) | Logik | US-07 | Genau zwei Einträge, Portfolio oder Anlage (Anlage = 100 %), Standardbezeichnung, ein Seed und ein gemeinsamer Schätzzeitraum für beide Einträge, Wahrscheinlichkeit „Eintrag 1 höher“, Fehlerfälle 400, 404, 422 |
-| `SavedSimulationService` | Logik | US-08 | Speichern des berechneten Ergebnisses unter einem Namen, Liste neueste zuerst, Abruf ohne Neuberechnung, Löschen; nur eigene Simulationen (NF-04) |
+| `SavedSimulationService` | Logik | US-08 | Speichern des berechneten Ergebnisses unter einem Namen, Liste neueste zuerst, Abruf ohne Neuberechnung, Löschen; nur eigene Simulationen (NF-04) | 
+| `DemoService` und `DemoController` (US-09, BE #93) | Logik / Präsentation | US-09 | Beispielsimulation ohne Anmeldung mit festen Beispielportfolios; höchstens 10.000 Pfade; Seed-Erzeugung wie US-04; Fehlerfälle 400, 404, 422, 503; keine Speicherung |
 | `PortfolioService` | Logik | US-03, US-06 | Aufruf von `validate()` vor dem Speichern und Ändern; Ablehnung unbekannter `assetId`; ungültige Änderung lässt das Portfolio unverändert; Ändern und Löschen fremder Portfolios liefert 404 (NF-04) |
-| `PriceHistoryService` und `PriceCache` mit `MarketDataProvider` | Daten | US-02, US-04, US-07 | Kursdaten jünger als 24 h aus dem Cache ohne Abruf, sonst Abruf bei Twelve Data und Speichern im Cache; bei Ausfall ohne gültigen Cache 503 (NF-07); frische und gecachte Kurse auf 6 Nachkommastellen gerundet (F4, NF-08); Suchergebnisse 24 h im `SearchCache` (NF-02). Primärer Anbieter ist Twelve Data; ein Fallback-Anbieter ist noch nicht entschieden. In den Unit-Tests wird der `MarketDataProvider` durch Mockito-Mocks ersetzt (Stand Version 3, siehe Abschnitt 6). |
+| `PriceHistoryService` und `PriceCache` mit `MarketDataProvider` | Daten | US-02, US-04, US-07 | Kursdaten jünger als 24 h aus dem Cache ohne Abruf, sonst Abruf bei Twelve Data und Speichern im Cache; bei Ausfall ohne gültigen Cache 503 (NF-07); frische und gecachte Kurse auf 6 Nachkommastellen gerundet (F4, NF-08); Suchergebnisse 24 h im `SearchCache` (NF-02). Primärer Anbieter ist Twelve Data; ein Fallback-Anbieter ist noch nicht entschieden. In den Unit-Tests wird der `MarketDataProvider` durch Mockito-Mocks oder ab Version 4 durch den `MockMarketDataProvider` ersetzt (siehe Abschnitt 6). |
 | REST-Controller (`SimulationController`, `ComparisonController`, Such- und Portfolio-Endpunkte) | Präsentation | US-02 bis US-08 | HTTP-Status, Fehlercodes und Fehlerformat laut API-Design, einschließlich `PUT`/`DELETE /portfolios/{id}`, `POST /comparisons` und Speichern, Liste, Abruf und Löschen von Simulationen |
 | `AuthService` (`register`, `login`, `logout`, `authenticate`) | Logik | US-01 | Prüfung von E-Mail-Format und Passwortlänge, Vergleich der E-Mail ohne Groß-/Kleinschreibung (E11), Speichern nur des Passwort-Hashes (NF-03), gleiche Meldung bei falscher E-Mail und falschem Passwort, Ablauf der Anmeldung nach 24 h (NF-16), Sperren des Tokens beim Abmelden |
 | `AuthController` | Präsentation | US-01 | HTTP-Status und Meldungen von `/auth/register`, `/auth/login` und `/auth/logout` laut API-Design |
-| Token-Prüfung in den geschützten Endpunkten (BE #54, BE #50) | Präsentation / Logik | US-03, US-04 | `401` ohne gültigen Token; Zuordnung der Portfolios zum Nutzer; `404` bei fremden Portfolios (NF-04) |
+| `CurrentUserArgumentResolver` mit `@CurrentUser` (ADR-06, BE #91) | Präsentation | US-01 bis US-08 | Auswertung von `Authorization: Bearer <token>` an zentraler Stelle; `401` bei fehlendem, falsch formatiertem, unbekanntem oder abgelaufenem Token; Controller erhalten den angemeldeten Nutzer als Parameter; `404` bei fremden Ressourcen (NF-04) |
 | Frontend-Prüflogik und Darstellung | Präsentation | US-01 bis US-08 | Login- und Registrierungsmaske (FE #4) mit Prüfung von E-Mail und Passwort vor dem Absenden und Erkennung einer abgelaufenen Anmeldung über `expiresAt` (E14); Mindestlänge des Suchbegriffs, Gewichtungssumme, Formatierung, Fehlermeldungen, Fächerdiagramm; ab Sprint 3 Kennzahlen unter dem Fächerdiagramm, Bearbeiten und Löschen im Portfolio-Editor, Vergleichsseite, Speichern und Liste gespeicherter Simulationen mit Namensprüfung (FE #17) |
 
 ## 4. Teststufen
@@ -146,6 +147,8 @@ Die Testnutzer werden über `POST /auth/register` angelegt, nicht direkt in die 
 
 Die Tabellen oben mit EUNL, IS3N und den Testanlagen des Mocks bleiben für die automatisierten Tests und als Stand von Sprint 1 und 2 gültig.
 
+**Stand Version 4 (Sprint 4).** Der `MockMarketDataProvider` ist umgesetzt (BE #89). Er liegt im Testcode (`src/test`) und gelangt nicht in den Produktions-Build. Er enthält die Testanlagen aus der ersten Tabelle dieses Abschnitts: EUNL und IS3N mit je 120 Monatswerten, zwei Anlagen mit 35 und eine mit genau 36 Monatswerten, eine Anlage mit konstantem Wachstum, 5 Messanlagen mit 10 Jahren Historie und 26 Suchtreffer mit „MSCI“ im Namen. Die Kursreihen werden ohne Zufall aus einer festen Formel erzeugt (NF-08). Ein Ausfall-Schalter löst `UpstreamUnavailableException` aus (NF-07). Bestehende Unit-Tests mit Mockito-Mocks bleiben gültig; neue Tests sollen den `MockMarketDataProvider` verwenden. Die manuellen Abnahmetests laufen weiterhin auf Heroku mit Twelve Data und den Testdaten auf US-Börsen.
+
 **Begründung.** Feste Kursreihen und ein fester Seed sorgen dafür, dass jeder Testlauf dieselben Ergebnisse liefert (NF-08) und dass Testergebnisse nicht von aktuellen Marktdaten abhängen. Die Testdaten bleiben auch nach der Auswahl von Twelve Data als primärem Anbieter synthetisch. Weil der Mock keine Verbindung zur Finanzdaten-API benötigt, laufen die Tests ohne Internetzugang und ohne API-Key (NF-12, NF-06) und verbrauchen kein Kontingent der kostenlosen API.
 
 ## 7. Testumgebung
@@ -154,7 +157,7 @@ Die Tabellen oben mit EUNL, IS3N und den Testanlagen des Mocks bleiben für die 
 |---|---|---|
 | **Lokal (Entwickler)** | Backend: Unit- und Integrationstests mit `mvnw test` bzw. `mvnw.cmd test`; Frontend: `npm test` (Node-Test-Runner) | Vor jedem Commit bzw. vor dem Öffnen eines Pull Requests |
 | **CI-Pipeline (GitHub Actions)** | Backend: Build, Unit- und Integrationstests, Abdeckungsbericht mit JaCoCo; Frontend: Tests mit dem Node-Test-Runner. Ohne Internetzugriff auf die Finanzdaten-API und ohne API-Key. | Automatisch bei jedem Pull Request auf `main`; ein Merge ist nur bei erfolgreicher Pipeline möglich (CONTRIBUTING.md) |
-| **Abnahmeumgebung** | Vollständige Anwendung (Frontend, Backend, PostgreSQL) auf Heroku; ab Sprint 2 mit der echten Twelve-Data-API, da kein `MockMarketDataProvider` vorhanden ist (siehe Abschnitt 6). Für NF-03 und NF-14 (b) ist lesender Zugriff auf die Datenbank nötig (Heroku Dataclip bzw. Postgres-Konsole). | Vor dem Sprint Review |
+| **Abnahmeumgebung** | Vollständige Anwendung (Frontend, Backend, PostgreSQL) auf Heroku; ab Sprint 2 mit der echten Twelve-Data-API, der `MockMarketDataProvider` (BE #89) wird nur in automatisierten Tests verwendet (siehe Abschnitt 6). Für NF-03 und NF-14 (b) ist lesender Zugriff auf die Datenbank nötig (Heroku Dataclip bzw. Postgres-Konsole). | Vor dem Sprint Review |
 
 Für manuell durchgeführte Alternativszenarien müsste die Abnahmeumgebung einen Ausfall der Finanzdaten-API darstellen können. Solange es dafür keinen Schalter gibt, werden der API-Ausfall (AT-02-07, AT-04-06, AT-07-11), das Cache-Alter und zu kurze Überschneidungen von Kurshistorien (AT-07-10) nur automatisiert getestet. *(Stand Version 3:)* Ein solcher Schalter ist nicht umgesetzt; die Abnahmeumgebung läuft auf Heroku (Docs #64).
 
@@ -236,7 +239,7 @@ Für die Kernlogik gilt zusätzlich der Zielwert der Testabdeckung aus Abschnitt
 |---|---|
 | Product Owner – Mert Eminel (KujoBaraka) | Sichtet die Abnahmetestfälle, führt die manuellen Abnahmetests durch, setzt den Status, priorisiert gefundene Fehler, nimmt Stories ab; ab Sprint 2: Abnahmetestfälle und Fortschreibung des Testkonzepts (Docs #61), Abnahme (Docs #62), Frontend-Tests zur Login-Maske (FE #4); ab Sprint 3: Abnahmetestfälle und Testkonzept v3 (Docs #100), Abnahme mit Nachtest und Bedienbarkeitstest (Docs #101), Frontend-Tests zu gespeicherten Simulationen (FE #17) |
 | Scrum Master – Carl Stibbe (carlstibbe) | Achtet auf die Einhaltung der Definition of Done; schreibt Tests zu eigenen Umsetzungs-Tasks (z. B. BE #39, FE #2, FE #3); ab Sprint 2 `MockMarketDataProvider` mit Testdaten (BE #53) und Abnahmeumgebung auf Heroku (Docs #64) |
-| Entwickler – Peter Orban (Pixxels02) | Unit-Tests für Portfolio, Suche und Simulationslogik (BE #32, BE #38, BE #41); CI-Pipelines; Messung und Interpretation der Testabdeckung (Docs #24); ab Sprint 3 Tests zu Kennzahlen, Suchcache und Speichern (BE #71, BE #77, BE #68), Testabdeckung und Pfadabdeckung US-07 (Docs #102) |
+| Entwickler – Peter Orban (Pixxels02) | Unit-Tests für Portfolio, Suche und Simulationslogik (BE #32, BE #38, BE #41); CI-Pipelines; Messung und Interpretation der Testabdeckung (Docs #24); ab Sprint 3 Tests zu Kennzahlen, Suchcache und Speichern (BE #71, BE #77, BE #68), Testabdeckung und Pfadabdeckung US-07 (Docs #102); ab Sprint 4 `MockMarketDataProvider` mit Testdaten (BE #89), Abnahmetestfälle Sprint 4 und Testkonzept v4 (Docs #135), Testabdeckung Sprint 4 (Docs #138) |
 | Entwickler – Paul Kaufmann (Paul02112004) | Testkonzept und Abnahmetestfälle (Docs #23); Tests zu eigenen Endpunkten (BE #27, BE #33; ab Sprint 2 BE #30, BE #50, BE #54; ab Sprint 3 BE #69, BE #70, F3, F4); unterstützt den Product Owner bei der Abnahme |
 | Alle Entwickler | Schreiben Unit- und Integrationstests zu ihrem Code, prüfen Tests im Code-Review, beheben Fehler aus Bug-Issues |
 
@@ -246,7 +249,8 @@ Das Testkonzept wird zu Beginn jedes Sprints überprüft und bei Bedarf ergänzt
 
 - **Sprint 2 (umgesetzt in Version 2):** Abnahme- und Integrationstests für die Anmeldung (US-01) einschließlich NF-03, NF-04, NF-14 (b) und NF-16; Vorbedingung „Nutzer ist angemeldet“ für US-03 und US-04 mit Testfällen ohne gültigen Token (`401 UNAUTHORIZED`); Korrekturen an den übernommenen Testfällen aus Sprint 1. Die Tests für die Kennzahlen (US-05) entfallen in Sprint 2, weil US-05 nach Sprint 3 verschoben wurde.
 - **Sprint 3 (umgesetzt in Version 3):** US-07 als zweite Kern-Story mit Unit-Tests, Abnahmetestfällen und Ableitung aus ihrem Aktivitätsdiagramm (Auswertung der Pfadabdeckung in Docs #102); Speichern von Simulationen (US-08); Kennzahlen (US-05, Feld `metrics`); Bearbeiten und Löschen von Portfolios (US-06) einschließlich `PUT` und `DELETE` mit fremden IDs (NF-04); Ablauf des Bedienbarkeitstests (NF-09); Basisportfolio der manuellen Tests auf US-Börsen; Nachtest der Befunde F1 bis F7.
-- **Sprint 4:** Beispielsimulation für Gäste (US-09), Vergleich mit bis zu vier Einträgen (US-10), Speichern von Vergleichen (E34); mögliche Änderungen durch den Change Request.
+- **Sprint 4 (umgesetzt in Version 4):** Nachtest von US-05 und US-07 nach den Befunden B1 bis B7 und H1; Testfälle für B5, B6, ADR-06 (Header und GET-Pfade) und die Beispielsimulation für Gäste (US-09); `MockMarketDataProvider` (NF-12). US-10 wird nicht umgesetzt (Sprint-Planning-Protokoll Sprint 4, Abschnitt 9); Vergleiche speichern (E34) ist nach Sprint 5 verschoben. Testfälle zum Change Request folgen nach Docs #131.
+- **Sprint 5:** Tests für die Aufteilung in getrennte Dienste (ADR-07), die lesende GraphQL-Schnittstelle (BE #94), den SPA-Teil und die asynchrone Kommunikation; JaCoCo-Bericht in der Backend-CI als Nachweis für NF-11.
 - **Laufend:** Nachweis der übrigen NFRs (NF-05, NF-13) laut Tabelle in Abschnitt 10; Ergänzung von Tests, sobald ein Fallback-Anbieter zu Twelve Data entschieden ist.
 
 ## Änderungshistorie
@@ -268,3 +272,7 @@ Das Testkonzept wird zu Beginn jedes Sprints überprüft und bei Bedarf ergänzt
 | 3 | 18.10.2026 | 9 | `ComparisonService` als Klasse der Kern-Story US-07 in die Kernlogik für NF-11 aufgenommen | ADR-05 |
 | 3 | 18.10.2026 | 10 | Testfälle für NF-01 (Vergleich, E33), NF-04, NF-07, NF-08 und NF-10 ergänzt; Ablauf des Bedienbarkeitstests (NF-09) festgelegt | Docs #100, NF-09 |
 | 3 | 18.10.2026 | 12, 13 | Rollen um Sprint-3-Aufgaben ergänzt; Fortschreibung: Sprint 3 umgesetzt, Ausblick Sprint 4 | Sprint-Planning-Protokoll Sprint 3 |
+| 4 | 25.10.2026 | Kopf | Sprint 4, Verweis auf `abnahmetestfaelle-sprint-4.md`, Grundlagen aktualisiert | Docs #135 |
+| 4 | 25.10.2026 | 3 | Zentrale Token-Auswertung (`CurrentUserArgumentResolver`) statt Token-Prüfung je Endpunkt; Testobjekt `DemoService` | ADR-06, BE #91, BE #93 |
+| 4 | 25.10.2026 | 6, 7 | `MockMarketDataProvider` umgesetzt (nur Testcode); Abnahme weiter auf Heroku mit Twelve Data | BE #89, PO-Entscheidung vom 18.10.2026 |
+| 4 | 25.10.2026 | 12, 13 | Rollen um Sprint-4-Aufgaben ergänzt; Fortschreibung: Sprint 4 umgesetzt, US-10 entfällt, Ausblick Sprint 5 | Sprint-Planning-Protokoll Sprint 4 |
