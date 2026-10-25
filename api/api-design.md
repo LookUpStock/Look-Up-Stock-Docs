@@ -2,11 +2,13 @@
 
 Stand: 25.10.2026 · Basis-URL `/api/v1` · Datenformat JSON
 
-Diese Markdown-Datei ist die bearbeitbare Fassung des API-Designs. Sie übernimmt den vollständigen Inhalt von `api-design.pdf` (Stand 02.10.2026; die PDF-Datei ist veraltet, maßgeblich ist diese Datei) und ergänzt die Entscheidungen des Product Owners vom 02.10.2026 (E1 bis E7) sowie die einzelnen Fehlerfälle für Portfolios und Simulationen.
+Diese Markdown-Datei ist die bearbeitbare Fassung des API-Designs. Sie übernimmt den vollständigen Inhalt von `api-design.pdf` (Stand 02.10.2026; die PDF-Datei wurde am 25.10.2026 entfernt, maßgeblich ist diese Datei) und ergänzt die Entscheidungen des Product Owners vom 02.10.2026 (E1 bis E7) sowie die einzelnen Fehlerfälle für Portfolios und Simulationen.
 
 **Anmeldung (ADR-06):** Der Token aus `POST /auth/login` wird bei allen Endpunkten, die eine Anmeldung erfordern, im Header `Authorization: Bearer <token>` mitgeschickt, nicht im Body. Fehlt der Header, hat er nicht das Format `Bearer <token>` oder ist der Token unbekannt bzw. abgelaufen, antwortet die API mit `401 UNAUTHORIZED` („Bitte melde dich an.“). Lesende Abfragen sind GET: Listen unter dem Sammelpfad (z. B. `GET /portfolios`), einzelne Einträge unter ihrer ID (z. B. `GET /portfolios/5`). Öffentliche Endpunkte (Registrieren, Anmelden, Anlagensuche, Gastmodus) brauchen keinen Header.
 
 **Änderung 25.10.2026 (Docs #133, ADR-06):** Token aus allen Request-Bodys in den `Authorization`-Header verschoben. `POST /…/list` wurde zu `GET /…`, `POST /…/{id}/details` zu `GET /…/{id}` (Portfolios und Simulationen; die Pfade für gespeicherte Vergleiche sind entsprechend beschrieben, aber nicht umgesetzt, siehe Abschnitt „Vergleiche“). `DELETE` und `POST /auth/logout` haben keinen Body mehr. Bis ADR-04 galt: Token im JSON-Body, lesende Abfragen als POST.
+
+**Änderung 25.10.2026 (Docs #149, BE #94):** Neuer Abschnitt „GraphQL (lesend)“: `POST /graphql` für Anlagensuche, eigene Portfolios und gespeicherte Simulationen; Anmeldung wie bei REST über den `Authorization`-Header (ADR-06). Schreibende Operationen laufen weiter über REST.
 
 **Fehlerformat:** Fehler haben immer das Format `{ "error": { "code", "message", "details" } }`. `message` ist ein deutscher Text zur direkten Anzeige im Frontend. Gewichtungen in Prozent (Summe 100), Anteile in Ergebnissen als Dezimalzahl (0.31 = 31 %).
 
@@ -1489,3 +1491,81 @@ Body wie bei <code>POST /simulations</code> ohne Speichern: <code>id</code>, <co
 </td>
 </tr>
 </table>
+
+## GraphQL (lesend, BE #94)
+
+Ergänzend zu REST gibt es eine lesende GraphQL-Schnittstelle. Sie liefert dieselben Daten wie die lesenden REST-Endpunkte, aber der Client wählt die Felder selbst und kann z. B. eine gespeicherte Simulation samt Portfolio und Kennzahlen in einer Anfrage abrufen. Schreibende Operationen (Mutations) gibt es nicht; Anlegen, Ändern, Löschen und Berechnen laufen über REST. Das Schema steht in `src/main/resources/graphql/schema.graphqls` (Backend).
+
+**Anmeldung (ADR-06):** wie bei REST über den Header `Authorization: Bearer <token>`. Der Header wird zentral gelesen; geprüft wird er erst in den Abfragen, die eine Anmeldung brauchen. `searchAssets` ist ohne Anmeldung nutzbar.
+
+**Fehlerformat:** GraphQL antwortet auch bei Fehlern mit `200 OK`. Fehler stehen im Feld `errors`; `message` ist derselbe deutsche Text wie bei REST, `extensions.code` derselbe Code (`UNAUTHORIZED`, `NOT_FOUND`, `VALIDATION_ERROR`, `UPSTREAM_UNAVAILABLE`). Das betroffene Feld in `data` ist dann `null`; bei Listen-Abfragen wie `savedSimulations` ist `data` insgesamt `null`, weil das Feld laut Schema nicht `null` sein darf (`!`).
+
+<table>
+<tr><th>Method</th><th>Ressource</th><th>Data In</th><th>Data Out</th></tr>
+<tr>
+<td><b>POST</b></td>
+<td><code>/graphql</code><br>Lesende Abfragen · Sprint 4 · Anmeldung je nach Abfrage</td>
+<td>
+Header: <code>Authorization: Bearer &lt;token&gt;</code> (außer bei <code>searchAssets</code>)
+<pre>
+{
+  "query": "query { savedSimulations { id name createdAt portfolio { name } metrics { medianEndValue targetProbability } } }"
+}
+</pre>
+Optional <code>variables</code> für Argumente, z. B. <code>{ "query": "query($id: ID!) { portfolio(id: $id) { name positions { symbol weight } } }", "variables": { "id": "5" } }</code>.
+</td>
+<td>
+<b>200 OK</b>
+<pre>
+{
+  "data": {
+    "savedSimulations": [
+      {
+        "id": "12",
+        "name": "Sparplan 20 Jahre",
+        "createdAt": "2026-10-18T19:30:00Z",
+        "portfolio": { "name": "Mein Weltportfolio" },
+        "metrics": { "medianEndValue": 104250.6, "targetProbability": null }
+      }
+    ]
+  }
+}
+</pre>
+<b>200 OK mit Fehler</b> (ohne gültigen Header)
+<pre>
+{
+  "errors": [
+    {
+      "message": "Bitte melde dich an.",
+      "path": ["savedSimulations"],
+      "extensions": { "classification": "UNAUTHORIZED", "code": "UNAUTHORIZED" }
+    }
+  ],
+  "data": null
+}
+</pre>
+</td>
+</tr>
+</table>
+
+**Abfragen**
+
+| Abfrage | Anmeldung | Liefert | Entspricht REST |
+|---|---|---|---|
+| `searchAssets(query: String!, limit: Int)` | nein | Liste von `Asset`; `limit` 1 bis 25, Standard 10 | `GET /assets/search` |
+| `portfolios` | ja | eigene Portfolios, neueste zuerst | `GET /portfolios` |
+| `portfolio(id: ID!)` | ja | ein eigenes Portfolio; fremde oder unbekannte ID → Fehler `NOT_FOUND` (NF-04) | `GET /portfolios/{id}` |
+| `savedSimulations` | ja | eigene gespeicherte Simulationen, neueste zuerst | `GET /simulations` |
+| `savedSimulation(id: ID!)` | ja | eine eigene gespeicherte Simulation; fremde oder unbekannte ID → Fehler `NOT_FOUND` (NF-04) | `GET /simulations/{id}` |
+
+**Typen**
+
+| Typ | Felder |
+|---|---|
+| `Asset` | `id`, `symbol`, `isin`, `name`, `exchange`, `micCode`, `currency`, `type` |
+| `Portfolio` | `id`, `name`, `createdAt` (ISO-8601, UTC), `updatedAt`, `positions` |
+| `Position` | `assetId`, `symbol`, `name`, `weight` (Prozent) |
+| `SavedSimulation` | `id`, `name`, `portfolioId`, `createdAt`, `portfolio` und `metrics` (werden nur geladen, wenn die Abfrage sie anfordert) |
+| `Metrics` | `totalContributions`, `medianEndValue`, `p5EndValue`, `p95EndValue`, `valueAtRisk95`, `maxDrawdownMedian` (Anteil, 0.31 = 31 %), `targetProbability` (`null` ohne Zielbetrag) |
+
+IDs sind im GraphQL-Typ `ID` und kommen daher als Zeichenkette (`"12"`). Die Oberfläche GraphiQL zum Ausprobieren ist auf Heroku ausgeschaltet und lässt sich lokal mit `GRAPHIQL_ENABLED=true` in der `.env` einschalten.
