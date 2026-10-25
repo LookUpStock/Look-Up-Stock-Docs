@@ -1,10 +1,12 @@
 # API-Design – LookUpStock
 
-Stand: 02.10.2026 · Basis-URL `/api/v1` · Datenformat JSON
+Stand: 25.10.2026 · Basis-URL `/api/v1` · Datenformat JSON
 
 Diese Markdown-Datei ist die bearbeitbare Fassung des API-Designs. Sie übernimmt den vollständigen Inhalt von `api-design.pdf` (Stand 02.10.2026) und ergänzt die Entscheidungen des Product Owners vom 02.10.2026 (E1 bis E7) sowie die einzelnen Fehlerfälle für Portfolios und Simulationen.
 
-**Anmeldung:** Der Token aus `POST /auth/login` wird bei allen Endpunkten, die eine Anmeldung erfordern, im JSON-Body im Feld `token` mitgeschickt (ab Sprint 2 Pflicht, in Sprint 1 wird das Feld ignoriert). Da Browser bei GET-Anfragen keinen Body erlauben, werden Abfragen, die eine Anmeldung erfordern, als POST auf eigene Pfade umgesetzt: `/list` für Listen und `/{id}/details` für einzelne Einträge. Öffentliche Abfragen (Anlagensuche, Gastmodus) bleiben GET.
+**Anmeldung (ADR-06):** Der Token aus `POST /auth/login` wird bei allen Endpunkten, die eine Anmeldung erfordern, im Header `Authorization: Bearer <token>` mitgeschickt, nicht im Body. Fehlt der Header, hat er nicht das Format `Bearer <token>` oder ist der Token unbekannt bzw. abgelaufen, antwortet die API mit `401 UNAUTHORIZED` („Bitte melde dich an.“). Lesende Abfragen sind GET: Listen unter dem Sammelpfad (z. B. `GET /portfolios`), einzelne Einträge unter ihrer ID (z. B. `GET /portfolios/5`). Öffentliche Endpunkte (Registrieren, Anmelden, Anlagensuche, Gastmodus) brauchen keinen Header.
+
+**Änderung 25.10.2026 (Docs #133, ADR-06):** Token aus allen Request-Bodys in den `Authorization`-Header verschoben. `POST /…/list` wurde zu `GET /…`, `POST /…/{id}/details` zu `GET /…/{id}` (Portfolios, Simulationen, Vergleiche). `DELETE` und `POST /auth/logout` haben keinen Body mehr. Bis ADR-04 galt: Token im JSON-Body, lesende Abfragen als POST.
 
 **Fehlerformat:** Fehler haben immer das Format `{ "error": { "code", "message", "details" } }`. `message` ist ein deutscher Text zur direkten Anzeige im Frontend. Gewichtungen in Prozent (Summe 100), Anteile in Ergebnissen als Dezimalzahl (0.31 = 31 %).
 
@@ -81,7 +83,7 @@ Diese Markdown-Datei ist die bearbeitbare Fassung des API-Designs. Sie übernimm
 <b>200 OK</b>
 <pre>
 {
-  "token": "eyJhbGciOiJIUzI1NiJ9...",
+  "token": "q8Z1vN3xR0tK7mW2pL5sA9dF4hJ6cB1eY0uG8iT3oQw",
   "expiresAt": "2026-10-13T10:00:00Z"
 }
 </pre>
@@ -100,24 +102,12 @@ Diese Markdown-Datei ist die bearbeitbare Fassung des API-Designs. Sie übernimm
 <td><b>POST</b></td>
 <td><code>/auth/logout</code><br>Abmelden · Sprint 2</td>
 <td>
-<pre>
-{
-  "token": "eyJhbGciOiJIUzI1NiJ9..."
-}
-</pre>
+Header: <code>Authorization: Bearer &lt;token&gt;</code><br>
+Kein Body.
 </td>
 <td>
 <b>204 No Content</b><br>
-Kein Body. Das Token wird bis zu seinem Ablauf gesperrt und kann nicht mehr verwendet werden.<br>
-<b>401 Unauthorized</b>
-<pre>
-{
-  "error": {
-    "code": "UNAUTHORIZED",
-    "message": "Bitte melde dich an."
-  }
-}
-</pre>
+Kein Body. Der Token wird gelöscht und kann nicht mehr verwendet werden. Die Abmeldung ist idempotent: Auch ohne Header oder mit unbekanntem bzw. abgelaufenem Token antwortet die API mit 204 (ADR-04).
 </td>
 </tr>
 </table>
@@ -230,9 +220,9 @@ Query: <code>q</code> (Pflicht, mind. 2 Zeichen: Ticker, ISIN oder Name), <code>
 <td><b>POST</b></td>
 <td><code>/portfolios</code><br>Portfolio anlegen · Sprint 1</td>
 <td>
+Header: <code>Authorization: Bearer &lt;token&gt;</code>
 <pre>
 {
-  "token": "eyJhbGciOiJIUzI1NiJ9...",
   "name": "Mein Weltportfolio",
   "positions": [
     {
@@ -246,7 +236,6 @@ Query: <code>q</code> (Pflicht, mind. 2 Zeichen: Ticker, ISIN oder Name), <code>
   ]
 }
 </pre>
-<code>token</code> ist ab Sprint 2 Pflicht; in Sprint 1 wird das Feld ignoriert.<br>
 <code>name</code>: Pflicht, höchstens 100 Zeichen. <code>positions</code>: mindestens eine Position, jede <code>assetId</code> höchstens einmal; <code>weight</code> größer als 0 mit höchstens 2 Nachkommastellen, Summe 100 (± 0,01).
 </td>
 <td>
@@ -390,15 +379,11 @@ Query: <code>q</code> (Pflicht, mind. 2 Zeichen: Ticker, ISIN oder Name), <code>
 </td>
 </tr>
 <tr>
-<td><b>POST</b></td>
-<td><code>/portfolios/list</code><br>Eigene Portfolios auflisten · Sprint 1</td>
+<td><b>GET</b></td>
+<td><code>/portfolios</code><br>Eigene Portfolios auflisten · Sprint 1</td>
 <td>
-<pre>
-{
-  "token": "eyJhbGciOiJIUzI1NiJ9..."
-}
-</pre>
-<code>token</code> ist ab Sprint 2 Pflicht; in Sprint 1 wird das Feld ignoriert.
+Header: <code>Authorization: Bearer &lt;token&gt;</code><br>
+Kein Body.
 </td>
 <td>
 <b>200 OK</b>
@@ -440,16 +425,12 @@ Query: <code>q</code> (Pflicht, mind. 2 Zeichen: Ticker, ISIN oder Name), <code>
 </td>
 </tr>
 <tr>
-<td><b>POST</b></td>
-<td><code>/portfolios/{portfolioId}/details</code><br>Ein Portfolio abrufen · Sprint 1</td>
+<td><b>GET</b></td>
+<td><code>/portfolios/{portfolioId}</code><br>Ein Portfolio abrufen · Sprint 1</td>
 <td>
-Pfad: <code>portfolioId</code>, z. B. <code>/portfolios/5/details</code>
-<pre>
-{
-  "token": "eyJhbGciOiJIUzI1NiJ9..."
-}
-</pre>
-<code>token</code> ist ab Sprint 2 Pflicht; in Sprint 1 wird das Feld ignoriert.
+Pfad: <code>portfolioId</code>, z. B. <code>/portfolios/5</code><br>
+Header: <code>Authorization: Bearer &lt;token&gt;</code><br>
+Kein Body.
 </td>
 <td>
 <b>200 OK</b>
@@ -499,10 +480,10 @@ Pfad: <code>portfolioId</code>, z. B. <code>/portfolios/5/details</code>
 <td><b>PUT</b></td>
 <td><code>/portfolios/{portfolioId}</code><br>Portfolio ändern · Sprint 2</td>
 <td>
-Pfad: <code>portfolioId</code>, z. B. <code>/portfolios/5</code>
+Pfad: <code>portfolioId</code>, z. B. <code>/portfolios/5</code><br>
+Header: <code>Authorization: Bearer &lt;token&gt;</code>
 <pre>
 {
-  "token": "eyJhbGciOiJIUzI1NiJ9...",
   "name": "Weltportfolio 80/20",
   "positions": [
     {
@@ -665,12 +646,9 @@ Regeln für <code>name</code> und <code>positions</code> wie bei <code>POST /por
 <td><b>DELETE</b></td>
 <td><code>/portfolios/{portfolioId}</code><br>Portfolio löschen · Sprint 2</td>
 <td>
-Pfad: <code>portfolioId</code>, z. B. <code>/portfolios/5</code>
-<pre>
-{
-  "token": "eyJhbGciOiJIUzI1NiJ9..."
-}
-</pre>
+Pfad: <code>portfolioId</code>, z. B. <code>/portfolios/5</code><br>
+Header: <code>Authorization: Bearer &lt;token&gt;</code><br>
+Kein Body.
 </td>
 <td>
 <b>204 No Content</b><br>
@@ -705,9 +683,9 @@ Kein Body<br>
 <td><b>POST</b></td>
 <td><code>/simulations</code><br>Simulation berechnen, optional speichern · Sprint 1–3</td>
 <td>
+Header: <code>Authorization: Bearer &lt;token&gt;</code>
 <pre>
 {
-  "token": "eyJhbGciOiJIUzI1NiJ9...",
   "portfolioId": 5,
   "parameters": {
     "startCapital": 10000,
@@ -722,7 +700,6 @@ Kein Body<br>
 }
 </pre>
 Pflicht: <code>portfolioId</code>, <code>startCapital</code>, <code>monthlyContribution</code>, <code>horizonYears</code>. Optional: <code>paths</code> (Standard 10.000, 1.000–50.000), <code>seed</code>, <code>targetAmount</code>. <code>save: true</code> speichert (ab Sprint 3, dann ist <code>name</code> Pflicht).<br>
-<code>token</code> ist ab Sprint 2 Pflicht; in Sprint 1 wird das Feld ignoriert.<br>
 Regeln: <code>startCapital</code> und <code>monthlyContribution</code> ≥ 0, nicht beide 0; <code>horizonYears</code> ganze Zahl von 1 bis 40; <code>seed</code> ganze Zahl; ohne <code>seed</code> erzeugt das System einen Seed und gibt ihn in <code>parameters.seed</code> zurück.
 </td>
 <td>
@@ -927,14 +904,11 @@ Regeln: <code>startCapital</code> und <code>monthlyContribution</code> ≥ 0, ni
 </td>
 </tr>
 <tr>
-<td><b>POST</b></td>
-<td><code>/simulations/list</code><br>Gespeicherte Simulationen auflisten · Sprint 3</td>
+<td><b>GET</b></td>
+<td><code>/simulations</code><br>Gespeicherte Simulationen auflisten · Sprint 3</td>
 <td>
-<pre>
-{
-  "token": "eyJhbGciOiJIUzI1NiJ9..."
-}
-</pre>
+Header: <code>Authorization: Bearer &lt;token&gt;</code><br>
+Kein Body.
 </td>
 <td>
 <b>200 OK</b>
@@ -962,15 +936,12 @@ Regeln: <code>startCapital</code> und <code>monthlyContribution</code> ≥ 0, ni
 </td>
 </tr>
 <tr>
-<td><b>POST</b></td>
-<td><code>/simulations/{simulationId}/details</code><br>Gespeicherte Simulation abrufen · Sprint 3</td>
+<td><b>GET</b></td>
+<td><code>/simulations/{simulationId}</code><br>Gespeicherte Simulation abrufen · Sprint 3</td>
 <td>
-Pfad: <code>simulationId</code>, z. B. <code>/simulations/12/details</code>
-<pre>
-{
-  "token": "eyJhbGciOiJIUzI1NiJ9..."
-}
-</pre>
+Pfad: <code>simulationId</code>, z. B. <code>/simulations/12</code><br>
+Header: <code>Authorization: Bearer &lt;token&gt;</code><br>
+Kein Body.
 </td>
 <td>
 <b>200 OK</b><br>
@@ -1056,12 +1027,9 @@ Body wie bei <code>POST /simulations</code>, mit <code>id</code> und <code>name<
 <td><b>DELETE</b></td>
 <td><code>/simulations/{simulationId}</code><br>Gespeicherte Simulation löschen · Sprint 3</td>
 <td>
-Pfad: <code>simulationId</code>, z. B. <code>/simulations/12</code>
-<pre>
-{
-  "token": "eyJhbGciOiJIUzI1NiJ9..."
-}
-</pre>
+Pfad: <code>simulationId</code>, z. B. <code>/simulations/12</code><br>
+Header: <code>Authorization: Bearer &lt;token&gt;</code><br>
+Kein Body.
 </td>
 <td>
 <b>204 No Content</b><br>
@@ -1096,9 +1064,9 @@ Kein Body<br>
 <td><b>POST</b></td>
 <td><code>/comparisons</code><br>Vergleich berechnen, optional speichern · Sprint 3–4</td>
 <td>
+Header: <code>Authorization: Bearer &lt;token&gt;</code>
 <pre>
 {
-  "token": "eyJhbGciOiJIUzI1NiJ9...",
   "items": [
     {
       "label": "Mein Weltportfolio",
@@ -1224,14 +1192,11 @@ Jedes Item hat entweder <code>portfolioId</code> oder <code>assetId</code>. 2 It
 </td>
 </tr>
 <tr>
-<td><b>POST</b></td>
-<td><code>/comparisons/list</code><br>Gespeicherte Vergleiche auflisten · Sprint 3</td>
+<td><b>GET</b></td>
+<td><code>/comparisons</code><br>Gespeicherte Vergleiche auflisten · Sprint 3</td>
 <td>
-<pre>
-{
-  "token": "eyJhbGciOiJIUzI1NiJ9..."
-}
-</pre>
+Header: <code>Authorization: Bearer &lt;token&gt;</code><br>
+Kein Body.
 </td>
 <td>
 <b>200 OK</b>
@@ -1262,15 +1227,12 @@ Jedes Item hat entweder <code>portfolioId</code> oder <code>assetId</code>. 2 It
 </td>
 </tr>
 <tr>
-<td><b>POST</b></td>
-<td><code>/comparisons/{comparisonId}/details</code><br>Gespeicherten Vergleich abrufen · Sprint 3</td>
+<td><b>GET</b></td>
+<td><code>/comparisons/{comparisonId}</code><br>Gespeicherten Vergleich abrufen · Sprint 3</td>
 <td>
-Pfad: <code>comparisonId</code>, z. B. <code>/comparisons/7/details</code>
-<pre>
-{
-  "token": "eyJhbGciOiJIUzI1NiJ9..."
-}
-</pre>
+Pfad: <code>comparisonId</code>, z. B. <code>/comparisons/7</code><br>
+Header: <code>Authorization: Bearer &lt;token&gt;</code><br>
+Kein Body.
 </td>
 <td>
 <b>200 OK</b><br>
@@ -1366,12 +1328,9 @@ Body wie bei <code>POST /comparisons</code>, mit <code>id</code> und <code>name<
 <td><b>DELETE</b></td>
 <td><code>/comparisons/{comparisonId}</code><br>Gespeicherten Vergleich löschen · Sprint 3</td>
 <td>
-Pfad: <code>comparisonId</code>, z. B. <code>/comparisons/7</code>
-<pre>
-{
-  "token": "eyJhbGciOiJIUzI1NiJ9..."
-}
-</pre>
+Pfad: <code>comparisonId</code>, z. B. <code>/comparisons/7</code><br>
+Header: <code>Authorization: Bearer &lt;token&gt;</code><br>
+Kein Body.
 </td>
 <td>
 <b>204 No Content</b><br>
@@ -1442,7 +1401,7 @@ Kein Body<br>
   }
 }
 </pre>
-Kein <code>token</code>. <code>paths</code> höchstens 10.000; kein <code>save</code> und <code>name</code>.
+Kein <code>Authorization</code>-Header nötig. <code>paths</code> höchstens 10.000; kein <code>save</code> und <code>name</code>.
 </td>
 <td>
 <b>200 OK</b><br>
