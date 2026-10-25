@@ -2,7 +2,7 @@
 
 Stand: 25.10.2026 · Basis-URL `/api/v1` · Datenformat JSON
 
-Diese Markdown-Datei ist die bearbeitbare Fassung des API-Designs. Sie übernimmt den vollständigen Inhalt von `api-design.pdf` (Stand 02.10.2026; die PDF-Datei ist veraltet, maßgeblich ist diese Datei) und ergänzt die Entscheidungen des Product Owners vom 02.10.2026 (E1 bis E7) sowie die einzelnen Fehlerfälle für Portfolios und Simulationen.
+Diese Markdown-Datei ist die bearbeitbare Fassung des API-Designs. Sie übernimmt den vollständigen Inhalt von `api-design.pdf` (Stand 02.10.2026; die PDF-Datei wurde am 25.10.2026 entfernt, maßgeblich ist diese Datei) und ergänzt die Entscheidungen des Product Owners vom 02.10.2026 (E1 bis E7) sowie die einzelnen Fehlerfälle für Portfolios und Simulationen.
 
 **Anmeldung (ADR-06):** Der Token aus `POST /auth/login` wird bei allen Endpunkten, die eine Anmeldung erfordern, im Header `Authorization: Bearer <token>` mitgeschickt, nicht im Body. Fehlt der Header, hat er nicht das Format `Bearer <token>` oder ist der Token unbekannt bzw. abgelaufen, antwortet die API mit `401 UNAUTHORIZED` („Bitte melde dich an.“). Lesende Abfragen sind GET: Listen unter dem Sammelpfad (z. B. `GET /portfolios`), einzelne Einträge unter ihrer ID (z. B. `GET /portfolios/5`). Öffentliche Endpunkte (Registrieren, Anmelden, Anlagensuche, Gastmodus) brauchen keinen Header.
 
