@@ -4,16 +4,31 @@
 |---|---|
 | **Projekt** | LookUpStock |
 | **Sprint** | 4 (19.10.2026 – 25.10.2026), Umsetzung in Sprint 5 (26.10.2026 – 01.11.2026) |
-| **Issue** | Docs #131 Change Request: Auswirkungsanalyse, Entscheidung, Backlog vorher und nachher, Kurzformat und Akzeptanzkriterien |
+| **Issue** | Docs #131 Change Request: Auswirkungsanalyse, Entscheidung, Backlog vorher und nachher, Kurzformat und Akzeptanzkriterien; Docs #2 US-09 Beispielsimulation (Version 2) |
 | **Verantwortlich** | Mert Eminel (KujoBaraka), Product Owner |
-| **Version** | 1 |
+| **Version** | 2 |
 | **Stand** | 25.10.2026 |
-| **Grundlagen** | Vorlage Use-Case-Kurzbeschreibung (Vorlesung, Folie 20), Change Request CR-01 (`change-request.md`), Ereigniskarte Nr. 8 „Reporting für die Geschäftsführung“ (erhalten am 23.10.2026), Kurzformat-Tabellen Sprint 1 bis Sprint 3 (E1 bis E35), NFRs Version 4 (NF-04, NF-14 b), ADR-06, ER-Diagramm v4 |
+| **Grundlagen** | Vorlage Use-Case-Kurzbeschreibung (Vorlesung, Folie 20), Sprint-Planning-Protokoll Sprint 4 (Akzeptanzkriterien US-09), Umsetzung BE #93, #103 und FE #38, API-Design Abschnitt „Gastmodus“, Change Request CR-01 (`change-request.md`), Ereigniskarte Nr. 8 „Reporting für die Geschäftsführung“ (erhalten am 23.10.2026), Kurzformat-Tabellen Sprint 1 bis Sprint 3 (E1 bis E35), NFRs Version 4 (NF-04, NF-14 b), ADR-06, ER-Diagramm v4 |
 | **KI-Nutzung** | Entwurf mit KI-Unterstützung erstellt und vom Product Owner geprüft, siehe KI-Log |
 
-Diese Datei setzt `kurzformat_sprint-3.md` fort. Sie enthält die neuen Stories aus dem Change Request CR-01: US-11 Nutzungskennzahlen anzeigen und US-12 Nutzungskennzahlen exportieren. US-13 (automatischer Monatsbericht) ist Won't und erhält keine Tabelle. Analyse, Optionen und Entscheidung stehen in `change-request.md`.
+Diese Datei setzt `kurzformat_sprint-3.md` fort. Sie enthält US-09 Beispielsimulation ausprobieren (Stretch in Sprint 4, Festlegungen E44 bis E47) und die neuen Stories aus dem Change Request CR-01: US-11 Nutzungskennzahlen anzeigen und US-12 Nutzungskennzahlen exportieren. US-13 (automatischer Monatsbericht) ist Won't und erhält keine Tabelle. Analyse, Optionen und Entscheidung stehen in `change-request.md`.
 
-Beide Stories sind dem Akteur **Geschäftsführung** vorbehalten (Akteursbeschreibung v4). Ohne gültige Anmeldung antwortet das Backend mit 401 und die Oberfläche führt zur Anmeldung (E14); angemeldete Nutzer ohne die Rolle Geschäftsführung erhalten 403 (E40).
+US-09 ist öffentlich und richtet sich an den **Gast**. US-11 und US-12 sind dem Akteur **Geschäftsführung** vorbehalten (Akteursbeschreibung v4). Ohne gültige Anmeldung antwortet das Backend mit 401 und die Oberfläche führt zur Anmeldung (E14); angemeldete Nutzer ohne die Rolle Geschäftsführung erhalten 403 (E40).
+
+---
+
+## US-09 Beispielsimulation ausprobieren
+
+| **Name** | **Beispielsimulation ausprobieren** |
+|---|---|
+| **Art** | User Story (US-09), Stretch in Sprint 4 |
+| **Kurzbeschreibung** | Ein Gast probiert auf der Startseite ohne Konto eine Monte-Carlo-Simulation mit einem vorgegebenen Beispielportfolio und festen Werten aus, um LookUpStock kennenzulernen, bevor er sich registriert. |
+| **Auslöser** | Ein Gast öffnet die Startseite und möchte sehen, was LookUpStock zeigt. |
+| **Akteure** | Gast (primär), Finanzdaten-API Twelve Data (sekundär) |
+| **Eingehende Information** | Auswahl eines der Beispielportfolios (E45). Startkapital, Sparrate, Anlagehorizont und Pfade sind fest vorgegeben (E46). |
+| **Vorbedingungen** | • Keine Anmeldung nötig; die Startseite ist öffentlich (E44).<br>• Für die Anlagen der Beispielportfolios liefert die Finanzdaten-API Kursdaten oder sie liegen im Cache (NF-07). |
+| **Nachbedingungen** | • Das Ergebnis zeigt das Fächerdiagramm, die Kennzahlen aus US-05 (ohne Zielwahrscheinlichkeit), Pfade, Seed und Schätzzeitraum (wie US-04).<br>• Die Hinweise E16 und E21 stehen unter dem Ergebnis (NF-14 a).<br>• Ein Hinweis mit Link lädt zur Registrierung ein (E47).<br>• Es wird nichts gespeichert; eine Speichern-Funktion gibt es nicht (E47).<br>• Gleicher Seed ergibt identische Ergebnisse (NF-08).<br>• Sind die Kursdaten nicht abrufbar, erscheint „Kursdaten sind gerade nicht verfügbar.“ (503); zu kurze Historie wie US-04 (422). |
+| **Essenzielle Schritte** | • Startseite ohne Anmeldung öffnen<br>• Beispielportfolio wählen<br>• Beispielsimulation mit den festen Werten berechnen<br>• Ergebnis mit Hinweisen und Einladung zur Registrierung anzeigen |
 
 ---
 
@@ -47,7 +62,7 @@ Beide Stories sind dem Akteur **Geschäftsführung** vorbehalten (Akteursbeschre
 
 ---
 
-## Festlegungen des Product Owners (E36 bis E43)
+## Festlegungen des Product Owners (E36 bis E47)
 
 Anlass: Change Request CR-01 (Ereigniskarte „Reporting für die Geschäftsführung“), Analyse am 25.10.2026. Die Nummerierung setzt E1 bis E35 fort. Technische Details der Umsetzung entscheidet das Backend-Team; der Product Owner übernimmt die umgesetzten Regeln danach in diese Tabelle.
 
@@ -61,6 +76,10 @@ Anlass: Change Request CR-01 (Ereigniskarte „Reporting für die Geschäftsfüh
 | E41 | US-12 | **Export als CSV-Datei:** Dateiname `lookupstock-nutzung-JJJJ-MM.csv`, Trennzeichen Semikolon, Zeichensatz UTF-8 mit BOM, Spalten `Monat;Kennzahl;Wert`, je Kennzahl eine Zeile, gleiche Bezeichnungen und Werte wie im Dashboard. | „Exportierbare Datei“ laut Ereigniskarte. CSV ist ohne zusätzliche Bibliothek erzeugbar; Semikolon und BOM sorgen dafür, dass Excel mit deutscher Einstellung Spalten und Umlaute richtig erkennt. |
 | E42 | US-13 | **Nicht umgesetzt (Won't):** automatischer monatlicher Versand (US-13), Export als PDF oder Excel-Datei, Diagramme oder Zeitreihen über mehrere Monate, nutzerbezogene Auswertungen (z. B. aktive Nutzer, Ranglisten), Auswertungen für die Zeit vor dem Beginn der Erfassung, Rollenverwaltung in der Oberfläche. | Entscheidung „teilweise umsetzen“ (CR-01, Abschnitt 5): Kapazität von Sprint 5 und Abgabe der Webprogrammierung am 08.11.2026; Datenschutz (E36); rückwirkende Daten existieren nicht. |
 | E43 | US-08 | **„Vergleiche speichern“ wird nicht umgesetzt (Won't).** Ersetzt E34 (geplant für Sprint 5). US-08 umfasst damit nur das Speichern, Aufrufen und Löschen von Simulationen. | Umpriorisierung zugunsten von CR-01: Komfortfunktion mit geringerem Nutzen als das Reporting; macht Kapazität in Sprint 5 frei. Der Vergleich selbst (US-07) bleibt unverändert. |
+| E44 | US-09 | **Startseite öffentlich.** Ohne gültige Anmeldung zeigt die Startseite den Bereich „Beispielsimulation ausprobieren“. Bei „Simulation starten“ und „Gespeicherte Simulationen“ steht stattdessen „Bitte melde dich an.“ mit Link zur Anmeldung. Angemeldete Nutzer sehen die Startseite wie bisher, ohne den Beispielbereich. | PO-Entscheidung vom 25.10.2026: Ein Gast soll LookUpStock ohne Umweg über die Anmeldeseite kennenlernen. Die eigene Simulation (US-04) und gespeicherte Simulationen (US-08) bleiben geschützt. |
+| E45 | US-09 | **Zwei Beispielportfolios:** „Beispiel: Weltportfolio“ (URTH 100 %) und „Beispiel: Welt 70 / Schwellenländer 30“ (URTH 70 %, IEMG 30 %). Die Zusammensetzung wird bei der Auswahl angezeigt. Die Portfolios sind fest vorgegeben, gehören keinem Nutzer und stehen nicht in der Datenbank. | Anlagen an US-Börsen wie in der PO-Entscheidung vom 18.10.2026, weil Twelve Data im kostenlosen Tarif keine Xetra-Kurse liefert (umgesetzt in #103). |
+| E46 | US-09 | **Feste Werte:** Startkapital 5.000 €, Sparrate 100 € pro Monat, Anlagehorizont 15 Jahre, 10.000 Pfade, ohne Seed (das System erzeugt einen und zeigt ihn an). Der Gast kann die Werte nicht ändern. Das Backend lehnt mehr als 10.000 Pfade mit „In der Beispielsimulation sind höchstens 10.000 Simulationspfade möglich.“ ab (400). | PO-Entscheidung vom 25.10.2026: Werte wie im Beispiel des API-Designs („Gastmodus“), passend zu den Testfällen. 10.000 Pfade sind die Obergrenze des öffentlichen Endpunkts und halten die Last klein. |
+| E47 | US-09 | **Nichts wird gespeichert;** die Antwort hat keine `id`. Unter dem Ergebnis steht „Eigene Portfolios zusammenstellen, simulieren, vergleichen und speichern? Jetzt kostenlos registrieren“ mit Link zur Registrierung. | Akzeptanzkriterium aus dem Sprint-Planning-Protokoll Sprint 4: Hinweis lädt zur Registrierung ein; Speichern ist nur mit Konto möglich (US-08). |
 
 ---
 
@@ -71,13 +90,23 @@ Anlass: Change Request CR-01 (Ereigniskarte „Reporting für die Geschäftsfüh
 | US-01 Registrieren und anmelden | Nachbedingungen | Konto angelegt bzw. angemeldet | Zusätzlich: Die Registrierung bzw. Anmeldung wird als Nutzungsereignis gezählt; für den Nutzer ändert sich nichts | E36, E37 |
 | | Eingehende Information | E-Mail-Adresse und Passwort | **Unverändert.** Die Rolle Geschäftsführung wird nicht bei der Registrierung gewählt, sondern vom Team vergeben | E40 |
 | US-02, US-03, US-04, US-07, US-09 | Nachbedingungen | – | Zusätzlich: Eine erfolgreiche Suche, Portfolio-Anlage, Simulation, ein Vergleich bzw. eine Beispielsimulation wird als Nutzungsereignis gezählt; Antworten und Anzeige bleiben unverändert | E37 |
+| US-01 Registrieren und anmelden | Vorbedingungen | Die Startseite (Simulation) setzt die Anmeldung voraus; ohne Anmeldung Weiterleitung zur Anmeldeseite | Die Startseite ist öffentlich; geschützt bleiben die Bereiche „Simulation starten“ und „Gespeicherte Simulationen“ mit Hinweis und Link zur Anmeldung | E44 |
 | US-08 Simulation speichern und aufrufen | Umfang | Simulationen speichern; Vergleiche speichern folgt (E34) | Nur Simulationen; Vergleiche speichern Won't. Eine gespeicherte Simulation wird zusätzlich als Nutzungsereignis gezählt | E37, E43 |
 
 ---
 
 ## Akzeptanzkriterien
 
-Zur Übernahme in die Story-Issues US-11 und US-12 (werden im Sprint-5-Planning angelegt). Für beide Stories gilt: Ohne gültige Anmeldung 401, ohne die Rolle Geschäftsführung 403.
+Zur Übernahme in das Story-Issue US-09 (Docs #2) und in die Story-Issues US-11 und US-12 (werden im Sprint-5-Planning angelegt). Für US-11 und US-12 gilt: Ohne gültige Anmeldung 401, ohne die Rolle Geschäftsführung 403.
+
+**US-09 Beispielsimulation ausprobieren**
+
+- Ohne Anmeldung zeigt die Startseite den Bereich „Beispielsimulation ausprobieren“; die eigene Simulation und die gespeicherten Simulationen zeigen „Bitte melde dich an.“ mit Link. *(E44)*
+- Der Gast wählt eines von zwei Beispielportfolios; die Zusammensetzung und die festen Werte werden angezeigt. *(E45, E46)*
+- Das Ergebnis zeigt Fächerdiagramm, Kennzahlen aus US-05, Pfade, Seed und Schätzzeitraum sowie die Hinweise E16 und E21 (NF-14 a).
+- Ein Hinweis mit Link lädt zur Registrierung ein; es gibt keine Speichern-Funktion und die Antwort hat keine `id`. *(E47)*
+- Gleicher Seed ergibt identische Ergebnisse (NF-08); mehr als 10.000 Pfade werden mit 400 abgelehnt. *(E46)*
+- Angemeldete Nutzer sehen die Startseite unverändert, ohne Beispielbereich. *(E44)*
 
 **US-11 Nutzungskennzahlen anzeigen**
 
@@ -104,3 +133,4 @@ Zur Übernahme in die Story-Issues US-11 und US-12 (werden im Sprint-5-Planning 
 | Version | Datum | Story | Änderung | Anlass |
 |---|---|---|---|---|
 | 1 | 25.10.2026 | US-11, US-12, US-08 | Neu: Kurzformat-Tabellen US-11 und US-12, Festlegungen E36 bis E43, Auswirkungen auf bestehende Stories, Akzeptanzkriterien | Docs #131, Change Request CR-01 |
+| 2 | 25.10.2026 | US-09, US-01 | Neu: Kurzformat-Tabelle US-09, Festlegungen E44 bis E47 (Startseite öffentlich, Beispielportfolios, feste Werte, nichts gespeichert), Auswirkung auf US-01, Akzeptanzkriterien US-09 | Docs #2, PO-Entscheidung vom 25.10.2026, Umsetzung BE #93, #103, FE #38 |
