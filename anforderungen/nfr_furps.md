@@ -1,8 +1,8 @@
 # Nicht-funktionale Anforderungen nach FURPS+
 
-**Projekt:** LookUpStock · **Issue:** Docs #16 · **Verantwortlich:** Mert Eminel (Product Owner)
-**Version:** 3 · **Stand:** 08.10.2026
-**Grundlagen:** NFR-Entwurf von Paul Kaufmann, Product Backlog, API-Design (Stand 02.10.2026, Token im JSON-Body), ADR-01 bis ADR-03, Testkonzept und Abnahmetestfälle Sprint 1, PO-Entscheidungen vom 02.10.2026
+**Projekt:** LookUpStock · **Issue:** Docs #16 (Version 4: Docs #131) · **Verantwortlich:** Mert Eminel (Product Owner)
+**Version:** 4 · **Stand:** 25.10.2026
+**Grundlagen:** NFR-Entwurf von Paul Kaufmann, Product Backlog, API-Design (Stand 02.10.2026, Token im JSON-Body), ADR-01 bis ADR-03, Testkonzept und Abnahmetestfälle Sprint 1, PO-Entscheidungen vom 02.10.2026, ADR-06 (Token im Header), Change Request CR-01 und Kurzformat-Tabellen Sprint 4 (E36, E40)
 
 Die Nummerierung NF-01 bis NF-15 stammt aus dem Entwurf und bleibt unverändert, weil die ADRs bereits darauf verweisen. NF-16 wurde ergänzt.
 
@@ -43,8 +43,8 @@ Jede Anforderung ist operationalisiert: Sie hat ein messbares Abnahmekriterium u
 | NF | Anforderung | Abnahmekriterium | Nachweis |
 |---|---|---|---|
 | NF-03 | Passwörter werden nur als gesalzener Hash gespeichert und haben mindestens 8 Zeichen. | In der Datenbank steht kein Passwort im Klartext. Die Werte haben das BCrypt-Format (`$2a$…`). `POST /auth/register` mit einem Passwort unter 8 Zeichen liefert 400 mit der Meldung aus dem API-Design. | Unit-Test und Prüfung der Datenbankinhalte: AT-01-08, AT-01-11 |
-| NF-04 | Jeder Nutzer kann nur seine eigenen Portfolios, Simulationen und Vergleiche sehen und ändern. | Nutzer B ruft `…/details`, `PUT` und `DELETE` mit IDs von Nutzer A auf und erhält jeweils 404. Die Daten von A bleiben unverändert. `…/list` zeigt nur eigene Einträge. | Integrations- und Abnahmetest: AT-01-13, AT-01-14 (`PUT` und `DELETE` mit US-06 in Sprint 3) |
-| NF-05 | Die Anwendung ist nur über HTTPS erreichbar, damit Zugangsdaten und Token, die im JSON-Body stehen, nicht mitgelesen werden können. | Ein Aufruf über `http://` wird auf `https://` umgeleitet. Das Zertifikat ist im Browser gültig, ohne Warnung. | Manuelle Prüfung nach dem Server-Deployment |
+| NF-04 | Jeder Nutzer kann nur seine eigenen Portfolios und Simulationen sehen und ändern. Die Nutzungskennzahlen (US-11, US-12) sind nur mit der Rolle Geschäftsführung abrufbar. | (a) Nutzer B ruft `GET /…/{id}`, `PUT` und `DELETE` mit IDs von Nutzer A auf und erhält jeweils 404. Die Daten von A bleiben unverändert. `GET /portfolios` und `GET /simulations` zeigen nur eigene Einträge.<br>(b) Ein angemeldeter Nutzer ohne die Rolle Geschäftsführung erhält beim Abruf und beim Export der Nutzungskennzahlen 403; die Prüfung erfolgt im Backend (E40). | (a) Integrations- und Abnahmetest: AT-01-13, AT-01-14 (`PUT` und `DELETE` mit US-06 in Sprint 3); (b) Abnahmetest zu US-11 (Sprint 5) |
+| NF-05 | Die Anwendung ist nur über HTTPS erreichbar, damit Zugangsdaten und der Token im Header `Authorization` (ADR-06) nicht mitgelesen werden können. | Ein Aufruf über `http://` wird auf `https://` umgeleitet. Das Zertifikat ist im Browser gültig, ohne Warnung. | Manuelle Prüfung nach dem Server-Deployment |
 | NF-06 | Der Schlüssel für die Finanzdaten-API (Twelve Data) liegt nur im Backend und gelangt nie in den Browser oder ins Repository. | Im Netzwerk-Tab des Browsers und im Frontend-Code taucht der Key nicht auf. `.env` steht in `.gitignore`, es gibt nur eine `.env.example` ohne echten Wert. In der CI liegt der Key als GitHub Secret. | Checkliste im Code-Review; Prüfung über NF-12 |
 | NF-16 | Eine Anmeldung ist begrenzt gültig und lässt sich beenden. | `expiresAt` liegt 24 h nach dem Login. Ein abgelaufener Token liefert 401. Nach `POST /auth/logout` liefert derselbe Token bei jedem geschützten Endpunkt 401. | AT-01-02, AT-01-03, AT-01-06, AT-01-10 |
 
@@ -74,8 +74,18 @@ Jede Anforderung ist operationalisiert: Sie hat ein messbares Abnahmekriterium u
 | NF | Anforderung | Abnahmekriterium | Nachweis |
 |---|---|---|---|
 | NF-13 | Alle Komponenten lassen sich auf dem Server mit einem einzigen Befehl starten. | Auf dem Server startet `docker compose up -d` Frontend, Backend und Datenbank. Danach ist die Anwendung ohne weitere manuelle Schritte erreichbar. | Manueller Start in sauberer Umgebung vor dem Sprint Review |
-| NF-14 | Die Anwendung grenzt sich von Anlageberatung ab und speichert nur nötige personenbezogene Daten. | (a) Jede Ergebnisseite (Simulation, Vergleich, Gastmodus) zeigt den Hinweis, dass es sich um keine Anlageberatung handelt. (b) Ein Nutzerkonto speichert nur E-Mail-Adresse und Passwort-Hash. | (a) AT-04-15; (b) AT-01-12 |
+| NF-14 | Die Anwendung grenzt sich von Anlageberatung ab und speichert nur nötige personenbezogene Daten. | (a) Jede Ergebnisseite (Simulation, Vergleich, Gastmodus) zeigt den Hinweis, dass es sich um keine Anlageberatung handelt. (b) Ein Nutzerkonto speichert nur E-Mail-Adresse und Passwort-Hash. Nutzungsereignisse für die Nutzungskennzahlen enthalten nur Ereignisart und Zeitpunkt, keinen Bezug zu einem Nutzerkonto, keine IP-Adresse und keine Eingaben (E36). | (a) AT-04-15; (b) AT-01-12; Nutzungsereignisse: Abnahmetest zu US-11 (Sprint 5) |
 | NF-15 | Frontend und Backend kommunizieren ausschließlich über die im API-Design beschriebene JSON-Schnittstelle unter `/api/v1`. | Jeder Endpunkt entspricht in Pfad, Methode und Feldern dem API-Design. Alle Fehler haben das Format `{ "error": { "code", "message", "details" } }`. | Review bei jeder Schnittstellenänderung |
+
+## Änderungen in Version 4 (25.10.2026)
+
+Anlass: Change Request CR-01 „Reporting für die Geschäftsführung“ (Docs #131) und ADR-06.
+
+| NF | Änderung | Grund |
+|---|---|---|
+| NF-04 | Teil (b) ergänzt: Nutzungskennzahlen nur mit der Rolle Geschäftsführung, sonst 403. Pfade in Teil (a) auf GET umgestellt (`GET /…/{id}` statt `…/details`, `GET /portfolios` statt `…/list`). „Vergleiche“ gestrichen, weil Vergleiche nicht gespeichert werden (E43) | CR-01 (E40), ADR-06 |
+| NF-05 | Token steht im Header `Authorization`, nicht mehr im JSON-Body | ADR-06 |
+| NF-14 (b) | Nutzungsereignisse ohne Personenbezug ergänzt | CR-01 (E36): Die Erfassung der Nutzung darf keine weiteren personenbezogenen Daten einführen |
 
 ## Änderungen in Version 3 (08.10.2026)
 
