@@ -8,6 +8,7 @@
 '     Parameter als Spalten, berechnetes Ergebnis als JSONB (ohne Neuberechnung abrufbar)
 '   - Unverändert: app_user, auth_token, portfolio, position, asset, price_history
 ' Notation: Krähenfuß (Information Engineering) · Werkzeug: PlantUML
+' Korrektur 25.10.2026 (Docs-Review): Legende zu ADR-07 als offen statt geplant formuliert
 
 hide circle
 skinparam linetype polyline
@@ -190,7 +191,7 @@ legend bottom left
   Weiß = bereits in v3 vorhanden (Migrationen V1 bis V6) · <back:#EAF4E4> Grün </back> = neu in v4 (Migration V7, BE #68)
   Mindestens eine Position je Portfolio (|{) ist fachliche Regel aus Portfolio.validate(), die Datenbank erzwingt sie nicht.
   Nicht enthalten: Suchcache (F5, BE #77, im Arbeitsspeicher), gespeicherte Vergleiche (folgen ggf. in Sprint 5).
-  Geplant (Sprint 5, ADR-07): price_history wandert in das Schema des Marktdaten-Dienstes.
+  Offen (Sprint 5, ADR-07 noch nicht entschieden): ob price_history mit der Aufteilung in Dienste in ein eigenes Schema wandert.
   Vorversion: diagramme/archiv/er-diagramm_v3
 endlegend
 

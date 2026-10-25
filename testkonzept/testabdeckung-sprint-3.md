@@ -74,7 +74,7 @@ Alle drei Klassen mit 0 % werden im Code verwendet; es handelt sich nicht um tot
 
 ## 4. Pfadabdeckung Aktivitätsdiagramm US-07
 
-Grundlage sind `diagramme/aktivitaetsdiagramm_us-07_v1.puml`, die Verzweigungstabelle im Testkonzept (Abschnitt 5) und die Status in `testkonzept/abnahmetestfaelle-sprint-3.md`. Ein Pfad gilt als abgedeckt, wenn mindestens ein zugeordneter Testfall ihn erfolgreich durchlaufen hat oder der Testfall nur aus einem Grund außerhalb des Pfads fehlgeschlagen ist (siehe Fußnote ¹).
+Grundlage sind `diagramme/archiv/aktivitaetsdiagramm_us-07_v1.puml` (Stand zum Messzeitpunkt; seit Docs #130 gilt v2), die Verzweigungstabelle im Testkonzept (Abschnitt 5) und die Status in `testkonzept/abnahmetestfaelle-sprint-3.md`. Ein Pfad gilt als abgedeckt, wenn mindestens ein zugeordneter Testfall ihn erfolgreich durchlaufen hat oder der Testfall nur aus einem Grund außerhalb des Pfads fehlgeschlagen ist (siehe Fußnote ¹).
 
 | Verzweigung | Pfad | Testfälle | Abgedeckt |
 |---|---|---|---|

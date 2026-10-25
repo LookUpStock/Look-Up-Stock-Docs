@@ -15,6 +15,7 @@
 '   - SimulationParameters um targetAmount ergänzt (US-05, E27); SimulationService.ensureSeed öffentlich (ADR-05)
 '   - PriceHistoryService liefert nur abgeschlossene Monate (E22, BE #87)
 '   - Weiterhin geplant: MockMarketDataProvider (BE #89), AssetController.details / AssetService.findById
+' Korrektur 25.10.2026 (Docs-Review): Multiplizität ComparisonResult–Pairwise 1 statt 1..* (genau zwei Einträge, ITEM_COUNT = 2)
 ' Werkzeug: PlantUML
 
 skinparam classAttributeIconSize 0
@@ -412,7 +413,7 @@ ComparisonService --> SimulationService : run()
 ComparisonService ..> ComparisonResult : <<create>>
 ComparisonService ..> ComparisonEntry
 ComparisonResult "1" *-- "2" CRItem
-ComparisonResult "1" *-- "1..*" CRPair
+ComparisonResult "1" *-- "1" CRPair
 CRItem --> "1" Metrics
 
 ' Gespeicherte Simulationen (US-08)
