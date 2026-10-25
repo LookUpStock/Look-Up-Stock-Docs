@@ -32,7 +32,7 @@ Auswertung der Testabdeckung der Kernlogik (NF-11) und der Pfadabdeckung des Akt
 | `PortfolioService` | 31/31 | 100 % | 14/14 | 100 % |
 | **Kernlogik gesamt** | **332/343** | **96,8 %** | **156/164** | **95,1 %** |
 
-**Bewertung:** NF-11 ist erfüllt. Die Kernlogik erreicht insgesamt 96,8 % Zeilenabdeckung, und jede einzelne Klasse liegt über dem Zielwert von 80 %.
+**Bewertung:** Der Zielwert von NF-11 ist erreicht, der Nachweis in der CI fehlt noch. Die Kernlogik erreicht insgesamt 96,8 % Zeilenabdeckung, und jede einzelne Klasse liegt über 80 %. Das Abnahmekriterium von NF-11 verlangt aber die Messung „in der CI-Pipeline“. Gemessen wurde einmalig lokal, weil JaCoCo nicht in `pom.xml` und CI eingebunden ist (siehe Abschnitt 1). NF-11 gilt deshalb erst als erfüllt, wenn JaCoCo in die CI aufgenommen ist und dort denselben Wert bestätigt (Maßnahme in Abschnitt 5).
 
 ### Vergleich mit dem Gesamtprojekt
 
@@ -74,12 +74,12 @@ Alle drei Klassen mit 0 % werden im Code verwendet; es handelt sich nicht um tot
 
 ## 4. Pfadabdeckung Aktivitätsdiagramm US-07
 
-Grundlage sind `diagramme/aktivitaetsdiagramm_us-07_v1.puml`, die Verzweigungstabelle im Testkonzept (Abschnitt 5) und die Status in `testkonzept/abnahmetestfaelle-sprint-3.md`. Ein Pfad gilt als abgedeckt, wenn mindestens ein zugeordneter Testfall ihn erfolgreich durchlaufen hat.
+Grundlage sind `diagramme/aktivitaetsdiagramm_us-07_v1.puml`, die Verzweigungstabelle im Testkonzept (Abschnitt 5) und die Status in `testkonzept/abnahmetestfaelle-sprint-3.md`. Ein Pfad gilt als abgedeckt, wenn mindestens ein zugeordneter Testfall ihn erfolgreich durchlaufen hat oder der Testfall nur aus einem Grund außerhalb des Pfads fehlgeschlagen ist (siehe Fußnote ¹).
 
 | Verzweigung | Pfad | Testfälle | Abgedeckt |
 |---|---|---|---|
 | Eingaben prüfen | gültig | AT-07-03, AT-07-12 | ja |
-| | ungültig (400) | AT-07-05, AT-07-12 | ja |
+| | ungültig (400) | AT-07-05, AT-07-12; AT-07-04 (manuell) nicht durchgeführt | ja (automatisiert) |
 | Art des Eintrags | Portfolio | AT-07-01 ¹ | ja |
 | | Anlage | AT-07-01 ¹ | ja |
 | Portfolio laden | vorhanden | AT-07-01 ¹ | ja |
@@ -104,13 +104,14 @@ Grundlage sind `diagramme/aktivitaetsdiagramm_us-07_v1.puml`, die Verzweigungsta
 | | kein Zielbetrag | AT-07-01 ¹ | ja |
 
 ¹ AT-07-01 ist fehlgeschlagen, aber nur wegen der fehlenden Anzeige von Seed und gemeinsamem Schätzzeitraum (B2). Die übrigen Punkte sind erfüllt, die Pfade selbst wurden also durchlaufen.
-² Das Verhalten bei nicht erreichbarem Anbieter ist nur über `/simulations` getestet (`SimulationControllerTest`). Einen eigenen 503-Test für `/comparisons` gibt es nicht.
+² Zum Messzeitpunkt (`d9c02ab`) war das Verhalten bei nicht erreichbarem Anbieter nur über `/simulations` getestet (`SimulationControllerTest`); ein eigener 503-Test für `/comparisons` fehlte. Seit Commit `97cfb92` (24.10.2026, BE #90) ist dieser Pfad durch `ComparisonControllerTest` abgedeckt.
 
-**Ergebnis:** Von 24 Pfaden sind 20 abgedeckt (83 %), 1 teilweise und 3 nicht.
+**Ergebnis:** Zum Stand `d9c02ab` sind von 24 Pfaden 20 abgedeckt (83 %), 1 teilweise und 3 nicht. Mit BE #90 sind es inzwischen 21 von 24.
 
-**Interpretation:** Alle offenen Pfade gehören zu manuellen Testfällen. Die automatisierten Tests decken alle ihnen zugeordneten Pfade ab. Für die Lücken gibt es zwei Ursachen:
-- Frontend-Fehler verhindern die Durchführung: Es fehlen die Eingaben für Bezeichnung (B3) und Zielbetrag (B1).
+**Interpretation:** Für die Lücken gibt es drei Ursachen:
+- Frontend-Fehler verhindern die Durchführung manueller Testfälle: Es fehlen die Eingaben für Bezeichnung (B3) und Zielbetrag (B1).
 - Manuelle Alternativszenarien wurden nicht durchgeführt (AT-07-08, AT-07-09).
+- Ein automatisierter Test fehlte: 503 bei `POST /comparisons`. Diese Lücke ist mit BE #90 geschlossen.
 
 ## 5. Maßnahmen
 
@@ -119,9 +120,9 @@ Grundlage sind `diagramme/aktivitaetsdiagramm_us-07_v1.puml`, die Verzweigungsta
 | Eingabe Zielbetrag im Vergleich, danach AT-07-02 durchführen | FE #30 (B1) |
 | Eigene Bezeichnung je Eintrag, danach AT-07-02 durchführen | FE #32 (B3) |
 | Anzeige Seed und Schätzzeitraum, danach AT-07-01 wiederholen | FE #31 (B2) |
-| 503-Test für `POST /comparisons` ergänzen | BE #90 |
+| 503-Test für `POST /comparisons` ergänzen | BE #90 – erledigt (Commit `97cfb92`, 24.10.2026) |
 | AT-07-04, AT-07-08 und AT-07-09 manuell durchführen | Docs #136 / #137 |
-| JaCoCo in `pom.xml` und Backend-CI aufnehmen, damit die Messung wie im Testkonzept beschrieben in jedem CI-Lauf erfolgt | neues Issue vorschlagen |
+| JaCoCo in `pom.xml` und Backend-CI aufnehmen, damit die Messung wie im Testkonzept beschrieben in jedem CI-Lauf erfolgt; Voraussetzung für den Nachweis von NF-11 | neues Issue vorschlagen |
 | Nicht abgedeckte Zweige in `ParameterEstimator` und `Portfolio` prüfen | optional |
 | Abdeckung des Pakets `client` über Mock-Testdaten erhöhen | BE #89 |
 | Integrationstest für den Kursdaten-Cache (`PriceCache`, `PriceHistory`) mit der Testdatenbank | neues Issue vorschlagen |
