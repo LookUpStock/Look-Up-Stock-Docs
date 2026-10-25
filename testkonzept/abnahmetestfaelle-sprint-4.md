@@ -10,9 +10,8 @@
 | **Durchführung** | Nachtest (Docs #136) und Abnahme (Docs #137) durch den Product Owner; Ergebnis im Abnahmeprotokoll Sprint 4 |
 | **Stories** | Nachtest US-05 (Docs #6) und US-07 (Docs #3, Kern-Story) nach den Befunden B1 bis B7 und H1; B6 Anlagensuche „ETHA“ (BE #88, BE #97, FE #40); B5 laufender Monat (BE #87); ADR-06 Token im Header (Docs #115, BE #91, FE #37); US-09 Beispielsimulation für Gäste (Docs #2, Stretch); NF-12 (BE #89) |
 | **Grundlagen** | Sprint-Planning-Protokoll Sprint 4 (Abschnitt 4 „Erledigt, wenn“), Abnahmeprotokoll Sprint 3, `anforderungen/kurzformat_sprint-3.md` (E24 bis E35), ADR-06, API-Design (Stand 25.10.2026, Docs #133), Aktivitäts- und Sequenzdiagramm US-07 v2 (Docs #130), [Testkonzept](testkonzept.md) Version 4 |
-| **KI-Nutzung** | Entwurf mit KI-Unterstützung erstellt und geprüft, siehe KI-Log |
 
-Diese Datei setzt [abnahmetestfaelle-sprint-3.md](abnahmetestfaelle-sprint-3.md) fort. Sie enthält die Vorgaben für den Nachtest der in Sprint 3 nicht bestandenen oder offenen Testfälle sowie die neuen Testfälle für B5, B6, ADR-06, US-09 und NF-12. Testfälle zum Change Request (Ereigniskarte) werden nach der Auswirkungsanalyse (Docs #131) ergänzt.
+Diese Datei setzt [abnahmetestfaelle-sprint-3.md](abnahmetestfaelle-sprint-3.md) fort. Sie enthält die Vorgaben für den Nachtest der in Sprint 3 nicht bestandenen oder offenen Testfälle sowie die neuen Testfälle für B5, B6, ADR-06, US-09 und NF-12. Die Testfälle zum Change Request (Ereigniskarte) folgen in Sprint 5 (siehe Abschnitt „Change Request“).
 
 ---
 
@@ -100,13 +99,11 @@ Nach dem Merge aller Frontend-Befunde werden die in Sprint 3 fehlgeschlagenen un
 | AT-09-03 | Grenze für Gäste: höchstens 10.000 Pfade; Parameter wie US-04 | Grenzwert | automatisiert (`DemoServiceTest`, `DemoControllerTest`) | `paths` 10.000 und 10.001; `seed` 4.2 | 10.000 → gültig (`zehntausendPfadeSindErlaubt`); 10.001 → `400 VALIDATION_ERROR`, „In der Beispielsimulation sind höchstens 10.000 Simulationspfade möglich.“, `details` nennt `paths`; Kommazahl beim Seed → `400` (`kommazahlBeimSeedLiefert400`). | offen |
 | AT-09-04 | Fehlerfälle der Beispielsimulation | Alternativszenario | automatisiert (`DemoServiceTest`, `DemoControllerTest`) | Unbekannte `portfolioId`; ohne `portfolioId`; ohne `parameters`; Kursdaten nicht abrufbar | Unbekannt → `404`, „Beispielportfolio nicht gefunden.“; ohne `portfolioId` → `400`, „Bitte ein Portfolio auswählen.“; ohne `parameters` → `400`; Anbieter nicht erreichbar → `503 UPSTREAM_UNAVAILABLE` (`kursdatenNichtVerfuegbarLiefert503`). | offen |
 
-**Hinweis zu AT-09-01:** Die Beispielportfolios verwenden derzeit EUNL und IS3N an der Xetra. Twelve Data liefert dafür im kostenlosen Tarif keine Kurse (F3, Docs #80); auf Heroku ist deshalb `422` statt `200` zu erwarten. Die Umstellung auf US-Börsen wird im Backend nachgeholt (Issue siehe Abnahmeprotokoll).
-
 ---
 
 ## Change Request (Ereigniskarte)
 
-Die Akzeptanzkriterien legt der Product Owner nach der Auswirkungsanalyse fest (Docs #131, `anforderungen/change-request.md`). Die Testfälle werden danach in diesem Abschnitt ergänzt (Umsetzung BE #92).
+Die Akzeptanzkriterien für US-11 und US-12 stehen in [`kurzformat_sprint-4.md`](../anforderungen/kurzformat_sprint-4.md) (Abschnitt „Akzeptanzkriterien“, Docs #131). Die Umsetzung erfolgt in Sprint 5 (BE #92, Aufteilung siehe `change-request.md`, Abschnitt 5.4). Die Testfälle AT-11-xx und AT-12-xx werden deshalb in den Abnahmetestfällen Sprint 5 erstellt und nicht in dieser Datei.
 
 ---
 
