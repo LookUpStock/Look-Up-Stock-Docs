@@ -27,7 +27,7 @@ Auswertung der Testabdeckung der Kernlogik (NF-11) zum Ende von Sprint 4. Erstma
 | `ComparisonService` | 64/64 | 100 % | 37/38 | 97,4 % |
 | `Portfolio` | 57/64 | 89,1 % | 29/32 | 90,6 % |
 | `PortfolioService` | 31/31 | 100 % | 14/14 | 100 % |
-| **Kernlogik gesamt** | **333/344** | **96,8 %** | **156/164** | **95,1 %** |
+| **Kernlogik gesamt** | **332/343** | **96,8 %** | **156/164** | **95,1 %** |
 
 **Bewertung:** NF-11 ist erstmals per CI nachgewiesen. Die Kernlogik erreicht ⟨Wert⟩ % Zeilenabdeckung und liegt damit über dem Zielwert von 80 %. Der Nachweis ist dauerhaft: Fällt der Wert unter 80 %, schlägt die Regel `check-core-logic` an und der CI-Lauf wird rot.
 
