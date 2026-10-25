@@ -185,7 +185,7 @@ stop
 
 legend bottom left
   **Vorbedingung, nicht im Diagramm:** gültige Anmeldung (sonst HTTP 401, wie bei US-04)
-  **Nicht enthalten:** Vergleich speichern (E34, nach Sprint 5 verschoben) · mehr als zwei Einträge (US-10, Won't laut Sprint-Planning Sprint 4)
+  **Nicht enthalten:** Vergleich speichern (Won't, E43 ersetzt E34) · mehr als zwei Einträge (US-10, Won't laut Sprint-Planning Sprint 4)
   Angaben „HTTP …“ = Antwort von POST /comparisons laut API-Design
 endlegend
 

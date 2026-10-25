@@ -2,11 +2,11 @@
 
 Stand: 25.10.2026 · Basis-URL `/api/v1` · Datenformat JSON
 
-Diese Markdown-Datei ist die bearbeitbare Fassung des API-Designs. Sie übernimmt den vollständigen Inhalt von `api-design.pdf` (Stand 02.10.2026) und ergänzt die Entscheidungen des Product Owners vom 02.10.2026 (E1 bis E7) sowie die einzelnen Fehlerfälle für Portfolios und Simulationen.
+Diese Markdown-Datei ist die bearbeitbare Fassung des API-Designs. Sie übernimmt den vollständigen Inhalt von `api-design.pdf` (Stand 02.10.2026; die PDF-Datei ist veraltet, maßgeblich ist diese Datei) und ergänzt die Entscheidungen des Product Owners vom 02.10.2026 (E1 bis E7) sowie die einzelnen Fehlerfälle für Portfolios und Simulationen.
 
 **Anmeldung (ADR-06):** Der Token aus `POST /auth/login` wird bei allen Endpunkten, die eine Anmeldung erfordern, im Header `Authorization: Bearer <token>` mitgeschickt, nicht im Body. Fehlt der Header, hat er nicht das Format `Bearer <token>` oder ist der Token unbekannt bzw. abgelaufen, antwortet die API mit `401 UNAUTHORIZED` („Bitte melde dich an.“). Lesende Abfragen sind GET: Listen unter dem Sammelpfad (z. B. `GET /portfolios`), einzelne Einträge unter ihrer ID (z. B. `GET /portfolios/5`). Öffentliche Endpunkte (Registrieren, Anmelden, Anlagensuche, Gastmodus) brauchen keinen Header.
 
-**Änderung 25.10.2026 (Docs #133, ADR-06):** Token aus allen Request-Bodys in den `Authorization`-Header verschoben. `POST /…/list` wurde zu `GET /…`, `POST /…/{id}/details` zu `GET /…/{id}` (Portfolios, Simulationen, Vergleiche). `DELETE` und `POST /auth/logout` haben keinen Body mehr. Bis ADR-04 galt: Token im JSON-Body, lesende Abfragen als POST.
+**Änderung 25.10.2026 (Docs #133, ADR-06):** Token aus allen Request-Bodys in den `Authorization`-Header verschoben. `POST /…/list` wurde zu `GET /…`, `POST /…/{id}/details` zu `GET /…/{id}` (Portfolios und Simulationen; die Pfade für gespeicherte Vergleiche sind entsprechend beschrieben, aber nicht umgesetzt, siehe Abschnitt „Vergleiche“). `DELETE` und `POST /auth/logout` haben keinen Body mehr. Bis ADR-04 galt: Token im JSON-Body, lesende Abfragen als POST.
 
 **Fehlerformat:** Fehler haben immer das Format `{ "error": { "code", "message", "details" } }`. `message` ist ein deutscher Text zur direkten Anzeige im Frontend. Gewichtungen in Prozent (Summe 100), Anteile in Ergebnissen als Dezimalzahl (0.31 = 31 %).
 
@@ -1058,11 +1058,13 @@ Kein Body<br>
 
 ## Vergleiche (US-07, US-08, US-10)
 
+**Hinweis (25.10.2026):** Umgesetzt ist nur `POST /comparisons` mit genau zwei Items (US-07, BE #69). Vergleiche speichern (`save`, `name`) und die drei Endpunkte für gespeicherte Vergleiche werden nicht umgesetzt (E43, Change Request CR-01), ebenso mehr als zwei Items (US-10, Won't laut Sprint-Planning-Protokoll Sprint 4). `save` wird nicht ausgewertet. Die Beschreibung bleibt zur Nachvollziehbarkeit stehen.
+
 <table>
 <tr><th>Method</th><th>Ressource</th><th>Data In</th><th>Data Out</th></tr>
 <tr>
 <td><b>POST</b></td>
-<td><code>/comparisons</code><br>Vergleich berechnen, optional speichern · Sprint 3–4</td>
+<td><code>/comparisons</code><br>Vergleich berechnen · Sprint 3–4 (Speichern nicht umgesetzt, E43)</td>
 <td>
 Header: <code>Authorization: Bearer &lt;token&gt;</code>
 <pre>
@@ -1088,7 +1090,7 @@ Header: <code>Authorization: Bearer &lt;token&gt;</code>
   "name": null
 }
 </pre>
-Jedes Item hat entweder <code>portfolioId</code> oder <code>assetId</code>. 2 Items (US-07), ab US-10 bis zu 4. Alle Items werden mit denselben Zufallszahlen berechnet.
+Jedes Item hat entweder <code>portfolioId</code> oder <code>assetId</code>. Genau 2 Items (US-07); mehr als zwei (US-10) werden nicht umgesetzt. Alle Items werden mit denselben Zufallszahlen berechnet.
 </td>
 <td>
 <b>200 OK bzw. 201 Created</b>
@@ -1193,7 +1195,7 @@ Jedes Item hat entweder <code>portfolioId</code> oder <code>assetId</code>. 2 It
 </tr>
 <tr>
 <td><b>GET</b></td>
-<td><code>/comparisons</code><br>Gespeicherte Vergleiche auflisten · Sprint 3</td>
+<td><code>/comparisons</code><br>Gespeicherte Vergleiche auflisten · <b>nicht umgesetzt (E43)</b></td>
 <td>
 Header: <code>Authorization: Bearer &lt;token&gt;</code><br>
 Kein Body.
@@ -1228,7 +1230,7 @@ Kein Body.
 </tr>
 <tr>
 <td><b>GET</b></td>
-<td><code>/comparisons/{comparisonId}</code><br>Gespeicherten Vergleich abrufen · Sprint 3</td>
+<td><code>/comparisons/{comparisonId}</code><br>Gespeicherten Vergleich abrufen · <b>nicht umgesetzt (E43)</b></td>
 <td>
 Pfad: <code>comparisonId</code>, z. B. <code>/comparisons/7</code><br>
 Header: <code>Authorization: Bearer &lt;token&gt;</code><br>
@@ -1326,7 +1328,7 @@ Body wie bei <code>POST /comparisons</code>, mit <code>id</code> und <code>name<
 </tr>
 <tr>
 <td><b>DELETE</b></td>
-<td><code>/comparisons/{comparisonId}</code><br>Gespeicherten Vergleich löschen · Sprint 3</td>
+<td><code>/comparisons/{comparisonId}</code><br>Gespeicherten Vergleich löschen · <b>nicht umgesetzt (E43)</b></td>
 <td>
 Pfad: <code>comparisonId</code>, z. B. <code>/comparisons/7</code><br>
 Header: <code>Authorization: Bearer &lt;token&gt;</code><br>
