@@ -2,11 +2,11 @@
 
 Stand: 25.10.2026 · Basis-URL `/api/v1` · Datenformat JSON
 
-Diese Markdown-Datei ist die bearbeitbare Fassung des API-Designs. Sie übernimmt den vollständigen Inhalt von `api-design.pdf` (Stand 02.10.2026) und ergänzt die Entscheidungen des Product Owners vom 02.10.2026 (E1 bis E7) sowie die einzelnen Fehlerfälle für Portfolios und Simulationen.
+Diese Markdown-Datei ist die bearbeitbare Fassung des API-Designs. Sie übernimmt den vollständigen Inhalt von `api-design.pdf` (Stand 02.10.2026; die PDF-Datei ist veraltet, maßgeblich ist diese Datei) und ergänzt die Entscheidungen des Product Owners vom 02.10.2026 (E1 bis E7) sowie die einzelnen Fehlerfälle für Portfolios und Simulationen.
 
 **Anmeldung (ADR-06):** Der Token aus `POST /auth/login` wird bei allen Endpunkten, die eine Anmeldung erfordern, im Header `Authorization: Bearer <token>` mitgeschickt, nicht im Body. Fehlt der Header, hat er nicht das Format `Bearer <token>` oder ist der Token unbekannt bzw. abgelaufen, antwortet die API mit `401 UNAUTHORIZED` („Bitte melde dich an.“). Lesende Abfragen sind GET: Listen unter dem Sammelpfad (z. B. `GET /portfolios`), einzelne Einträge unter ihrer ID (z. B. `GET /portfolios/5`). Öffentliche Endpunkte (Registrieren, Anmelden, Anlagensuche, Gastmodus) brauchen keinen Header.
 
-**Änderung 25.10.2026 (Docs #133, ADR-06):** Token aus allen Request-Bodys in den `Authorization`-Header verschoben. `POST /…/list` wurde zu `GET /…`, `POST /…/{id}/details` zu `GET /…/{id}` (Portfolios, Simulationen, Vergleiche). `DELETE` und `POST /auth/logout` haben keinen Body mehr. Bis ADR-04 galt: Token im JSON-Body, lesende Abfragen als POST.
+**Änderung 25.10.2026 (Docs #133, ADR-06):** Token aus allen Request-Bodys in den `Authorization`-Header verschoben. `POST /…/list` wurde zu `GET /…`, `POST /…/{id}/details` zu `GET /…/{id}` (Portfolios und Simulationen; die Pfade für gespeicherte Vergleiche sind entsprechend beschrieben, aber nicht umgesetzt, siehe Abschnitt „Vergleiche“). `DELETE` und `POST /auth/logout` haben keinen Body mehr. Bis ADR-04 galt: Token im JSON-Body, lesende Abfragen als POST.
 
 **Fehlerformat:** Fehler haben immer das Format `{ "error": { "code", "message", "details" } }`. `message` ist ein deutscher Text zur direkten Anzeige im Frontend. Gewichtungen in Prozent (Summe 100), Anteile in Ergebnissen als Dezimalzahl (0.31 = 31 %).
 
@@ -1058,11 +1058,13 @@ Kein Body<br>
 
 ## Vergleiche (US-07, US-08, US-10)
 
+**Hinweis (25.10.2026):** Umgesetzt ist nur `POST /comparisons` mit genau zwei Items (US-07, BE #69). Vergleiche speichern (`save`, `name`) und die drei Endpunkte für gespeicherte Vergleiche werden nicht umgesetzt (E43, Change Request CR-01), ebenso mehr als zwei Items (US-10, Won't laut Sprint-Planning-Protokoll Sprint 4). `save` wird nicht ausgewertet. Die Beschreibung bleibt zur Nachvollziehbarkeit stehen.
+
 <table>
 <tr><th>Method</th><th>Ressource</th><th>Data In</th><th>Data Out</th></tr>
 <tr>
 <td><b>POST</b></td>
-<td><code>/comparisons</code><br>Vergleich berechnen, optional speichern · Sprint 3–4</td>
+<td><code>/comparisons</code><br>Vergleich berechnen · Sprint 3–4 (Speichern nicht umgesetzt, E43)</td>
 <td>
 Header: <code>Authorization: Bearer &lt;token&gt;</code>
 <pre>
@@ -1088,7 +1090,7 @@ Header: <code>Authorization: Bearer &lt;token&gt;</code>
   "name": null
 }
 </pre>
-Jedes Item hat entweder <code>portfolioId</code> oder <code>assetId</code>. 2 Items (US-07), ab US-10 bis zu 4. Alle Items werden mit denselben Zufallszahlen berechnet.
+Jedes Item hat entweder <code>portfolioId</code> oder <code>assetId</code>. Genau 2 Items (US-07); mehr als zwei (US-10) werden nicht umgesetzt. Alle Items werden mit denselben Zufallszahlen berechnet.
 </td>
 <td>
 <b>200 OK bzw. 201 Created</b>
@@ -1193,7 +1195,7 @@ Jedes Item hat entweder <code>portfolioId</code> oder <code>assetId</code>. 2 It
 </tr>
 <tr>
 <td><b>GET</b></td>
-<td><code>/comparisons</code><br>Gespeicherte Vergleiche auflisten · Sprint 3</td>
+<td><code>/comparisons</code><br>Gespeicherte Vergleiche auflisten · <b>nicht umgesetzt (E43)</b></td>
 <td>
 Header: <code>Authorization: Bearer &lt;token&gt;</code><br>
 Kein Body.
@@ -1228,7 +1230,7 @@ Kein Body.
 </tr>
 <tr>
 <td><b>GET</b></td>
-<td><code>/comparisons/{comparisonId}</code><br>Gespeicherten Vergleich abrufen · Sprint 3</td>
+<td><code>/comparisons/{comparisonId}</code><br>Gespeicherten Vergleich abrufen · <b>nicht umgesetzt (E43)</b></td>
 <td>
 Pfad: <code>comparisonId</code>, z. B. <code>/comparisons/7</code><br>
 Header: <code>Authorization: Bearer &lt;token&gt;</code><br>
@@ -1326,7 +1328,7 @@ Body wie bei <code>POST /comparisons</code>, mit <code>id</code> und <code>name<
 </tr>
 <tr>
 <td><b>DELETE</b></td>
-<td><code>/comparisons/{comparisonId}</code><br>Gespeicherten Vergleich löschen · Sprint 3</td>
+<td><code>/comparisons/{comparisonId}</code><br>Gespeicherten Vergleich löschen · <b>nicht umgesetzt (E43)</b></td>
 <td>
 Pfad: <code>comparisonId</code>, z. B. <code>/comparisons/7</code><br>
 Header: <code>Authorization: Bearer &lt;token&gt;</code><br>
@@ -1359,6 +1361,8 @@ Kein Body<br>
 
 ## Gastmodus (US-09)
 
+Beide Endpunkte sind öffentlich (kein `Authorization`-Header nötig) und speichern nichts. Die Beispielportfolios stehen im Code (`DemoPortfolio`), nicht in der Datenbank. Sie verwenden Anlagen an US-Börsen, weil Twelve Data im kostenlosen Tarif keine Xetra-Kurse liefert (F3, Docs #80; PO-Entscheidung vom 18.10.2026).
+
 <table>
 <tr><th>Method</th><th>Ressource</th><th>Data In</th><th>Data Out</th></tr>
 <tr>
@@ -1375,16 +1379,32 @@ Kein Body<br>
       "name": "Beispiel: Weltportfolio",
       "positions": [
         {
-          "assetId": 17,
-          "symbol": "EUNL",
-          "name": "iShares Core MSCI World",
+          "symbol": "URTH",
+          "name": "iShares MSCI World ETF",
           "weight": 100
+        }
+      ]
+    },
+    {
+      "id": 901,
+      "name": "Beispiel: Welt 70 / Schwellenländer 30",
+      "positions": [
+        {
+          "symbol": "URTH",
+          "name": "iShares MSCI World ETF",
+          "weight": 70
+        },
+        {
+          "symbol": "IEMG",
+          "name": "iShares Core MSCI Emerging Markets ETF",
+          "weight": 30
         }
       ]
     }
   ]
 }
 </pre>
+Positionen ohne <code>assetId</code>: Beispielportfolios haben keine festen Anlage-IDs; die Anlagen werden erst bei der Simulation in <code>asset</code> gesucht oder angelegt.
 </td>
 </tr>
 <tr>
@@ -1393,7 +1413,7 @@ Kein Body<br>
 <td>
 <pre>
 {
-  "portfolioId": 900,
+  "portfolioId": 901,
   "parameters": {
     "startCapital": 5000,
     "monthlyContribution": 100,
@@ -1401,35 +1421,35 @@ Kein Body<br>
   }
 }
 </pre>
-Kein <code>Authorization</code>-Header nötig. <code>paths</code> höchstens 10.000; kein <code>save</code> und <code>name</code>.
+Kein <code>Authorization</code>-Header nötig. Regeln für <code>parameters</code> wie bei <code>POST /simulations</code>, zusätzlich <code>paths</code> höchstens 10.000. Kein <code>save</code> und <code>name</code>.
 </td>
 <td>
 <b>200 OK</b><br>
-Body wie bei <code>POST /simulations</code>, <code>id</code> ist immer <code>null</code>:
+Body wie bei <code>POST /simulations</code> ohne Speichern: <code>id</code>, <code>name</code> und <code>createdAt</code> sind immer <code>null</code>.
 <pre>
 {
   "id": null,
-  "portfolioId": 900,
+  "name": null,
+  "portfolioId": 901,
   "parameters": {
     "startCapital": 5000,
     "monthlyContribution": 100,
     "horizonYears": 15,
     "paths": 10000,
-    "seed": 731
+    "seed": 731,
+    "targetAmount": null
+  },
+  "estimates": {
+    "historyFrom": "2016-10-01",
+    "historyTo": "2026-09-01",
+    "assets": [
+      { "assetId": 41, "annualReturn": 0.081, "annualVolatility": 0.152 },
+      { "assetId": 42, "annualReturn": 0.044, "annualVolatility": 0.178 }
+    ]
   },
   "timeline": [
-    {
-      "month": 0,
-      "p5": 5000,
-      "p50": 5000,
-      "p95": 5000
-    },
-    {
-      "month": 180,
-      "p5": 24100.3,
-      "p50": 41250.8,
-      "p95": 70980.2
-    }
+    { "month": 0, "p5": 5000, "p50": 5000, "p95": 5000 },
+    { "month": 180, "p5": 24100.3, "p50": 41250.8, "p95": 70980.2 }
   ],
   "metrics": {
     "totalContributions": 23000,
@@ -1441,9 +1461,31 @@ Body wie bei <code>POST /simulations</code>, <code>id</code> ist immer <code>nul
     "targetProbability": null
   },
   "runtimeMs": 610,
-  "createdAt": "2026-11-10T12:00:00Z"
+  "createdAt": null
 }
 </pre>
+<code>timeline</code> hier gekürzt; die IDs in <code>estimates.assets</code> sind die Anlage-IDs in der Datenbank.<br>
+<b>400 Bad Request</b> (mehr als 10.000 Pfade)
+<pre>
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "In der Beispielsimulation sind höchstens 10.000 Simulationspfade möglich.",
+    "details": [ { "field": "paths", "message": "Wert: 20000" } ]
+  }
+}
+</pre>
+Übrige Prüffehler (400) wie bei <code>POST /simulations</code>.<br>
+<b>404 Not Found</b> (unbekanntes Beispielportfolio)
+<pre>
+{
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Beispielportfolio nicht gefunden."
+  }
+}
+</pre>
+<b>422 Unprocessable Entity</b> und <b>503 Service Unavailable</b> wie bei <code>POST /simulations</code> (zu wenig Kursdaten bzw. Finanzdaten-API nicht erreichbar).
 </td>
 </tr>
 </table>
