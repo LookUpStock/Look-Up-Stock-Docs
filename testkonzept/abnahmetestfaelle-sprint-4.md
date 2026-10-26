@@ -6,8 +6,8 @@
 | **Sprint** | 4 (19.10.2026 – 25.10.2026) |
 | **Issue** | Docs #135 Abnahmetestfälle Sprint 4 und Testkonzept v4 |
 | **Verantwortlich** | Peter Orban (Pixxels02); Freigabe durch Mert Eminel (KujoBaraka), Product Owner |
-| **Stand** | 25.10.2026 |
-| **Durchführung** | Nachtest (Docs #136) und Abnahme (Docs #137) durch den Product Owner; Ergebnis im Abnahmeprotokoll Sprint 4 |
+| **Stand** | 25.10.2026, Ergebnisse der Abnahme eingetragen (Docs #137) |
+| **Durchführung** | Nachtest (Docs #136) und Abnahme (Docs #137) durch den Product Owner am 25.10.2026; Ergebnis im [Abnahmeprotokoll Sprint 4](abnahmeprotokoll-sprint-4.md) |
 | **Stories** | Nachtest US-05 (Docs #6) und US-07 (Docs #3, Kern-Story) nach den Befunden B1 bis B7 und H1; B6 Anlagensuche „ETHA“ (BE #88, BE #97, FE #40); B5 laufender Monat (BE #87); ADR-06 Token im Header (Docs #115, BE #91, FE #37); US-09 Beispielsimulation für Gäste (Docs #2, Stretch); NF-12 (BE #89) |
 | **Grundlagen** | Sprint-Planning-Protokoll Sprint 4 (Abschnitt 4 „Erledigt, wenn“), Abnahmeprotokoll Sprint 3, `anforderungen/kurzformat_sprint-3.md` (E24 bis E35), ADR-06, API-Design (Stand 25.10.2026, Docs #133), Aktivitäts- und Sequenzdiagramm US-07 v2 (Docs #130), [Testkonzept](testkonzept.md) Version 4 |
 
@@ -45,19 +45,19 @@ Nach dem Merge aller Frontend-Befunde werden die in Sprint 3 fehlgeschlagenen un
 
 | Testfall | Befund | Beim Nachtest | Grund | Ergebnis |
 |---|---|---|---|---|
-| AT-05-02 | B1 (FE #30) | unverändert | Eingabefeld Zielbetrag ergänzt | offen |
-| AT-07-01 | B2 (FE #31) | unverändert | Seed und gemeinsamer Schätzzeitraum werden angezeigt | offen |
-| AT-07-02 | B1, B3 (FE #30, FE #32) | unverändert | Eingabe von Bezeichnung und Zielbetrag ergänzt | offen |
-| AT-07-03 | – | unverändert (manueller Teil) | in Sprint 3 nicht durchgeführt | offen |
-| AT-07-04 | – | unverändert | in Sprint 3 nicht durchgeführt | offen |
-| AT-07-08 | B7 (FE #34) | **Erwartung angepasst:** Die Meldung nennt **ETHA genau einmal**; IBIT wird nicht genannt (43 Monatswerte) | Testdaten-Annahme aus Sprint 3 korrigiert; B7 | offen |
-| AT-07-09 | – | unverändert | in Sprint 3 nicht durchgeführt | offen |
-| AT-07-13 | – | unverändert | in Sprint 3 nicht gemessen | offen |
-| AT-04-08 | B7 (FE #34) | „Krypto-Test“ simulieren; ETHA wird **genau einmal** genannt, `message` und `details` stehen nicht doppelt hintereinander | B7 | offen |
-| Sichtprüfung B4 | B4 (FE #33) | Die Vergleichsseite zeigt nach dem Ergebnis die Hinweise E16/E21 wie die Simulationsseite (NF-14 a, wie AT-04-15) | kein eigener Testfall laut Sprint-Planning | offen |
-| Sichtprüfung H1 | H1 (FE #35) | In AT-07-02 haben beide Fächerdiagramme dieselbe Y-Achse (Maximum über beide Einträge) | Hinweis aus der Abnahme Sprint 3 | offen |
-| AT-NF09-01 | – | unverändert | Bedienbarkeitstest aus Sprint 3 nachgeholt (Docs #134) | offen |
-| AT-NF10-01 | – | zusätzlich die Startseite mit Beispielsimulation (US-09) | NF-10 aus Sprint 3 nachgeholt (FE #36) | offen |
+| AT-05-02 | B1 (FE #30) | unverändert | Eingabefeld Zielbetrag ergänzt | bestanden (25.10.2026, Zielwahrscheinlichkeit 98,37 %, API `targetProbability` 0,9837) |
+| AT-07-01 | B2 (FE #31) | unverändert | Seed und gemeinsamer Schätzzeitraum werden angezeigt | bestanden (25.10.2026, Seed 978871 und Schätzzeitraum 01.11.2016 bis 01.09.2026 angezeigt, 42,6 %) |
+| AT-07-02 | B1, B3 (FE #30, FE #32) | unverändert | Eingabe von Bezeichnung und Zielbetrag ergänzt | bestanden (25.10.2026, „Welt“ und „Aktien“, Seed 42, Zielwahrscheinlichkeit 98,37 % und 100 %) |
+| AT-07-03 | – | unverändert (manueller Teil) | in Sprint 3 nicht durchgeführt | bestanden (25.10.2026, zweiter Lauf identisch; zweimal „Mein Weltportfolio“ identisch, 0 %) |
+| AT-07-04 | – | unverändert | in Sprint 3 nicht durchgeführt | bestanden (25.10.2026, Meldung am Feld, nach Korrektur Ergebnis; keine Anfrage, weil das Frontend vorab prüft) |
+| AT-07-08 | B7 (FE #34) | **Erwartung angepasst:** Die Meldung nennt **ETHA genau einmal**; IBIT wird nicht genannt (43 Monatswerte) | Testdaten-Annahme aus Sprint 3 korrigiert; B7 | bestanden (25.10.2026, `422`, ETHA genau einmal) |
+| AT-07-09 | – | unverändert | in Sprint 3 nicht durchgeführt | bestanden (25.10.2026, `422` mit EUNL und Hinweis auf eine andere Börse) |
+| AT-07-13 | – | unverändert | in Sprint 3 nicht gemessen | bestanden (25.10.2026, 2.957 bis 3.045 ms, 20 von 20 ≤ 6.000 ms) |
+| AT-04-08 | B7 (FE #34) | „Krypto-Test“ simulieren; ETHA wird **genau einmal** genannt, `message` und `details` stehen nicht doppelt hintereinander | B7 | bestanden (25.10.2026, `422`, ETHA genau einmal) |
+| Sichtprüfung B4 | B4 (FE #33) | Die Vergleichsseite zeigt nach dem Ergebnis die Hinweise E16/E21 wie die Simulationsseite (NF-14 a, wie AT-04-15) | kein eigener Testfall laut Sprint-Planning | bestanden (25.10.2026) |
+| Sichtprüfung H1 | H1 (FE #35) | In AT-07-02 haben beide Fächerdiagramme dieselbe Y-Achse (Maximum über beide Einträge) | Hinweis aus der Abnahme Sprint 3 | bestanden (25.10.2026, beide Diagramme bis 10.000.000 €) |
+| AT-NF09-01 | – | unverändert | Bedienbarkeitstest aus Sprint 3 nachgeholt (Docs #134) | offen (Bedienbarkeitstest am 26.10.2026) |
+| AT-NF10-01 | – | zusätzlich die Startseite mit Beispielsimulation (US-09) | NF-10 aus Sprint 3 nachgeholt (FE #36) | bestanden (25.10.2026, alle Seiten ohne horizontales Scrollen; Hinweise H5, H6) |
 
 ---
 
@@ -65,8 +65,8 @@ Nach dem Merge aller Frontend-Befunde werden die in Sprint 3 fehlgeschlagenen un
 
 | ID | Bezug | Art | Durchführung | Schritte / Eingabe | Erwartetes Ergebnis | Status |
 |---|---|---|---|---|---|---|
-| AT-02-10 | B6 (BE #88, BE #97): Suche nach „ETHA“ ohne Fehler; E10 | Normalfall | manuell | Als Nutzer A im Portfolio-Editor „ETHA“ suchen | **UI:** Unter den Treffern steht ETHA (iShares Ethereum Trust, NASDAQ); es erscheint keine Fehlermeldung.<br>**API:** `GET /api/v1/assets/search?q=ETHA` → `200 OK`; `results` enthält einen Eintrag mit `symbol` „ETHA“ und Börse NASDAQ. | offen |
-| AT-02-11 | FE #40: Fehlermeldung der Anlagensuche erscheint unter dem Suchfeld; E3 | Alternativszenario | manuell | Im Suchfeld nur „E“ eingeben und suchen | **UI:** „Bitte mindestens 2 Zeichen eingeben.“ steht direkt unter dem Suchfeld; das Feld bleibt bedienbar, nach Eingabe von „ETHA“ verschwindet die Meldung.<br>**API:** Die Oberfläche sendet keine Anfrage; direkt per HTTP-Client `q=E` → `400 VALIDATION_ERROR`. | offen |
+| AT-02-10 | B6 (BE #88, BE #97): Suche nach „ETHA“ ohne Fehler; E10 | Normalfall | manuell | Als Nutzer A im Portfolio-Editor „ETHA“ suchen | **UI:** Unter den Treffern steht ETHA (iShares Ethereum Trust, NASDAQ); es erscheint keine Fehlermeldung.<br>**API:** `GET /api/v1/assets/search?q=ETHA` → `200 OK`; `results` enthält einen Eintrag mit `symbol` „ETHA“ und Börse NASDAQ. | bestanden (25.10.2026, `200`, ETHA · NASDAQ unter den Treffern) |
+| AT-02-11 | FE #40: Fehlermeldung der Anlagensuche erscheint unter dem Suchfeld; E3 | Alternativszenario | manuell | Im Suchfeld nur „E“ eingeben und suchen | **UI:** „Bitte mindestens 2 Zeichen eingeben.“ steht direkt unter dem Suchfeld; das Feld bleibt bedienbar, nach Eingabe von „ETHA“ verschwindet die Meldung.<br>**API:** Die Oberfläche sendet keine Anfrage; direkt per HTTP-Client `q=E` → `400 VALIDATION_ERROR`. | bestanden (25.10.2026, Hinweis unter dem Suchfeld, keine Anfrage; `400` automatisiert über AT-02-04) |
 
 ---
 
@@ -74,7 +74,7 @@ Nach dem Merge aller Frontend-Befunde werden die in Sprint 3 fehlgeschlagenen un
 
 | ID | Bezug | Art | Durchführung | Schritte / Eingabe | Erwartetes Ergebnis | Status |
 |---|---|---|---|---|---|---|
-| AT-04-17 | B5 (BE #87): Nur abgeschlossene Monate zählen; E22 | Grenzwert | automatisiert (`PriceHistoryServiceTest`) | Feste Uhr; Kursreihe mit Wert im laufenden Monat; Cache vor und nach dem Monatswechsel; Wert am letzten Tag des Monats | Der Wert des laufenden Monats wird gespeichert, aber weder zur Schätzung noch zu den 36 Monatswerten gezählt; nach dem Monatswechsel zählt der gerade abgeschlossene Monat; der letzte Tag gehört noch zum laufenden Monat (`laufenderMonatWirdBeimAbrufAusgeschlossenAberGespeichert`, `laufenderMonatAusDemCacheWirdAusgeschlossen`, `nachDemMonatswechselZaehltDerAbgeschlosseneMonat`, `letzterTagDesMonatsGehoertNochZumLaufendenMonat`). | offen |
+| AT-04-17 | B5 (BE #87): Nur abgeschlossene Monate zählen; E22 | Grenzwert | automatisiert (`PriceHistoryServiceTest`) | Feste Uhr; Kursreihe mit Wert im laufenden Monat; Cache vor und nach dem Monatswechsel; Wert am letzten Tag des Monats | Der Wert des laufenden Monats wird gespeichert, aber weder zur Schätzung noch zu den 36 Monatswerten gezählt; nach dem Monatswechsel zählt der gerade abgeschlossene Monat; der letzte Tag gehört noch zum laufenden Monat (`laufenderMonatWirdBeimAbrufAusgeschlossenAberGespeichert`, `laufenderMonatAusDemCacheWirdAusgeschlossen`, `nachDemMonatswechselZaehltDerAbgeschlosseneMonat`, `letzterTagDesMonatsGehoertNochZumLaufendenMonat`). | bestanden (`PriceHistoryServiceTest`, CI) |
 
 ---
 
@@ -82,11 +82,11 @@ Nach dem Merge aller Frontend-Befunde werden die in Sprint 3 fehlgeschlagenen un
 
 | ID | Bezug | Art | Durchführung | Schritte / Eingabe | Erwartetes Ergebnis | Status |
 |---|---|---|---|---|---|---|
-| AT-ADR6-01 | ADR-06: Header statt Body, lesende Abfragen per GET; FE #37 | Normalfall | manuell | Als Nutzer A anmelden; Portfolioliste, ein Portfolio und die gespeicherten Simulationen öffnen; „Mein Weltportfolio“ simulieren; Netzwerk-Tab der Entwicklertools beobachten | **UI:** Alle Seiten funktionieren wie in Sprint 3.<br>**API:** Die Liste kommt über `GET /api/v1/portfolios`, das Portfolio über `GET /api/v1/portfolios/{id}`, die Simulationen über `GET /api/v1/simulations`, jeweils `200 OK` mit Header `Authorization: Bearer …`; **kein** Request-Body enthält ein Feld `token`. | offen |
-| AT-ADR6-02 | ADR-06: fehlender oder ungültiger Header → 401; NF-16 | Alternativszenario | manuell (API) und automatisiert (`CurrentUserArgumentResolverTest`) | `GET /api/v1/portfolios` 1. ohne Header, 2. mit `Authorization: Basic abc`, 3. mit `Authorization: Bearer ` (leer), 4. mit unbekanntem Token | Jeweils `401 UNAUTHORIZED`, „Bitte melde dich an.“. Automatisiert zusätzlich: `bearer` in Kleinschreibung ist gültig. | offen |
-| AT-ADR6-03 | ADR-06 und NF-16: Abmelden sperrt das Token sofort | Alternativszenario | manuell (API) | Als Nutzer A anmelden; `POST /auth/logout` **ohne Body** mit Header; danach mit demselben Token `GET /api/v1/portfolios` | Logout → `204 No Content`; danach `401 UNAUTHORIZED`, „Bitte melde dich an.“. | offen |
-| AT-ADR6-04 | NF-04 mit GET-Pfaden | NFR | manuell (API) und automatisiert (`PortfolioControllerTest`, `SimulationControllerTest`) | Mit dem Token von Nutzer B: `GET /api/v1/portfolios/{id}` von „Mein Weltportfolio“ (A) und `GET /api/v1/simulations/{id}` von „Sparplan 20 Jahre“ (A) | `404 NOT_FOUND`, „Portfolio nicht gefunden.“ bzw. „Simulation nicht gefunden.“; `GET /api/v1/portfolios` als B liefert nur eigene Einträge. | offen |
-| AT-ADR6-05 | ADR-06: alte POST-Pfade entfallen, keine Übergangsphase | Alternativszenario | manuell (API) | Mit gültigem Token: `POST /api/v1/portfolios/list` | `405 METHOD_NOT_ALLOWED`, „Diese HTTP-Methode ist hier nicht erlaubt.“; es werden keine Daten geliefert. | offen |
+| AT-ADR6-01 | ADR-06: Header statt Body, lesende Abfragen per GET; FE #37 | Normalfall | manuell | Als Nutzer A anmelden; Portfolioliste, ein Portfolio und die gespeicherten Simulationen öffnen; „Mein Weltportfolio“ simulieren; Netzwerk-Tab der Entwicklertools beobachten | **UI:** Alle Seiten funktionieren wie in Sprint 3.<br>**API:** Die Liste kommt über `GET /api/v1/portfolios`, das Portfolio über `GET /api/v1/portfolios/{id}`, die Simulationen über `GET /api/v1/simulations`, jeweils `200 OK` mit Header `Authorization: Bearer …`; **kein** Request-Body enthält ein Feld `token`. | bestanden (25.10.2026; `GET /portfolios/{id}` wird vom Frontend nicht verwendet, siehe Protokoll) |
+| AT-ADR6-02 | ADR-06: fehlender oder ungültiger Header → 401; NF-16 | Alternativszenario | manuell (API) und automatisiert (`CurrentUserArgumentResolverTest`) | `GET /api/v1/portfolios` 1. ohne Header, 2. mit `Authorization: Basic abc`, 3. mit `Authorization: Bearer ` (leer), 4. mit unbekanntem Token | Jeweils `401 UNAUTHORIZED`, „Bitte melde dich an.“. Automatisiert zusätzlich: `bearer` in Kleinschreibung ist gültig. | bestanden (25.10.2026, viermal `401`; automatisiert `CurrentUserArgumentResolverTest`) |
+| AT-ADR6-03 | ADR-06 und NF-16: Abmelden sperrt das Token sofort | Alternativszenario | manuell (API) | Als Nutzer A anmelden; `POST /auth/logout` **ohne Body** mit Header; danach mit demselben Token `GET /api/v1/portfolios` | Logout → `204 No Content`; danach `401 UNAUTHORIZED`, „Bitte melde dich an.“. | bestanden (25.10.2026, `204`, danach `401`) |
+| AT-ADR6-04 | NF-04 mit GET-Pfaden | NFR | manuell (API) und automatisiert (`PortfolioControllerTest`, `SimulationControllerTest`) | Mit dem Token von Nutzer B: `GET /api/v1/portfolios/{id}` von „Mein Weltportfolio“ (A) und `GET /api/v1/simulations/{id}` von „Sparplan 20 Jahre“ (A) | `404 NOT_FOUND`, „Portfolio nicht gefunden.“ bzw. „Simulation nicht gefunden.“; `GET /api/v1/portfolios` als B liefert nur eigene Einträge. | bestanden (25.10.2026, je `404`, B ohne eigene Einträge) |
+| AT-ADR6-05 | ADR-06: alte POST-Pfade entfallen, keine Übergangsphase | Alternativszenario | manuell (API) | Mit gültigem Token: `POST /api/v1/portfolios/list` | `405 METHOD_NOT_ALLOWED`, „Diese HTTP-Methode ist hier nicht erlaubt.“; es werden keine Daten geliefert. | bestanden (25.10.2026, `405` mit Meldung, geprüft mit `curl`; Hinweis H7) |
 
 ---
 
@@ -94,10 +94,10 @@ Nach dem Merge aller Frontend-Befunde werden die in Sprint 3 fehlgeschlagenen un
 
 | ID | Bezug | Art | Durchführung | Schritte / Eingabe | Erwartetes Ergebnis | Status |
 |---|---|---|---|---|---|---|
-| AT-09-01 | AK US-09: ohne Anmeldung Beispielportfolio simulieren; Ergebnis mit Fächerdiagramm, Kennzahlen und Hinweisen E16/E21 (NF-14 a); Einladung zur Registrierung | Normalfall | manuell | Ohne Anmeldung (privates Fenster) die Startseite öffnen; ein Beispielportfolio wählen; Beispielsimulation starten | **UI:** Fächerdiagramm, Kennzahlen aus US-05 und die Hinweise E16/E21 erscheinen; ein Hinweis lädt zur Registrierung ein; es gibt keine Speichern-Funktion.<br>**API:** `GET /api/v1/demo/portfolios` → `200 OK` mit den Beispielportfolios; `POST /api/v1/demo/simulations` ohne `Authorization`-Header → `200 OK`, Antwort ohne `id`. | offen |
-| AT-09-02 | NF-08: gleicher Seed → identisches Ergebnis | NFR | manuell (API) und automatisiert (`DemoServiceTest`) | `POST /api/v1/demo/simulations` zweimal mit identischen Parametern und `seed` 42; automatisiert zusätzlich ohne Seed | Beide Läufe liefern identische `timeline`, `estimates` und `metrics`; ohne Seed wird einer erzeugt und in `parameters.seed` zurückgegeben (`ohneSeedWirdEinerErzeugt`). | offen |
-| AT-09-03 | Grenze für Gäste: höchstens 10.000 Pfade; Parameter wie US-04 | Grenzwert | automatisiert (`DemoServiceTest`, `DemoControllerTest`) | `paths` 10.000 und 10.001; `seed` 4.2 | 10.000 → gültig (`zehntausendPfadeSindErlaubt`); 10.001 → `400 VALIDATION_ERROR`, „In der Beispielsimulation sind höchstens 10.000 Simulationspfade möglich.“, `details` nennt `paths`; Kommazahl beim Seed → `400` (`kommazahlBeimSeedLiefert400`). | offen |
-| AT-09-04 | Fehlerfälle der Beispielsimulation | Alternativszenario | automatisiert (`DemoServiceTest`, `DemoControllerTest`) | Unbekannte `portfolioId`; ohne `portfolioId`; ohne `parameters`; Kursdaten nicht abrufbar | Unbekannt → `404`, „Beispielportfolio nicht gefunden.“; ohne `portfolioId` → `400`, „Bitte ein Portfolio auswählen.“; ohne `parameters` → `400`; Anbieter nicht erreichbar → `503 UPSTREAM_UNAVAILABLE` (`kursdatenNichtVerfuegbarLiefert503`). | offen |
+| AT-09-01 | AK US-09: ohne Anmeldung Beispielportfolio simulieren; Ergebnis mit Fächerdiagramm, Kennzahlen und Hinweisen E16/E21 (NF-14 a); Einladung zur Registrierung | Normalfall | manuell | Ohne Anmeldung (privates Fenster) die Startseite öffnen; ein Beispielportfolio wählen; Beispielsimulation starten | **UI:** Fächerdiagramm, Kennzahlen aus US-05 und die Hinweise E16/E21 erscheinen; ein Hinweis lädt zur Registrierung ein; es gibt keine Speichern-Funktion.<br>**API:** `GET /api/v1/demo/portfolios` → `200 OK` mit den Beispielportfolios; `POST /api/v1/demo/simulations` ohne `Authorization`-Header → `200 OK`, Antwort ohne `id`. | bestanden (25.10.2026, `id` ist `null` wie im API-Design) |
+| AT-09-02 | NF-08: gleicher Seed → identisches Ergebnis | NFR | manuell (API) und automatisiert (`DemoServiceTest`) | `POST /api/v1/demo/simulations` zweimal mit identischen Parametern und `seed` 42; automatisiert zusätzlich ohne Seed | Beide Läufe liefern identische `timeline`, `estimates` und `metrics`; ohne Seed wird einer erzeugt und in `parameters.seed` zurückgegeben (`ohneSeedWirdEinerErzeugt`). | bestanden (25.10.2026, Seed 42 zweimal identisch; automatisiert `DemoServiceTest`) |
+| AT-09-03 | Grenze für Gäste: höchstens 10.000 Pfade; Parameter wie US-04 | Grenzwert | automatisiert (`DemoServiceTest`, `DemoControllerTest`) | `paths` 10.000 und 10.001; `seed` 4.2 | 10.000 → gültig (`zehntausendPfadeSindErlaubt`); 10.001 → `400 VALIDATION_ERROR`, „In der Beispielsimulation sind höchstens 10.000 Simulationspfade möglich.“, `details` nennt `paths`; Kommazahl beim Seed → `400` (`kommazahlBeimSeedLiefert400`). | bestanden (`DemoServiceTest`, `DemoControllerTest`, CI) |
+| AT-09-04 | Fehlerfälle der Beispielsimulation | Alternativszenario | automatisiert (`DemoServiceTest`, `DemoControllerTest`) | Unbekannte `portfolioId`; ohne `portfolioId`; ohne `parameters`; Kursdaten nicht abrufbar | Unbekannt → `404`, „Beispielportfolio nicht gefunden.“; ohne `portfolioId` → `400`, „Bitte ein Portfolio auswählen.“; ohne `parameters` → `400`; Anbieter nicht erreichbar → `503 UPSTREAM_UNAVAILABLE` (`kursdatenNichtVerfuegbarLiefert503`). | bestanden (`DemoServiceTest`, `DemoControllerTest`, CI) |
 
 ---
 
@@ -111,7 +111,7 @@ Die Akzeptanzkriterien für US-11 und US-12 stehen in [`kurzformat_sprint-4.md`]
 
 | ID | Bezug | Art | Durchführung | Schritte / Eingabe | Erwartetes Ergebnis | Status |
 |---|---|---|---|---|---|---|
-| AT-NF12-01 | NF-12: Tests laufen mit einer Attrappe der Datenquelle ohne Internet und ohne API-Key | NFR | automatisiert (`MockMarketDataProviderTest`, CI) | CI-Lauf auf `main` mit Dummy-Key (`ci-dummy-key`); `MockMarketDataProvider` mit den Testdaten aus Testkonzept Abschnitt 6, einschließlich Ausfall-Schalter | CI grün; `MockMarketDataProviderTest` bestanden (120, 35 und 36 Monatswerte, mehr als 25 Suchtreffer für „MSCI“, unbekanntes Symbol leer, Ausfall → `UpstreamUnavailableException`, Zusammenspiel mit `PriceHistoryService`). | offen |
+| AT-NF12-01 | NF-12: Tests laufen mit einer Attrappe der Datenquelle ohne Internet und ohne API-Key | NFR | automatisiert (`MockMarketDataProviderTest`, CI) | CI-Lauf auf `main` mit Dummy-Key (`ci-dummy-key`); `MockMarketDataProvider` mit den Testdaten aus Testkonzept Abschnitt 6, einschließlich Ausfall-Schalter | CI grün; `MockMarketDataProviderTest` bestanden (120, 35 und 36 Monatswerte, mehr als 25 Suchtreffer für „MSCI“, unbekanntes Symbol leer, Ausfall → `UpstreamUnavailableException`, Zusammenspiel mit `PriceHistoryService`). | bestanden (`MockMarketDataProviderTest`, CI) |
 
 AT-NF09-01 und AT-NF10-01 werden im Nachtest durchgeführt (siehe oben).
 
