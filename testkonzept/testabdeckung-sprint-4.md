@@ -20,14 +20,14 @@ Auswertung der Testabdeckung der Kernlogik (NF-11) zum Ende von Sprint 4. Erstma
 
 | Klasse | Zeilen | Zeilen % | Zweige | Zweige % |
 |---|---|---|---|---|
-| `ParameterEstimator` | ⟨ ⟩ | ⟨ ⟩ | ⟨ ⟩ | ⟨ ⟩ |
-| `MonteCarloEngine` | ⟨ ⟩ | ⟨ ⟩ | ⟨ ⟩ | ⟨ ⟩ |
-| `MetricsCalculator` | ⟨ ⟩ | ⟨ ⟩ | ⟨ ⟩ | ⟨ ⟩ |
-| `SimulationService` | ⟨ ⟩ | ⟨ ⟩ | ⟨ ⟩ | ⟨ ⟩ |
-| `ComparisonService` | ⟨ ⟩ | ⟨ ⟩ | ⟨ ⟩ | ⟨ ⟩ |
-| `Portfolio` | ⟨ ⟩ | ⟨ ⟩ | ⟨ ⟩ | ⟨ ⟩ |
-| `PortfolioService` | ⟨ ⟩ | ⟨ ⟩ | ⟨ ⟩ | ⟨ ⟩ |
-| **Kernlogik gesamt** | **⟨ ⟩** | **⟨ ⟩** | **⟨ ⟩** | **⟨ ⟩** |
+| `ParameterEstimator` | 59/60 | 98,3 % | 30/34 | 88,2 % |
+| `MonteCarloEngine` | 31/31 | 100 % | 10/10 | 100 % |
+| `MetricsCalculator` | 57/57 | 100 % | 28/28 | 100 % |
+| `SimulationService` | 33/36 | 91,7 % | 8/8 | 100 % |
+| `ComparisonService` | 64/64 | 100 % | 37/38 | 97,4 % |
+| `Portfolio` | 57/64 | 89,1 % | 29/32 | 90,6 % |
+| `PortfolioService` | 31/31 | 100 % | 14/14 | 100 % |
+| **Kernlogik gesamt** | **332/343** | **96,8 %** | **156/164** | **95,1 %** |
 
 **Bewertung:** NF-11 ist erstmals per CI nachgewiesen. Die Kernlogik erreicht ⟨Wert⟩ % Zeilenabdeckung und liegt damit über dem Zielwert von 80 %. Der Nachweis ist dauerhaft: Fällt der Wert unter 80 %, schlägt die Regel `check-core-logic` an und der CI-Lauf wird rot.
 
