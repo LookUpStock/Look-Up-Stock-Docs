@@ -1,6 +1,6 @@
 # API-Design – LookUpStock
 
-Stand: 25.10.2026 · Basis-URL `/api/v1` · Datenformat JSON
+Stand: 30.10.2026 · Basis-URL `/api/v1` · Datenformat JSON
 
 Diese Markdown-Datei ist die bearbeitbare Fassung des API-Designs. Sie übernimmt den vollständigen Inhalt von `api-design.pdf` (Stand 02.10.2026; die PDF-Datei wurde am 25.10.2026 entfernt, maßgeblich ist diese Datei) und ergänzt die Entscheidungen des Product Owners vom 02.10.2026 (E1 bis E7) sowie die einzelnen Fehlerfälle für Portfolios und Simulationen.
 
@@ -9,6 +9,8 @@ Diese Markdown-Datei ist die bearbeitbare Fassung des API-Designs. Sie übernimm
 **Änderung 25.10.2026 (Docs #133, ADR-06):** Token aus allen Request-Bodys in den `Authorization`-Header verschoben. `POST /…/list` wurde zu `GET /…`, `POST /…/{id}/details` zu `GET /…/{id}` (Portfolios und Simulationen; die Pfade für gespeicherte Vergleiche sind entsprechend beschrieben, aber nicht umgesetzt, siehe Abschnitt „Vergleiche“). `DELETE` und `POST /auth/logout` haben keinen Body mehr. Bis ADR-04 galt: Token im JSON-Body, lesende Abfragen als POST.
 
 **Änderung 25.10.2026 (Docs #149, BE #94):** Neuer Abschnitt „GraphQL (lesend)“: `POST /graphql` für Anlagensuche, eigene Portfolios und gespeicherte Simulationen; Anmeldung wie bei REST über den `Authorization`-Header (ADR-06). Schreibende Operationen laufen weiter über REST.
+
+Änderung 30.10.2026 (Docs #165, CR-01, US-11, US-12): Neuer Abschnitt „Auswertungen“: GET /reports/usage liefert die neun Nutzungskennzahlen eines Monats (E39), GET /reports/usage/export dieselben Werte als CSV-Datei (E41). Beide nur mit der Rolle Geschäftsführung (E40); neuer Fehlercode 403 FORBIDDEN. POST /auth/login liefert zusätzlich das Feld role.
 
 **Fehlerformat:** Fehler haben immer das Format `{ "error": { "code", "message", "details" } }`. `message` ist ein deutscher Text zur direkten Anzeige im Frontend. Gewichtungen in Prozent (Summe 100), Anteile in Ergebnissen als Dezimalzahl (0.31 = 31 %).
 
@@ -83,12 +85,8 @@ Diese Markdown-Datei ist die bearbeitbare Fassung des API-Designs. Sie übernimm
 </td>
 <td>
 <b>200 OK</b>
-<pre>
-{
-  "token": "q8Z1vN3xR0tK7mW2pL5sA9dF4hJ6cB1eY0uG8iT3oQw",
-  "expiresAt": "2026-10-13T10:00:00Z"
-}
-</pre>
+<pre> { "token": "q8Z1vN3xR0tK7mW2pL5sA9dF4hJ6cB1eY0uG8iT3oQw", "expiresAt": "2026-10-13T10:00:00Z", "role": "USER" } </pre>
+<code>role</code> ist <code>USER</code> oder <code>MANAGEMENT</code> (Geschäftsführung, E40). Das Frontend blendet damit den Navigationseintrag „Auswertungen“ ein; geschützt wird allein durch die Prüfung im Backend.
 <b>401 Unauthorized</b>
 <pre>
 {
@@ -1491,6 +1489,125 @@ Body wie bei <code>POST /simulations</code> ohne Speichern: <code>id</code>, <co
 </td>
 </tr>
 </table>
+
+## Auswertungen (US-11, US-12)
+ 
+Nutzungskennzahlen für die Geschäftsführung (Change Request CR-01). Grundlage sind die anonym erfassten Nutzungsereignisse (E36, E37), die über die Queue übertragen werden (ADR-07); neue Ereignisse erscheinen deshalb mit einigen Sekunden Verzögerung.
+ 
+**Zugriff (E40):** Beide Endpunkte erfordern den Header `Authorization: Bearer <token>` (ADR-06) und die Rolle `MANAGEMENT`. Ohne Anmeldung `401 UNAUTHORIZED`, angemeldet ohne die Rolle `403 FORBIDDEN`. Die Rolle wird vom Team in der Datenbank vergeben (README des Backends), nicht über die API.
+ 
+**Monat (E38):** Parameter `month` im Format `JJJJ-MM`, Kalendermonat nach deutscher Zeit (Europe/Berlin). Ohne `month` gilt der laufende Monat; er ist mit `"preliminary": true` gekennzeichnet. Monate vor dem Beginn der Erfassung und künftige Monate werden mit 400 abgelehnt, es werden keine Nullwerte geliefert.
+ 
+**Kennzahlen (E39):** feste Reihenfolge, `label` ist der deutsche Anzeigetext und wird im Dashboard und in der CSV-Datei unverändert verwendet.
+ 
+| `key` | `label` | Quelle |
+|---|---|---|
+| `registrations` | Neue Registrierungen | Ereignis |
+| `logins` | Anmeldungen | Ereignis |
+| `portfoliosCreated` | Angelegte Portfolios | Ereignis |
+| `simulationsRun` | Durchgeführte Simulationen | Ereignis |
+| `simulationsSaved` | Gespeicherte Simulationen | Ereignis |
+| `comparisonsRun` | Durchgeführte Vergleiche | Ereignis |
+| `demoSimulationsRun` | Beispielsimulationen (Gäste) | Ereignis |
+| `assetSearches` | Anlagensuchen | Ereignis |
+| `totalAccounts` | Nutzerkonten insgesamt am Monatsende | Zählung der Nutzerkonten |
+ 
+Für den laufenden Monat ist `totalAccounts` der Stand zum Zeitpunkt der Abfrage.
+ 
+<table>
+<tr><th>Method</th><th>Ressource</th><th>Data In</th><th>Data Out</th></tr>
+<tr>
+<td><b>GET</b></td>
+<td><code>/reports/usage?month=2026-10</code><br>Kennzahlen eines Monats · Sprint 5 · Rolle Geschäftsführung</td>
+<td>Kein Body. Header <code>Authorization: Bearer &lt;token&gt;</code>. Query-Parameter <code>month</code> optional (<code>JJJJ-MM</code>), ohne Angabe der laufende Monat.</td>
+<td>
+<b>200 OK</b>
+<pre>
+{
+  "month": "2026-10",
+  "preliminary": true,
+  "trackingSince": "2026-10-31",
+  "metrics": [
+    { "key": "registrations", "label": "Neue Registrierungen", "value": 4 },
+    { "key": "logins", "label": "Anmeldungen", "value": 27 },
+    { "key": "portfoliosCreated", "label": "Angelegte Portfolios", "value": 9 },
+    { "key": "simulationsRun", "label": "Durchgeführte Simulationen", "value": 41 },
+    { "key": "simulationsSaved", "label": "Gespeicherte Simulationen", "value": 12 },
+    { "key": "comparisonsRun", "label": "Durchgeführte Vergleiche", "value": 7 },
+    { "key": "demoSimulationsRun", "label": "Beispielsimulationen (Gäste)", "value": 15 },
+    { "key": "assetSearches", "label": "Anlagensuchen", "value": 63 },
+    { "key": "totalAccounts", "label": "Nutzerkonten insgesamt am Monatsende", "value": 38 }
+  ]
+}
+</pre>
+<code>trackingSince</code> ist der Tag des ersten erfassten Ereignisses (Beginn der Erfassung). Eine gespeicherte Simulation zählt in <code>simulationsRun</code> und <code>simulationsSaved</code> (E37).<br>
+<b>400 Bad Request</b> (Monat vor Beginn der Erfassung oder in der Zukunft)
+<pre>
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Für diesen Monat liegen keine Auswertungen vor."
+  }
+}
+</pre>
+<b>400 Bad Request</b> (falsches Format)
+<pre>
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Bitte gib den Monat im Format JJJJ-MM an.",
+    "details": [ { "field": "month", "message": "Wert: 10-2026" } ]
+  }
+}
+</pre>
+<b>401 Unauthorized</b>
+<pre>
+{
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "Bitte melde dich an."
+  }
+}
+</pre>
+<b>403 Forbidden</b>
+<pre>
+{
+  "error": {
+    "code": "FORBIDDEN",
+    "message": "Dafür fehlt die Berechtigung."
+  }
+}
+</pre>
+</td>
+</tr>
+<tr>
+<td><b>GET</b></td>
+<td><code>/reports/usage/export?month=2026-10</code><br>Kennzahlen als CSV-Datei · Sprint 5 · Rolle Geschäftsführung</td>
+<td>Wie <code>GET /reports/usage</code>.</td>
+<td>
+<b>200 OK</b><br>
+Header:<br>
+<code>Content-Type: text/csv; charset=UTF-8</code><br>
+<code>Content-Disposition: attachment; filename="lookupstock-nutzung-2026-10.csv"</code><br>
+Body (UTF-8 mit BOM, Trennzeichen Semikolon, Zeilenende CRLF, E41):
+<pre>
+Monat;Kennzahl;Wert
+2026-10;Neue Registrierungen;4
+2026-10;Anmeldungen;27
+2026-10;Angelegte Portfolios;9
+2026-10;Durchgeführte Simulationen;41
+2026-10;Gespeicherte Simulationen;12
+2026-10;Durchgeführte Vergleiche;7
+2026-10;Beispielsimulationen (Gäste);15
+2026-10;Anlagensuchen;63
+2026-10;Nutzerkonten insgesamt am Monatsende;38
+</pre>
+Dieselben Bezeichnungen, Werte und Reihenfolge wie <code>GET /reports/usage</code>. Weil der Token im Header steht (ADR-06), lädt das Frontend die Datei per <code>fetch</code> und bietet sie als Blob zum Download an; ein einfacher Link reicht nicht.<br>
+<b>400</b>, <b>401</b>, <b>403</b> wie bei <code>GET /reports/usage</code>, als JSON im Fehlerformat.
+</td>
+</tr>
+</table>
+Auswertungen gibt es nur über REST, nicht über GraphQL.
 
 ## GraphQL (lesend, BE #94)
 
