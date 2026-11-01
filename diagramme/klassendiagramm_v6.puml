@@ -1,0 +1,840 @@
+@startuml klassendiagramm_v6
+' LookUpStock – Klassendiagramm v6 (Backend: core-service und marktdaten-service)
+' Sprint 5 · Stand 01.11.2026 · Issue Docs #163
+' Grundlagen: Backend-Code (main, Stand 01.11.2026: BE #105 bis #114, #125 gemergt),
+'             Klassendiagramm v5, ADR-01 bis ADR-07, API-Design (GraphQL, Auswertungen, interne Schnittstellen)
+' Änderungen gegenüber v5:
+'   - Aufteilung in zwei Dienste (ADR-07): neues Paket marktdaten-service mit InternalController,
+'     InternalApiKeyFilter, SearchService, SearchCache, PriceService, PriceCacheRepository, TwelveDataProvider;
+'     im core-service ersetzt MarktdatenClient den TwelveDataProvider (synchrone Ausnahme, HTTP)
+'   - Entfernt aus dem core-service: TwelveDataProvider, TwelveDataError, SearchCache, PriceCache,
+'     PriceHistory, PriceHistoryRepository; PriceHistoryService ohne eigenen Cache
+'   - Neu (BE #108): MutationController für schreibende GraphQL-Operationen
+'   - Neu (BE #110, #114, #125): Queue mit MessagePublisher, DatabaseMessagePublisher, QueueMessage;
+'     UsageEventRecorder und UsageEventConsumer (nutzung.ereignis); PricePreloadRequester (Core) und
+'     PricePreloadConsumer (marktdaten-service) für kursdaten.vorladen
+'   - Neu (BE #111, #112): ReportController, UsageReportService, UsageReportCsvWriter, UsageEvent, UsageReport,
+'     UsageEventType, UsageMetric, UserRole; User mit Rolle
+'   - Grün markiert ist nur, was seit v5 neu ist; die «neu»-Markierungen aus v5 sind entfernt
+' Werkzeug: PlantUML
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam linetype polyline
+skinparam nodesep 30
+skinparam ranksep 45
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+  ArrowColor #333333
+  BackgroundColor<<geplant>> #EEEEEE
+  BorderColor<<geplant>> #888888
+  BackgroundColor<<neu>> #EAF4E4
+}
+skinparam package {
+  BorderColor #666666
+  FontStyle bold
+}
+skinparam note {
+  BackgroundColor #FFFBE6
+  BorderColor #999999
+}
+hide circle
+hide empty members
+hide stereotype
+
+title Klassendiagramm v6 – LookUpStock Backend (Sprint 5: zwei Dienste, Queue, GraphQL schreibend, Auswertungen)
+
+package "core-service" as CORE {
+package "Präsentationsschicht (ADR-01)" as PL {
+  class AuthController {
+    + register(request: RegisterRequest): UserResponse
+    + login(request: LoginRequest): LoginResponse
+    + logout(authorization: String): void
+  }
+  class PortfolioController {
+    + create(owner: User, request: PortfolioRequest): PortfolioResponse
+    + list(owner: User): PortfolioListResponse «GET»
+    + details(owner: User, portfolioId: Long): PortfolioResponse «GET»
+    + update(owner: User, portfolioId: Long, request: PortfolioRequest): PortfolioResponse
+    + delete(owner: User, portfolioId: Long): void
+  }
+  class AssetController {
+    + search(q: String, limit: Integer): SearchResponse
+    + stats(symbol: String, interval: String, outputSize: Integer): AssetStatsResponse
+    + prices(symbol: String, interval: String, outputSize: Integer): AssetPricesResponse
+    + details(assetId: Long): AssetResponse «geplant»
+  }
+  class SimulationController {
+    + simulate(user: User, request: SimulationRequest): SimulationResponse
+    + list(user: User): SavedSimulationListResponse «GET»
+    + details(user: User, simulationId: Long): SimulationResponse «GET»
+    + delete(user: User, simulationId: Long): void
+  }
+  class ComparisonController {
+    + compare(user: User, request: ComparisonRequest): ComparisonResponse
+  }
+  class CurrentUserArgumentResolver {
+    + supportsParameter(parameter: MethodParameter): boolean
+    + resolveArgument(...): User
+    + {static} extractToken(header: String): String
+  }
+  annotation CurrentUser
+  class DemoController {
+    + portfolios(): DemoPortfolioListResponse
+    + simulate(request: DemoSimulationRequest): SimulationResponse
+  }
+  class QueryController {
+    + searchAssets(query: String, limit: Integer): List<AssetResponse>
+    + portfolios(token: String): List<PortfolioResponse>
+    + portfolio(id: Long, token: String): PortfolioResponse
+    + savedSimulations(token: String): List<Entry>
+    + savedSimulation(id: Long, token: String): Entry
+    + savedSimulationPortfolio(...): PortfolioResponse
+    + savedSimulationMetrics(...): Metrics
+  }
+  class AuthTokenInterceptor {
+    + TOKEN_KEY: String = "authToken"
+    + intercept(request: WebGraphQlRequest, chain: Chain): Mono<WebGraphQlResponse>
+  }
+  class GraphQlExceptionResolver {
+    # resolveToSingleError(ex: Throwable, env: DataFetchingEnvironment): GraphQLError
+  }
+  class MutationController <<neu>> {
+    + createPortfolio(input: PortfolioRequest, token: String): PortfolioResponse
+    + updatePortfolio(id: Long, input: PortfolioRequest, token: String): PortfolioResponse
+    + deletePortfolio(id: Long, token: String): boolean
+    + simulate(input: SimulationRequest, token: String): SimulationResponse
+    + deleteSavedSimulation(id: Long, token: String): boolean
+    + compare(input: ComparisonRequest, token: String): ComparisonResponse
+  }
+  class ReportController <<neu>> {
+    + usage(user: User, month: String): UsageReportResponse «GET»
+    + export(user: User, month: String): ResponseEntity<byte[]> «GET, text/csv»
+  }
+}
+
+package "Logikschicht (ADR-01)" as LL {
+  class AuthService {
+    ~ TOKEN_VALIDITY: Duration = 24 h
+    ~ MIN_PASSWORD_LENGTH: int = 8
+    ~ MAX_PASSWORD_BYTES: int = 72
+    - passwordEncoder: PasswordEncoder
+    - clock: Clock
+    + register(email: String, password: String): User
+    + login(email: String, password: String): LoginResponse
+    + logout(token: String): void
+    + authenticate(token: String): User
+    - normalize(email: String): String
+    - generateToken(): String
+  }
+  class PortfolioService {
+    + create(request: PortfolioRequest, owner: User): Portfolio
+    + findAll(owner: User): List<Portfolio>
+    + findById(id: Long, owner: User): Portfolio
+    + update(id: Long, request: PortfolioRequest, owner: User): Portfolio
+    + delete(id: Long, owner: User): void
+    - buildValidated(request: PortfolioRequest, owner: User): Portfolio
+  }
+  class AssetService {
+    + search(query: String, limit: Integer): List<Asset>
+    + getHistoricalPrices(symbol: String, interval: String, outputSize: Integer): List<PricePoint>
+    + findById(id: Long): Asset «geplant»
+    - findOrCreate(hit: SearchHit): Asset
+  }
+  class AssetStatisticsService {
+    + calculate(symbol: String, interval: String, outputSize: Integer): AssetStatsResponse
+  }
+  class SimulationService {
+    - seedGenerator: LongSupplier
+    + simulate(portfolioId: Long, parameters: SimulationParameters, owner: User): SimulationResult
+    + ensureSeed(parameters: SimulationParameters): SimulationParameters
+    + run(weights: List<WeightedAsset>, estimation: EstimationResult, parameters: SimulationParameters): SimulationRun
+  }
+  class ComparisonService {
+    + ITEM_COUNT: int = 2
+    - clock: Clock
+    + compare(entries: List<ComparisonEntry>, parameters: SimulationParameters, owner: User): ComparisonResult
+  }
+  class SavedSimulationService {
+    - objectMapper: ObjectMapper
+    + save(result: SimulationResult, name: String, owner: User): SavedSimulation
+    + findAll(owner: User): List<SavedSimulation>
+    + findById(id: Long, owner: User): SavedSimulation
+    + delete(id: Long, owner: User): void
+    + readResult(simulation: SavedSimulation): StoredSimulationResult
+  }
+  class DemoService {
+    + MAX_PATHS: int = 10000
+    + portfolios(): List<DemoPortfolio>
+    + simulate(portfolioId: Long, parameters: SimulationParameters): SimulationResult
+    - findOrCreate(position: Position): Asset
+  }
+  class DemoPortfolio {
+    + id: long
+    + name: String
+    + positions: List<Position>
+    + {static} ALL: List<DemoPortfolio>
+  }
+  class "DemoPortfolio.Position" as DemoPos {
+    + symbol: String
+    + micCode: String
+    + weight: BigDecimal
+  }
+  class ParameterEstimator {
+    + MIN_MONTHS: int = 36
+    + estimate(assets: List<Asset>): EstimationResult
+  }
+  class PriceHistoryService {
+    ~ MONTHS_TO_LOAD: int = 120
+    ~ PRICE_SCALE: int = 6
+    + getMonthlyPrices(asset: Asset): List<PricePoint>
+    ~ {static} completedMonths(prices: List<PricePoint>, currentMonth: YearMonth): List<PricePoint>
+  }
+  class MonteCarloEngine {
+    + simulate(weights: List<WeightedAsset>, estimation: EstimationResult, parameters: SimulationParameters): double[][]
+  }
+  class MetricsCalculator {
+    + percentiles(paths: double[][]): List<TimelinePoint>
+    - percentile(sorted: double[], q: double): double
+    + metrics(paths: double[][], parameters: SimulationParameters): Metrics
+    - maxDrawdown(path: double[]): double
+  }
+  class User {
+    - id: Long
+    - email: String
+    - passwordHash: String
+    - createdAt: Instant
+    - <back:#EAF4E4>role: UserRole = USER</back>
+  }
+  enum UserRole <<neu>> {
+    USER
+    MANAGER
+  }
+  class UsageReportService <<neu>> {
+    ~ ZONE: ZoneId = Europe/Berlin
+    - clock: Clock
+    + report(month: String, user: User): UsageReport
+  }
+  class UsageReportCsvWriter <<neu>> {
+    + fileName(report: UsageReport): String
+    + write(report: UsageReport): byte[]
+  }
+  class UsageReport <<record>> <<neu>> {
+    + month: YearMonth
+    + preliminary: boolean
+    + trackingSince: LocalDate
+    + values: Map<UsageMetric, Long>
+  }
+  enum UsageMetric <<neu>> {
+    REGISTRATIONS … TOTAL_ACCOUNTS (9)
+    + key: String
+    + label: String
+    + eventType: UsageEventType
+  }
+  enum UsageEventType <<neu>> {
+    REGISTRATION
+    LOGIN
+    PORTFOLIO_CREATED
+    SIMULATION_RUN
+    SIMULATION_SAVED
+    COMPARISON_RUN
+    DEMO_SIMULATION_RUN
+    ASSET_SEARCH
+  }
+  class UsageEvent <<neu>> {
+    - id: Long
+    - eventType: UsageEventType
+    - occurredAt: Instant
+  }
+  class UsageEventRecorder <<neu>> {
+    - clock: Clock
+    + record(type: UsageEventType): void
+  }
+  class UsageEventConsumer <<neu>> {
+    ~ BATCH_SIZE: int = 50
+    ~ MAX_ATTEMPTS: int = 3
+    + processBatch(): void «@Scheduled 5 s»
+  }
+  class PricePreloadRequester <<neu>> {
+    + request(portfolio: Portfolio): void
+  }
+  class AuthToken {
+    - id: Long
+    - token: String
+    - createdAt: Instant
+    - expiresAt: Instant
+    + isExpired(now: Instant): boolean
+  }
+  class Portfolio {
+    - id: Long
+    - name: String
+    - createdAt: Instant
+    - updatedAt: Instant
+    + addPosition(asset: Asset, weight: BigDecimal): void
+    + validate(): void
+    + getWeights(): List<WeightedAsset>
+    + updateFrom(draft: Portfolio): void
+  }
+  class Position {
+    - id: Long
+    - weight: BigDecimal
+    + getAsset(): Asset
+    + getWeight(): BigDecimal
+  }
+  class Asset {
+    - id: Long
+    - symbol: String
+    - isin: String
+    - name: String
+    - exchange: String
+    - currency: String
+    - type: String
+    - micCode: String
+  }
+  class WeightedAsset <<record>> {
+    + asset: Asset
+    + share: BigDecimal
+  }
+  class SimulationParameters {
+    + startCapital: Double
+    + monthlyContribution: Double
+    + horizonYears: Integer
+    + paths: Integer = 10000
+    + seed: Long
+    + targetAmount: Double
+    + validate(): void
+    + horizonMonths(): int
+    + withSeed(newSeed: long): SimulationParameters
+  }
+  class EstimationResult {
+    + historyFrom: LocalDate
+    + historyTo: LocalDate
+    + estimates: List<Estimate>
+    + findByAssetId(assetId: Long): Estimate
+  }
+  class Estimate {
+    + asset: Asset
+    + annualReturn: double
+    + annualVolatility: double
+  }
+  class SimulationResult <<record>> {
+    + portfolioId: Long
+    + parameters: SimulationParameters
+    + estimation: EstimationResult
+    + timeline: List<TimelinePoint>
+    + metrics: Metrics
+    + runtimeMs: long
+  }
+  class SimulationRun {
+    + timeline: List<TimelinePoint>
+    + metrics: Metrics
+    + endValues: double[]
+  }
+  class Metrics {
+    + totalContributions: double
+    + medianEndValue: double
+    + p5EndValue: double
+    + p95EndValue: double
+    + valueAtRisk95: double
+    + maxDrawdownMedian: double
+    + targetProbability: Double
+  }
+  class ComparisonEntry {
+    + label: String
+    + portfolioId: Long
+    + assetId: Long
+  }
+  class ComparisonResult {
+    + parameters: SimulationParameters
+    + estimation: EstimationResult
+    + items: List<Item>
+    + pairwise: List<Pairwise>
+    + runtimeMs: long
+    + createdAt: Instant
+  }
+  class "ComparisonResult.Item" as CRItem {
+    + label: String
+    + portfolioId: Long
+    + assetId: Long
+    + timeline: List<TimelinePoint>
+    + metrics: Metrics
+  }
+  class "ComparisonResult.Pairwise" as CRPair {
+    + a: int
+    + b: int
+    + probabilityAOutperformsB: double
+  }
+  class SavedSimulation {
+    - id: Long
+    - name: String
+    - startCapital: BigDecimal
+    - monthlyContribution: BigDecimal
+    - horizonYears: int
+    - paths: int
+    - seed: long
+    - targetAmount: BigDecimal
+    - result: String «jsonb»
+    - runtimeMs: long
+    - createdAt: Instant
+  }
+  class TimelinePoint {
+    + month: int
+    + p5: double
+    + p50: double
+    + p95: double
+  }
+}
+
+package "Datenschicht (ADR-01)" as DL {
+  interface UserRepository {
+    + findByEmail(email: String): Optional<User>
+    + existsByEmail(email: String): boolean
+  }
+  interface AuthTokenRepository {
+    + findByToken(token: String): Optional<AuthToken>
+    + deleteByToken(token: String): long
+  }
+  interface PortfolioRepository {
+    + findAllByOwnerOrderByCreatedAtDesc(owner: User): List<Portfolio>
+    + findByIdAndOwner(id: Long, owner: User): Optional<Portfolio>
+  }
+  interface AssetRepository {
+    + findBySymbolAndMicCode(symbol: String, micCode: String): Optional<Asset>
+  }
+  interface SavedSimulationRepository {
+    + findAllByOwnerOrderByCreatedAtDesc(owner: User): List<SavedSimulation>
+    + findByIdAndOwner(id: Long, owner: User): Optional<SavedSimulation>
+  }
+  interface UsageEventRepository <<neu>> {
+    + countByTypeBetween(from: Instant, to: Instant): List<EventTypeCount>
+    + findEarliestOccurredAt(): Optional<Instant>
+  }
+  interface QueueMessageRepository <<neu>> {
+    + lockNextBatch(topic: String, limit: int): List<QueueMessage> «FOR UPDATE SKIP LOCKED»
+  }
+  class QueueMessage <<neu>> {
+    - id: Long
+    - topic: String
+    - payload: String «jsonb»
+    - createdAt: Instant
+    - attempts: int
+    - failed: boolean
+    - lastError: String
+    + registerFailure(error: String, maxAttempts: int): void
+  }
+  interface MessagePublisher <<neu>> {
+    + publish(topic: String, payload: Object): void
+  }
+  class DatabaseMessagePublisher <<neu>> {
+    + publish(topic: String, payload: Object): void «REQUIRES_NEW»
+  }
+  interface MarketDataProvider {
+    + search(query: String): List<SearchHit>
+    + getHistoricalPrices(symbol: String, micCode: String, interval: String, outputSize: int): List<PricePoint>
+  }
+  class MarktdatenClient <<neu>> {
+    + API_KEY_HEADER: String = "X-Internal-Api-Key"
+    - restClient: RestClient «Timeout 5 s»
+    + search(query: String): List<SearchHit>
+    + getHistoricalPrices(symbol, micCode, interval, outputSize): List<PricePoint>
+  }
+  class MockMarketDataProvider {
+    «Test» feste Kursreihen, Ausfall-Schalter
+  }
+  class SearchHit <<record>>
+  class PricePoint <<record>> {
+    + date: LocalDate
+    + close: BigDecimal
+  }
+}
+}
+
+package "marktdaten-service (eigene Heroku-App, ADR-07)" as MDS <<neu>> {
+  class InternalController <<neu>> {
+    + search(q: String): List<SearchHit> «GET /internal/search»
+    + prices(symbol, mic, interval, outputsize): List<PricePoint> «GET /internal/prices»
+  }
+  class InternalApiKeyFilter <<neu>> {
+    + HEADER: String = "X-Internal-Api-Key"
+    - expectedKey: byte[]
+    # doFilterInternal(...): void
+  }
+  class "ErrorHandler" as MdErrorHandler <<neu>>
+  class SearchService <<neu>> {
+    + search(query: String): List<SearchHit>
+  }
+  class "SearchCache" as MdSearchCache <<neu>> {
+    ~ TIME_TO_LIVE: Duration = 24 h
+    + getOrLoad(query: String, loader: Supplier<List<SearchHit>>): List<SearchHit>
+  }
+  class PriceService <<neu>> {
+    ~ MAX_CACHE_AGE: Duration = 24 h
+    ~ PRICE_SCALE: int = 6
+    + getPrices(symbol, micCode, interval, outputSize): List<PricePoint>
+    ~ {static} isFresh(fetchedAt: Instant, now: Instant): boolean
+  }
+  class PriceCacheRepository <<neu>> {
+    - jdbcTemplate: JdbcTemplate
+    + load(symbol: String, micCode: String): Optional<CachedPrices>
+    + replace(symbol, micCode, prices, fetchedAt): void «REQUIRES_NEW»
+  }
+  class PricePreloadConsumer <<neu>> {
+    ~ BATCH_SIZE: int = 3
+    ~ MAX_ATTEMPTS: int = 3
+    + processBatch(): void «@Scheduled 15 s»
+  }
+  class QueueRepository <<neu>> {
+    + lockNextBatch(topic: String, limit: int): List<QueueEntry>
+    + delete(id: long): void
+    + registerFailure(id: long, error: String, maxAttempts: int): void
+  }
+  interface "MarketDataProvider" as MdProvider <<neu>> {
+    + search(query: String): List<SearchHit>
+    + getHistoricalPrices(symbol, micCode, interval, outputSize): List<PricePoint>
+  }
+  class TwelveDataProvider <<neu>>
+  enum TwelveDataError <<neu>> {
+    INVALID_KEY
+    PLAN_RESTRICTED
+    RATE_LIMIT
+    NOT_FOUND
+    OTHER
+  }
+}
+
+' Schichten untereinander anordnen
+PL -[hidden]down- LL
+LL -[hidden]down- DL
+Asset -[hidden]down- UserRepository
+TimelinePoint -[hidden]down- MarketDataProvider
+CORE -[hidden]down- MDS
+
+' Anmeldung zentral (ADR-06)
+CurrentUserArgumentResolver ..> AuthService : authenticate(token)
+CurrentUserArgumentResolver ..> CurrentUser
+CurrentUserArgumentResolver ..> User : liefert
+AuthController ..> CurrentUserArgumentResolver : extractToken()
+
+' Beispielsimulation ohne Anmeldung (US-09)
+DemoController --> DemoService
+DemoService --> AssetRepository
+DemoService --> ParameterEstimator
+DemoService --> SimulationService : ensureSeed(), run()
+DemoService ..> DemoPortfolio
+DemoService ..> SimulationResult : <<create>>
+DemoPortfolio "1" *-- "1..*" DemoPos
+
+' GraphQL lesend (BE #94)
+QueryController --> AssetService
+QueryController --> PortfolioService
+QueryController --> SavedSimulationService
+QueryController ..> AuthService : authenticate(token)
+AuthTokenInterceptor ..> CurrentUserArgumentResolver : extractToken()
+QueryController ..> AuthTokenInterceptor : TOKEN_KEY
+
+' GraphQL schreibend (BE #108)
+MutationController --> PortfolioService
+MutationController --> SimulationService
+MutationController --> SavedSimulationService
+MutationController --> ComparisonService
+MutationController ..> AuthService : authenticate(token)
+MutationController ..> AuthTokenInterceptor : TOKEN_KEY
+
+' Auswertungen (US-11, US-12)
+ReportController --> UsageReportService
+ReportController --> UsageReportCsvWriter
+UsageReportService --> UsageEventRepository
+UsageReportService --> UserRepository : count()
+UsageReportService ..> UsageReport : <<create>>
+UsageReportService ..> User : role = MANAGER (sonst 403)
+UsageReport ..> UsageMetric
+UsageMetric ..> UsageEventType
+User --> UserRole
+
+' Queue (ADR-07)
+UsageEventRecorder --> MessagePublisher : nutzung.ereignis
+PricePreloadRequester --> MessagePublisher : kursdaten.vorladen
+DatabaseMessagePublisher ..|> MessagePublisher
+DatabaseMessagePublisher --> QueueMessageRepository
+UsageEventConsumer --> QueueMessageRepository
+UsageEventConsumer --> UsageEventRepository
+UsageEventConsumer ..> UsageEvent : <<create>>
+QueueMessageRepository ..> QueueMessage
+UsageEvent --> UsageEventType
+AuthService --> UsageEventRecorder
+PortfolioService --> UsageEventRecorder
+PortfolioService --> PricePreloadRequester
+
+' Präsentation -> Logik
+AuthController --> AuthService
+PortfolioController --> PortfolioService
+AssetController --> AssetService
+AssetController --> AssetStatisticsService
+SimulationController --> SimulationService
+SimulationController --> SavedSimulationService
+ComparisonController --> ComparisonService
+
+' Anmeldung (US-01)
+AuthService --> UserRepository
+AuthService --> AuthTokenRepository
+AuthService ..> User : <<create>>
+AuthService ..> AuthToken : <<create>>
+AuthToken "0..*" --> "1" User : user
+
+' Portfolio (US-03, US-06)
+PortfolioService --> PortfolioRepository
+PortfolioService --> AssetRepository
+PortfolioService ..> Portfolio : <<create>>
+Portfolio "0..*" --> "1" User : owner
+Portfolio "1" *-- "1..*" Position : enthält
+Position "0..*" --> "1" Asset : bezieht sich auf
+Portfolio ..> WeightedAsset : <<create>>
+WeightedAsset --> "1" Asset
+
+' Suche und Statistik (US-02)
+AssetService --> MarketDataProvider
+AssetService --> AssetRepository
+AssetStatisticsService --> MarketDataProvider
+
+' Simulation (US-04, ADR-02)
+SimulationService --> PortfolioService
+SimulationService --> ParameterEstimator
+SimulationService --> MonteCarloEngine
+SimulationService --> MetricsCalculator
+SimulationService ..> SimulationResult : <<create>>
+SimulationService ..> SimulationParameters : withSeed()
+SimulationService ..> SimulationRun : <<create>>
+MetricsCalculator ..> Metrics : <<create>>
+SimulationResult --> "1" Metrics
+MonteCarloEngine ..> EstimationResult
+MonteCarloEngine ..> SimulationParameters
+MetricsCalculator ..> TimelinePoint : <<create>>
+SimulationResult "1" *-- "1..*" TimelinePoint
+EstimationResult "1" *-- "1..*" Estimate
+ParameterEstimator ..> EstimationResult : <<create>>
+
+' Vergleich (US-07, ADR-05)
+ComparisonService --> PortfolioService
+ComparisonService --> AssetRepository
+ComparisonService --> ParameterEstimator
+ComparisonService --> SimulationService : run()
+ComparisonService ..> ComparisonResult : <<create>>
+ComparisonService ..> ComparisonEntry
+ComparisonResult "1" *-- "2" CRItem
+ComparisonResult "1" *-- "1" CRPair
+CRItem --> "1" Metrics
+
+' Gespeicherte Simulationen (US-08)
+SavedSimulationService --> SavedSimulationRepository
+SavedSimulationService --> PortfolioService
+SavedSimulationService ..> SavedSimulation : <<create>>
+SavedSimulation "0..*" --> "1" User : owner
+SavedSimulation "0..*" --> "1" Portfolio : portfolio
+
+' Kursdaten und Cache (NF-07, NF-08, NF-12)
+ParameterEstimator --> PriceHistoryService
+PriceHistoryService --> MarketDataProvider
+MarktdatenClient ..|> MarketDataProvider
+MockMarketDataProvider ..|> MarketDataProvider
+
+' marktdaten-service (ADR-07)
+MarktdatenClient ..> InternalController : HTTP, synchron\nX-Internal-Api-Key
+InternalApiKeyFilter ..> InternalController : schützt /internal/**
+InternalController --> SearchService
+InternalController --> PriceService
+SearchService --> MdSearchCache
+SearchService --> MdProvider
+PriceService --> MdProvider
+PriceService --> PriceCacheRepository
+PricePreloadConsumer --> QueueRepository
+PricePreloadConsumer --> PriceService
+TwelveDataProvider ..|> MdProvider
+TwelveDataProvider ..> TwelveDataError
+PricePreloadRequester ..> PricePreloadConsumer : asynchron über\nqueue_message
+
+note right of AuthService
+  <b>Anmeldung (US-01)</b>
+  register: E-Mail klein geschrieben (E11), Format (E12),
+  Passwort ≥ 8 Zeichen, nur BCrypt-Hash speichern (NF-03)
+  login: gleiche Meldung bei falscher E-Mail und
+  falschem Passwort; Token 24 h gültig (NF-16)
+  authenticate: liefert den User zum Token oder 401
+  Uhr (Clock) austauschbar für Tests (AT-01-10)
+end note
+
+note bottom of PortfolioService
+  <b>Zugriffsschutz (NF-04, ADR-04, ADR-06)</b>
+  arbeitet nur mit Portfolios des übergebenen
+  Nutzers (findByIdAndOwner); fremde ID → 404,
+  auch bei update/delete (US-06)
+end note
+
+note bottom of MonteCarloEngine
+  <b>Simulationsmodell v2 (E15, E18, E23)</b>
+  je Anlage μ = annualReturn / 12, σ = annualVolatility / √12;
+  Zufallszahl je Anlage und Monat, unabhängig (keine Korrelation);
+  Gewichte jeden Monat zurückgesetzt (Rebalancing);
+  Wert = max(0, Wert · (1 + R)) + Sparrate am Monatsende;
+  je Aufruf neues Random(seed) (NF-08, Vergleich ADR-05)
+end note
+
+note bottom of MetricsCalculator
+  p5, p50, p95 je Monat,
+  lineare Interpolation (QUANTIL.INKL);
+  metrics(): Einzahlungen, Endwerte (p5, p50, p95),
+  Value at Risk 95 %, max. Drawdown des Medianpfads,
+  Zielwahrscheinlichkeit bei Zielbetrag (US-05, E24–E27)
+end note
+
+note right of SimulationService
+  <b>GRASP Controller (ADR-02)</b>
+  koordiniert, rechnet nicht selbst:
+  Eingaben prüfen → eigenes Portfolio laden (404) →
+  Seed festlegen (NF-08) → schätzen (422/503) →
+  simulieren → Perzentile berechnen
+end note
+
+note right of ComparisonService
+  <b>GRASP Controller + Creator (ADR-05)</b>
+  genau 2 Einträge (Portfolio oder Anlage = 100 %);
+  ein Seed für alle Einträge, eine gemeinsame
+  Schätzung über alle Anlagen (E17);
+  je Eintrag SimulationService.run()
+end note
+
+note bottom of PriceHistoryService
+  <b>Monatswerte für die Schätzung</b>
+  120 Monatswerte über MarketDataProvider
+  (im Betrieb MarktdatenClient), sortiert,
+  auf 6 Nachkommastellen gerundet (NF-08);
+  nur abgeschlossene Monate (E22).
+  Der 24-h-Cache liegt seit BE #106
+  im marktdaten-service (PriceService)
+end note
+
+note right of DemoService
+  <b>Beispielsimulation (US-09)</b>
+  öffentlich, ohne Speichern; höchstens
+  10.000 Pfade; Beispielportfolios im Code,
+  Anlagen URTH/IEMG (F3: keine Xetra-Kurse
+  im kostenlosen Tarif); unbekannte ID → 404
+end note
+
+note right of QueryController
+  <b>GraphQL lesend (BE #94)</b>
+  Token aus dem Header über
+  AuthTokenInterceptor (ADR-06);
+  geschützte Abfragen ohne Token →
+  UNAUTHORIZED; Suche ohne Anmeldung
+end note
+
+note right of CurrentUserArgumentResolver
+  <b>Anmeldung zentral (ADR-06)</b>
+  liest Authorization: Bearer <token>;
+  fehlt der Header oder ist der Token
+  ungültig → 401; sonst User über
+  AuthService.authenticate (ADR-04)
+  GRASP Pure Fabrication
+end note
+
+note bottom of SavedSimulationService
+  <b>Gespeicherte Simulation (US-08)</b>
+  speichert Parameter und Ergebnis
+  (JSON in simulation.result, jsonb);
+  readResult() ohne Neuberechnung;
+  nur eigene Einträge (findByIdAndOwner, NF-04)
+end note
+
+
+note bottom of ParameterEstimator
+  je Anlage mind. 36 Monatswerte (E8);
+  ohne Kurse und zu kurze Historie werden
+  getrennt mit allen Anlagen gemeldet
+  (E6, 422, F3); gemeinsamer Schätzzeitraum
+  (E17); Rendite = 12 · Mittel,
+  Volatilität = Std.-Abw. · √12
+end note
+
+note right of MarktdatenClient
+  <b>Synchrone Ausnahme (ADR-07)</b>
+  Simulation braucht die Kurse, bevor sie
+  rechnet (NF-01); jeder Fehler des
+  marktdaten-service (Timeout, 401, 503)
+  → 503 UPSTREAM_UNAVAILABLE (NF-07).
+  GRASP Protected Variations / Indirection
+end note
+
+note bottom of MutationController
+  <b>GraphQL schreibend (BE #108)</b>
+  bindet die Eingaben an dieselben
+  Request-Records wie REST und ruft
+  dieselben Services; Fehler über
+  GraphQlExceptionResolver mit Code
+  und Details wie bei REST
+end note
+
+note bottom of UsageReportService
+  <b>Auswertung (US-11, E38 bis E40)</b>
+  nur Rolle MANAGER, sonst 403;
+  Monat nach Europe/Berlin; laufender
+  Monat vorläufig; Monate vor Beginn
+  der Erfassung und künftige → 400
+end note
+
+note bottom of DatabaseMessagePublisher
+  <b>Queue als Tabelle (ADR-07, B2)</b>
+  publish() in eigener Transaktion;
+  Verbraucher holen mit FOR UPDATE
+  SKIP LOCKED ab und löschen nach Erfolg;
+  nach 3 Fehlversuchen failed = true.
+  Wechsel auf einen Broker ändert nur
+  diese Klasse (Protected Variations)
+end note
+
+note bottom of PricePreloadConsumer
+  <b>kursdaten.vorladen (ADR-07)</b>
+  höchstens 3 Nachrichten je 15 s
+  (Kontingent Twelve Data); lädt fehlende
+  oder veraltete Monatswerte in den Cache;
+  liest public.queue_message über JDBC
+end note
+
+note bottom of PriceService
+  <b>Kurs-Cache (NF-07)</b>
+  Monatswerte jünger als 24 h aus
+  marktdaten.price_cache, sonst Abruf bei
+  Twelve Data und Ersetzen; nicht
+  erreichbar → 503; andere Intervalle
+  ohne Cache
+end note
+
+note bottom of TwelveDataError
+  401 INVALID_KEY, 429 RATE_LIMIT → 503;
+  403 PLAN_RESTRICTED, 400/404 NOT_FOUND
+  → keine Kurse (leere Liste) (F3)
+end note
+
+note bottom of Portfolio
+  <b>GRASP Information Expert (ADR-03)</b>
+  validate(): Regeln E1, E2, E9 (Name, Gewichtungen, Summe 100 %)
+  updateFrom(): übernimmt einen geprüften Entwurf; bleibende
+  Positionen werden geändert statt neu angelegt
+  (UNIQUE portfolio_id, asset_id)
+end note
+
+legend bottom left
+  <b>Legende</b>
+  Weiß = bereits in v5 vorhanden · <back:#EAF4E4> Grün </back> = neu seit v5 (Backend main, 01.11.2026) · «GET» = lesender Endpunkt per GET (ADR-06)
+  Grau «geplant» hinter einer Methode = Klasse vorhanden, Methode folgt · «Test» = Klasse liegt unter src/test (Testattrappe, NF-12)
+  Zwei Dienste (ADR-07): core-service (Drei-Schichten-Architektur nach ADR-01) und marktdaten-service; synchron per HTTP nur für Suche und Kurse,
+  asynchron über die Tabelle queue_message (Themen nutzung.ereignis und kursdaten.vorladen).
+  Anmeldung (ADR-06): REST über @CurrentUser, GraphQL über AuthTokenInterceptor; zwischen den Diensten über den Header X-Internal-Api-Key.
+  Nicht dargestellt: DTOs (…Request, …Response, UsageReportResponse), Exceptions und Fehlerbehandlung, Konfiguration (CorsConfig, ClockConfig,
+  PasswordConfig, WebConfig, SchedulingConfig), Health-/PingController, Twelve-Data-DTOs, Nachrichten-Records (UsageEventMessage, PricePreloadMessage), GraphQL-Schema.
+  Vorversion: diagramme/archiv/klassendiagramm_v5
+endlegend
+
+@enduml

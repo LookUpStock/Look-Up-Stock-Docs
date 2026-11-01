@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="1669px" preserveAspectRatio="none" style="width:2856px;height:1669px;" version="1.1" viewBox="0 0 2856 1669" width="2856px" zoomAndPan="magnify"><defs><filter height="1" id="bfcmp9kpl8fyy0" width="1" x="0" y="0"><feFlood flood-color="#EAF4E4" result="flood"/><feComposite in="SourceGraphic" in2="flood" operator="over"/></filter></defs><g><text fill="#000000" font-family="Arial" font-size="18" lengthAdjust="spacingAndGlyphs" textLength="654" x="1104" y="17.4375">Domänenmodell v5 - LookUpStock (Sprint 5: US-01 bis US-09, US-11, US-12)</text><!--MD5=[b9d7fd4fb140d923286973407a6a2a61]
+class Nutzer--><rect fill="#FFFFFF" height="85.7578" id="Nutzer" style="stroke: #333333; stroke-width: 1.5;" width="81" x="1017.5" y="54.7793"/><text fill="#000000" font-family="Arial" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="39" x="1038.5" y="71.4043">Nutzer</text><line style="stroke: #333333; stroke-width: 1.5;" x1="1018.5" x2="1097.5" y1="79.2988" y2="79.2988"/><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="28" x="1023.5" y="93.9551">email</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="49" x="1023.5" y="107.2646">passwort</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="69" x="1023.5" y="120.5742">registriertAm</text><text fill="#2E7D32" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="23" x="1023.5" y="133.8838">rolle</text><!--MD5=[07d2e0908d569744d531516069c43ca4]
+class Anmeldung--><rect fill="#FFFFFF" height="72.4482" id="Anmeldung" style="stroke: #333333; stroke-width: 1.5;" width="92" x="1202" y="61.7793"/><text fill="#000000" font-family="Arial" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="64" x="1216" y="78.4043">Anmeldung</text><line style="stroke: #333333; stroke-width: 1.5;" x1="1203" x2="1293" y1="86.2988" y2="86.2988"/><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="80" x="1208" y="100.9551">angemeldetAm</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="47" x="1208" y="114.2646">gültigBis</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="49" x="1208" y="127.5742">/istGültig</text><!--MD5=[4813dc6ee94b9854bcd48c09633f0da5]
+class Portfolio--><rect fill="#FFFFFF" height="85.7578" id="Portfolio" style="stroke: #333333; stroke-width: 1.5;" width="132" x="992" y="277.7793"/><text fill="#000000" font-family="Arial" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="48" x="1034" y="294.4043">Portfolio</text><line style="stroke: #333333; stroke-width: 1.5;" x1="993" x2="1123" y1="302.2988" y2="302.2988"/><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="29" x="998" y="316.9551">name</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="54" x="998" y="330.2646">erstelltAm</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="65" x="998" y="343.5742">geändertAm</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="120" x="998" y="356.8838">/summeGewichtungen</text><!--MD5=[a64a835c3d62471a77f615251fdde58a]
+class Position--><rect fill="#FFFFFF" height="45.8291" id="Position" style="stroke: #333333; stroke-width: 1.5;" width="75" x="1250.5" y="297.7793"/><text fill="#000000" font-family="Arial" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="45" x="1265.5" y="314.4043">Position</text><line style="stroke: #333333; stroke-width: 1.5;" x1="1251.5" x2="1324.5" y1="322.2988" y2="322.2988"/><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="63" x="1256.5" y="336.9551">gewichtung</text><!--MD5=[0fd2cac0cd3b9d5f05b322462e3b1858]
+class Anlage--><rect fill="#FFFFFF" height="112.377" id="Anlage" style="stroke: #333333; stroke-width: 1.5;" width="59" x="765.5" y="718.7793"/><text fill="#000000" font-family="Arial" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="39" x="775.5" y="735.4043">Anlage</text><line style="stroke: #333333; stroke-width: 1.5;" x1="766.5" x2="823.5" y1="743.2988" y2="743.2988"/><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="29" x="771.5" y="757.9551">name</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="29" x="771.5" y="771.2646">ticker</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="19" x="771.5" y="784.5742">isin</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="30" x="771.5" y="797.8838">börse</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="47" x="771.5" y="811.1934">währung</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="14" x="771.5" y="824.5029">art</text><!--MD5=[7a85a578f0c3864eecfc595d974d094f]
+class Kurswert--><rect fill="#FFFFFF" height="59.1387" id="Kurswert" style="stroke: #333333; stroke-width: 1.5;" width="76" x="928" y="745.2793"/><text fill="#000000" font-family="Arial" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="52" x="940" y="761.9043">Kurswert</text><line style="stroke: #333333; stroke-width: 1.5;" x1="929" x2="1003" y1="769.7988" y2="769.7988"/><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="34" x="934" y="784.4551">datum</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="64" x="934" y="797.7646">schlusskurs</text><!--MD5=[e36a4c0f7055b067b077b74a1222e806]
+class Simulation--><rect fill="#FFFFFF" height="72.4482" id="Simulation" style="stroke: #333333; stroke-width: 1.5;" width="115" x="601.5" y="953.7793"/><text fill="#000000" font-family="Arial" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="60" x="629" y="970.4043">Simulation</text><line style="stroke: #333333; stroke-width: 1.5;" x1="602.5" x2="715.5" y1="978.2988" y2="978.2988"/><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="88" x="607.5" y="992.9551">durchgeführtAm</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="103" x="607.5" y="1006.2646">schätzzeitraumVon</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="97" x="607.5" y="1019.5742">schätzzeitraumBis</text><!--MD5=[f4f2e6597d51c85e2c20577fc61b5c2c]
+class GespeicherteSimulation--><rect fill="#FFFFFF" height="59.1387" id="GespeicherteSimulation" style="stroke: #333333; stroke-width: 1.5;" width="145" x="199.5" y="960.2793"/><text fill="#000000" font-family="Arial" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="139" x="202.5" y="976.9043">Gespeicherte Simulation</text><line style="stroke: #333333; stroke-width: 1.5;" x1="200.5" x2="343.5" y1="984.7988" y2="984.7988"/><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="29" x="205.5" y="999.4551">name</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="80" x="205.5" y="1012.7646">gespeichertAm</text><!--MD5=[e425feb766bed5e11c24ac66aaeea807]
+class Simulationsparameter--><rect fill="#FFFFFF" height="112.377" id="Simulationsparameter" style="stroke: #333333; stroke-width: 1.5;" width="132" x="414" y="1151.7793"/><text fill="#000000" font-family="Arial" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="126" x="417" y="1168.4043">Simulationsparameter</text><line style="stroke: #333333; stroke-width: 1.5;" x1="415" x2="545" y1="1176.2988" y2="1176.2988"/><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="59" x="420" y="1190.9551">startkapital</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="103" x="420" y="1204.2646">monatlicheSparrate</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="109" x="420" y="1217.5742">anlagehorizontJahre</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="59" x="420" y="1230.8838">pfadanzahl</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="25" x="420" y="1244.1934">seed</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="52" x="420" y="1257.5029">zielbetrag</text><!--MD5=[79697b9bdfde6ef7549dde6c81128040]
+class Schätzung--><rect fill="#FFFFFF" height="59.1387" id="Schätzung" style="stroke: #333333; stroke-width: 1.5;" width="93" x="867.5" y="960.2793"/><text fill="#000000" font-family="Arial" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="61" x="883.5" y="976.9043">Schätzung</text><line style="stroke: #333333; stroke-width: 1.5;" x1="868.5" x2="959.5" y1="984.7988" y2="984.7988"/><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="69" x="873.5" y="999.4551">jahresrendite</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="81" x="873.5" y="1012.7646">jahresvolatilität</text><!--MD5=[636dbf4c626172b79696403cb2551313]
+class Verlaufspunkt--><rect fill="#FFFFFF" height="85.7578" id="Verlaufspunkt" style="stroke: #333333; stroke-width: 1.5;" width="85" x="616.5" y="1164.7793"/><text fill="#000000" font-family="Arial" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="79" x="619.5" y="1181.4043">Verlaufspunkt</text><line style="stroke: #333333; stroke-width: 1.5;" x1="617.5" x2="700.5" y1="1189.2988" y2="1189.2988"/><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="34" x="622.5" y="1203.9551">monat</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="14" x="622.5" y="1217.2646">p5</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="21" x="622.5" y="1230.5742">p50</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="21" x="622.5" y="1243.8838">p95</text><!--MD5=[a8f509b217baa88156b0b3c158ddb334]
+class Kennzahlen--><rect fill="#FFFFFF" height="125.6865" id="Kennzahlen" style="stroke: #333333; stroke-width: 1.5;" width="133" x="771.5" y="1144.7793"/><text fill="#000000" font-family="Arial" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="67" x="804.5" y="1161.4043">Kennzahlen</text><line style="stroke: #333333; stroke-width: 1.5;" x1="772.5" x2="903.5" y1="1169.2988" y2="1169.2988"/><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="112" x="777.5" y="1183.9551">summeEinzahlungen</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="57" x="777.5" y="1197.2646">endwertP5</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="82" x="777.5" y="1210.5742">endwertMedian</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="64" x="777.5" y="1223.8838">endwertP95</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="76" x="777.5" y="1237.1934">valueAtRisk95</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="118" x="777.5" y="1250.5029">maxDrawdownMedian</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="121" x="777.5" y="1263.8125">/zielwahrscheinlichkeit</text><!--MD5=[c80b8d794d5cd3065ef5af2585e2cb18]
+class Vergleich--><rect fill="#FFFFFF" height="59.1387" id="Vergleich" style="stroke: #333333; stroke-width: 1.5;" width="178" x="1616" y="522.2793"/><text fill="#000000" font-family="Arial" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="54" x="1678" y="538.9043">Vergleich</text><line style="stroke: #333333; stroke-width: 1.5;" x1="1617" x2="1793" y1="546.7988" y2="546.7988"/><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="88" x="1622" y="561.4551">durchgeführtAm</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="166" x="1622" y="574.7646">/wahrscheinlichkeitErsterHöher</text><!--MD5=[657c24946fd3d9085acc3ee60391fcc5]
+class Vergleichseintrag--><rect fill="#FFFFFF" height="59.1387" id="Vergleichseintrag" style="stroke: #333333; stroke-width: 1.5;" width="106" x="1789" y="745.2793"/><text fill="#000000" font-family="Arial" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="100" x="1792" y="761.9043">Vergleichseintrag</text><line style="stroke: #333333; stroke-width: 1.5;" x1="1790" x2="1894" y1="769.7988" y2="769.7988"/><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="69" x="1795" y="784.4551">bezeichnung</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="44" x="1795" y="797.7646">position</text><!--MD5=[35b9c008fcdc76cf41467de2167dfbd7]
+class Beispielportfolio--><rect fill="#EAF4E4" height="59.1387" id="Beispielportfolio" style="stroke: #333333; stroke-width: 1.5;" width="97" x="437.5" y="68.2793"/><rect fill="#EAF4E4" height="24.5195" style="stroke: #333333; stroke-width: 1.5;" width="97" x="437.5" y="68.2793"/><text fill="#000000" font-family="Arial" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="91" x="440.5" y="84.9043">Beispielportfolio</text><line style="stroke: #333333; stroke-width: 1.5;" x1="438.5" x2="533.5" y1="92.7988" y2="92.7988"/><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="29" x="443.5" y="107.4551">name</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="73" x="443.5" y="120.7646">beschreibung</text><!--MD5=[d226bfc6e7602111f71e45956b79b3b9]
+class Nutzungsereignis--><rect fill="#EAF4E4" height="59.1387" id="Nutzungsereignis" style="stroke: #333333; stroke-width: 1.5;" width="105" x="1965.5" y="745.2793"/><rect fill="#EAF4E4" height="24.5195" style="stroke: #333333; stroke-width: 1.5;" width="105" x="1965.5" y="745.2793"/><text fill="#000000" font-family="Arial" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="99" x="1968.5" y="761.9043">Nutzungsereignis</text><line style="stroke: #333333; stroke-width: 1.5;" x1="1966.5" x2="2069.5" y1="769.7988" y2="769.7988"/><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="14" x="1971.5" y="784.4551">art</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="50" x="1971.5" y="797.7646">zeitpunkt</text><!--MD5=[410aec9b14b4f61f7c269cf645e35c8b]
+class Monatsauswertung--><rect fill="#EAF4E4" height="72.4482" id="Monatsauswertung" style="stroke: #333333; stroke-width: 1.5;" width="115" x="1932.5" y="284.7793"/><rect fill="#EAF4E4" height="24.5195" style="stroke: #333333; stroke-width: 1.5;" width="115" x="1932.5" y="284.7793"/><text fill="#000000" font-family="Arial" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="109" x="1935.5" y="301.4043">Monatsauswertung</text><line style="stroke: #333333; stroke-width: 1.5;" x1="1933.5" x2="2046.5" y1="309.2988" y2="309.2988"/><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="34" x="1938.5" y="323.9551">monat</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="56" x="1938.5" y="337.2646">erfasstSeit</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="51" x="1938.5" y="350.5742">/vorläufig</text><!--MD5=[f721c6e0a50daeddd14fa00c6c59de3d]
+class Kennzahlwert--><rect fill="#EAF4E4" height="59.1387" id="Kennzahlwert" style="stroke: #333333; stroke-width: 1.5;" width="85" x="2104.5" y="522.2793"/><rect fill="#EAF4E4" height="24.5195" style="stroke: #333333; stroke-width: 1.5;" width="85" x="2104.5" y="522.2793"/><text fill="#000000" font-family="Arial" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="79" x="2107.5" y="538.9043">Kennzahlwert</text><line style="stroke: #333333; stroke-width: 1.5;" x1="2105.5" x2="2188.5" y1="546.7988" y2="546.7988"/><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="69" x="2110.5" y="561.4551">bezeichnung</text><text fill="#000000" font-family="Arial" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="27" x="2110.5" y="574.7646">/wert</text><path d="M654.5,29.7793 L654.5,165.6152 L947.5,165.6152 L947.5,39.7793 L937.5,29.7793 L654.5,29.7793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><path d="M937.5,29.7793 L937.5,39.7793 L947.5,39.7793 L937.5,29.7793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="227" x="660.5" y="47.373">{email: Pflicht, gültiges Format (E12),</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="225" x="664.5" y="63.1025">eindeutig ohne Unterscheidung von</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="208" x="664.5" y="78.832">Groß- und Kleinschreibung (E11)}</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="213" x="660.5" y="94.5615">{passwort: mindestens 8 Zeichen,</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="216" x="664.5" y="110.291">nur als Hash gespeichert (NF-03)}</text><text fill="#2E7D32" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="237" x="660.5" y="126.0205">{rolle: Nutzer oder Geschäftsführung;</text><text fill="#2E7D32" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="223" x="664.5" y="141.75">bei der Registrierung immer Nutzer,</text><text fill="#2E7D32" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="268" x="664.5" y="157.4795">Geschäftsführung vergibt das Team (E40)}</text><path d="M1364,61.2793 L1364,134.1973 L1700,134.1973 L1700,71.2793 L1690,61.2793 L1364,61.2793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><path d="M1690,61.2793 L1690,71.2793 L1700,71.2793 L1690,61.2793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="315" x="1370" y="78.873">{gültigBis = angemeldetAm + 24 Stunden (NF-16)}</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="212" x="1370" y="94.6025">{endet vorzeitig durch Abmelden}</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="211" x="1370" y="110.332">/istGültig = noch nicht abgelaufen</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="135" x="1370" y="126.0615">und nicht abgemeldet</text><path d="M592,252.7793 L592,388.6152 L922,388.6152 L922,262.7793 L912,252.7793 L592,252.7793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><path d="M912,252.7793 L912,262.7793 L922,262.7793 L912,252.7793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="244" x="598" y="270.373">{name: Pflicht, höchstens 100 Zeichen}</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="274" x="598" y="286.1025">{ein Name nur aus Leerzeichen gilt als leer}</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="204" x="598" y="301.832">{nur für den besitzenden Nutzer</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="258" x="602" y="317.5615">sichtbar, änderbar und löschbar (NF-04)}</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="263" x="598" y="333.291">{beim Bearbeiten gelten dieselben Regeln</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="305" x="602" y="349.0205">wie beim Erstellen; geändertAm wird aktualisiert}</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="262" x="598" y="364.75">{beim Löschen werden die gespeicherten</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="288" x="602" y="380.4795">Simulationen des Portfolios mitgelöscht (E28)}</text><path d="M1769.5,37.7793 L1769.5,157.8857 L2060.5,157.8857 L2060.5,47.7793 L2050.5,37.7793 L1769.5,37.7793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><path d="M2050.5,37.7793 L2050.5,47.7793 L2060.5,47.7793 L2050.5,37.7793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="194" x="1775.5" y="55.373">{gewichtung &gt; 0 %, höchstens</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="135" x="1779.5" y="71.1025">2 Nachkommastellen}</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="243" x="1775.5" y="86.832">{Summe der Gewichtungen je Portfolio</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="262" x="1779.5" y="102.5615">= 100 % (Toleranz ± 0,01 Prozentpunkte)}</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="270" x="1775.5" y="118.291">{jede Anlage höchstens einmal je Portfolio}</text><text fill="#2E7D32" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="221" x="1775.5" y="134.0205">{gehört genau einem Portfolio oder</text><text fill="#2E7D32" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="226" x="1779.5" y="149.75">genau einem Beispielportfolio (xor)}</text><path d="M1074.5,746.2793 L1074.5,803.4678 L1379.5,803.4678 L1379.5,756.2793 L1369.5,746.2793 L1074.5,746.2793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><path d="M1369.5,746.2793 L1369.5,756.2793 L1379.5,756.2793 L1369.5,746.2793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="284" x="1080.5" y="763.873">{ein Kurswert je Monat (Monatsschlusskurs)}</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="214" x="1080.5" y="779.6025">{für eine Simulation sind je Anlage</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="219" x="1084.5" y="795.332">mindestens 36 Monatswerte nötig}</text><path d="M135,1349.7793 L135,1469.8857 A0,0 0 0 0 135,1469.8857 L455,1469.8857 A0,0 0 0 0 455,1469.8857 L455,1359.7793 L445,1349.7793 L353.76,1349.7793 L428.96,1263.9593 L345.76,1349.7793 L135,1349.7793 A0,0 0 0 0 135,1349.7793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><path d="M445,1349.7793 L445,1359.7793 L455,1359.7793 L445,1349.7793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="270" x="141" y="1367.373">{anlagehorizontJahre: ganze Zahl, 1 bis 40}</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="253" x="141" y="1383.1025">{startkapital ≥ 0, monatlicheSparrate ≥ 0,</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="87" x="145" y="1398.832">nicht beide 0}</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="299" x="141" y="1414.5615">{pfadanzahl: 1.000 bis 50.000, Standard 10.000}</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="265" x="141" y="1430.291">{seed: optional; ohne Angabe vom System</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="224" x="145" y="1446.0205">erzeugt und dem Nutzer angezeigt}</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="196" x="141" y="1461.75">{zielbetrag: optional, &gt; 0 (E27)}</text><path d="M1031,921.7793 L1031,1057.6152 L1323,1057.6152 L1323,931.7793 L1313,921.7793 L1031,921.7793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><path d="M1313,921.7793 L1313,931.7793 L1323,931.7793 L1313,921.7793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="271" x="1037" y="939.373">{simuliert genau ein eigenes Portfolio oder,</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="227" x="1041" y="955.1025">nur im Vergleich, genau eine Anlage</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="252" x="1041" y="970.832">(xor; Anlage = Portfolio mit 100 %, E30)}</text><text fill="#2E7D32" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="220" x="1037" y="986.5615">{oder, ohne Anmeldung, genau ein</text><text fill="#2E7D32" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="161" x="1041" y="1002.291">Beispielportfolio (US-09)}</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="197" x="1037" y="1018.0205">{Schätzzeitraum gilt gemeinsam</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="196" x="1041" y="1033.75">für alle Anlagen der Simulation}</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="219" x="1037" y="1049.4795">{nur für eigene Portfolios (NF-04)}</text><path d="M974.5,1179.2793 L974.5,1236.4678 A0,0 0 0 0 974.5,1236.4678 L1277.5,1236.4678 A0,0 0 0 0 1277.5,1236.4678 L1277.5,1189.2793 L1267.5,1179.2793 L1102.74,1179.2793 L942.15,1019.4593 L1094.74,1179.2793 L974.5,1179.2793 A0,0 0 0 0 974.5,1179.2793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><path d="M1267.5,1179.2793 L1267.5,1189.2793 L1277.5,1189.2793 L1267.5,1179.2793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="282" x="980.5" y="1196.873">{genau eine Schätzung je simulierter Anlage}</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="236" x="980.5" y="1212.6025">{wird aus den Kurswerten der Anlage</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="172" x="984.5" y="1228.332">im Schätzzeitraum ermittelt}</text><path d="M525,1365.2793 L525,1453.9268 A0,0 0 0 0 525,1453.9268 L793,1453.9268 A0,0 0 0 0 793,1453.9268 L793,1375.2793 L783,1365.2793 L663,1365.2793 L659,1251.1893 L655,1365.2793 L525,1365.2793 A0,0 0 0 0 525,1365.2793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><path d="M783,1365.2793 L783,1375.2793 L793,1375.2793 L783,1365.2793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="178" x="531" y="1382.873">{ein Verlaufspunkt je Monat,</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="224" x="535" y="1398.6025">von 0 bis anlagehorizontJahre × 12}</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="247" x="531" y="1414.332">p5, p50, p95 = 5., 50. und 95. Perzentil</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="212" x="531" y="1430.0615">des Portfoliowerts über alle Pfade</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="216" x="531" y="1445.791">(Grundlage des Fächerdiagramms)</text><path d="M863,1341.7793 L863,1477.6152 A0,0 0 0 0 863,1477.6152 L1291,1477.6152 A0,0 0 0 0 1291,1477.6152 L1291,1351.7793 L1281,1341.7793 L1000.77,1341.7793 L904.57,1264.4893 L992.77,1341.7793 L863,1341.7793 A0,0 0 0 0 863,1341.7793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><path d="M1281,1341.7793 L1281,1351.7793 L1291,1351.7793 L1281,1341.7793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="277" x="869" y="1359.373">Werte zum Ende des Anlagehorizonts (E24)</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="225" x="869" y="1375.1025">summeEinzahlungen = startkapital +</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="328" x="869" y="1390.832">anlagehorizontJahre × 12 × monatlicheSparrate (E19)</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="407" x="869" y="1406.5615">valueAtRisk95 = max(0, summeEinzahlungen − endwertP5) (E25)</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="353" x="869" y="1422.291">maxDrawdownMedian = Median des größten Rückgangs</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="193" x="869" y="1438.0205">vom Höchststand je Pfad (E26)</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="280" x="869" y="1453.75">/zielwahrscheinlichkeit = Anteil der Pfade mit</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="284" x="869" y="1469.4795">Endwert ≥ zielbetrag; nur mit Zielbetrag (E27)</text><path d="M6,1163.2793 L6,1251.9268 A0,0 0 0 0 6,1251.9268 L344,1251.9268 A0,0 0 0 0 344,1251.9268 L344,1173.2793 L334,1163.2793 L198.66,1163.2793 L259.12,1019.4593 L190.66,1163.2793 L6,1163.2793 A0,0 0 0 0 6,1163.2793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><path d="M334,1163.2793 L334,1173.2793 L344,1173.2793 L334,1163.2793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="244" x="12" y="1180.873">{name: Pflicht, höchstens 100 Zeichen}</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="237" x="12" y="1196.6025">{zeigt beim Aufrufen dieselben Werte</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="313" x="16" y="1212.332">wie beim Speichern, ohne Neuberechnung (E32)}</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="204" x="12" y="1228.0615">{nur für den besitzenden Nutzer</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="194" x="16" y="1243.791">sichtbar und löschbar (NF-04)}</text><path d="M1160.5,475.7793 L1160.5,627.3447 L1545.5,627.3447 L1545.5,485.7793 L1535.5,475.7793 L1160.5,475.7793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><path d="M1535.5,475.7793 L1535.5,485.7793 L1545.5,485.7793 L1535.5,475.7793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="192" x="1166.5" y="493.373">{genau zwei Einträge (US-07)}</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="268" x="1166.5" y="509.1025">{die Simulationen aller Einträge verwenden</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="274" x="1170.5" y="524.832">dieselben Parameterwerte, denselben Seed</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="252" x="1170.5" y="540.5615">und einen gemeinsamen Schätzzeitraum</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="190" x="1170.5" y="556.291">für alle Anlagen (E29, NF-08)}</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="273" x="1166.5" y="572.0205">/wahrscheinlichkeitErsterHöher = Anteil der</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="281" x="1166.5" y="587.75">Pfade, in denen Eintrag 1 am Ende mehr wert</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="129" x="1166.5" y="603.4795">ist als Eintrag 2 (E31)</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="364" x="1166.5" y="619.209">{wird nicht gespeichert (E34; Speichern ist Won't, CR-01)}</text><path d="M44,276.2793 L44,364.9268 A0,0 0 0 0 44,364.9268 L380,364.9268 A0,0 0 0 0 380,364.9268 L380,286.2793 L370,276.2793 L270.12,276.2793 L450.46,127.4493 L262.12,276.2793 L44,276.2793 A0,0 0 0 0 44,276.2793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><path d="M370,276.2793 L370,286.2793 L380,286.2793 L370,276.2793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="300" x="50" y="293.873">{vom Team vorgegeben, gehört keinem Nutzer}</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="295" x="50" y="309.6025">{Gäste können es ohne Anmeldung simulieren,</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="239" x="54" y="325.332">höchstens 10.000 Pfade; das Ergebnis</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="199" x="54" y="341.0615">wird nicht gespeichert (US-09)}</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="315" x="50" y="356.791">{Gewichtungen wie beim Portfolio, Summe 100 %}</text><path d="M2140.5,714.7793 L2140.5,834.8857 L2475.5,834.8857 L2475.5,724.7793 L2465.5,714.7793 L2140.5,714.7793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><path d="M2465.5,714.7793 L2465.5,724.7793 L2475.5,724.7793 L2465.5,714.7793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="314" x="2146.5" y="732.373">{art: Registrierung, Anmeldung, Portfolio angelegt,</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="302" x="2150.5" y="748.1025">Simulation durchgeführt, Simulation gespeichert,</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="268" x="2150.5" y="763.832">Vergleich durchgeführt, Beispielsimulation,</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="132" x="2150.5" y="779.5615">Anlagensuche (E37)}</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="271" x="2146.5" y="795.291">{nur nach einer erfolgreichen Aktion (E37)}</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="258" x="2146.5" y="811.0205">{anonym: kein Bezug zu Nutzer, Portfolio</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="135" x="2150.5" y="826.75">oder Eingaben (E36)}</text><path d="M2117.5,268.7793 L2117.5,373.1563 L2456.5,373.1563 L2456.5,278.7793 L2446.5,268.7793 L2117.5,268.7793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><path d="M2446.5,268.7793 L2446.5,278.7793 L2456.5,278.7793 L2446.5,268.7793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="318" x="2123.5" y="286.373">{monat: Kalendermonat nach deutscher Zeit (E38)}</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="241" x="2123.5" y="302.1025">{nur Monate ab Beginn der Erfassung,</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="154" x="2127.5" y="317.832">keine künftigen Monate}</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="259" x="2123.5" y="333.5615">/vorläufig = monat ist der laufende Monat</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="242" x="2123.5" y="349.291">{nur für die Geschäftsführung sichtbar</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="177" x="2127.5" y="365.0205">und exportierbar (E40, E41)}</text><path d="M2546,722.7793 L2546,827.1563 A0,0 0 0 0 2546,827.1563 L2844,827.1563 A0,0 0 0 0 2844,827.1563 L2844,732.7793 L2834,722.7793 L2572.45,722.7793 L2189.54,569.9393 L2564.45,722.7793 L2546,722.7793 A0,0 0 0 0 2546,722.7793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><path d="M2834,722.7793 L2834,732.7793 L2844,732.7793 L2834,722.7793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="215" x="2552" y="740.373">{genau neun Kennzahlen in fester</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="236" x="2556" y="756.1025">Reihenfolge (E39): acht Anzahlen von</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="259" x="2556" y="771.832">Nutzungsereignissen je Art im Monat und</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="273" x="2556" y="787.5615">die Zahl der Nutzerkonten am Monatsende}</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="236" x="2552" y="803.291">/wert = Anzahl im Monat bzw. Konten</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="251" x="2552" y="819.0205">am Monatsende (laufender Monat: jetzt)</text><path d="M1449.5,746.2793 L1449.5,803.4678 L1718.5,803.4678 L1718.5,756.2793 L1708.5,746.2793 L1449.5,746.2793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><path d="M1708.5,746.2793 L1708.5,756.2793 L1718.5,756.2793 L1708.5,746.2793 " fill="#FFFBE6" style="stroke: #999999; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="248" x="1455.5" y="763.873">{bezeichnung: ohne Eingabe Name des</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="243" x="1459.5" y="779.6025">simulierten Portfolios bzw. der Anlage}</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="208" x="1455.5" y="795.332">{position: 1 oder 2 (Reihenfolge)}</text><!--MD5=[2300fe4671d9c0a1dfdca46bb8af96fb]
+link Nutzer to Anmeldung--><path d="M1098.76,97.7793 C1129.07,97.7793 1170.47,97.7793 1201.97,97.7793 " fill="none" id="Nutzer-Anmeldung" style="stroke: #333333; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="19" x="1134.25" y="91.373">hat</text><polygon fill="#000000" points="1156.25,85.144,1162.25,88.144,1156.25,91.144,1156.25,85.144" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="5" x="1106.4657" y="94.1236">1</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="23" x="1170.8798" y="94.3381">0..*</text><!--MD5=[5d899c44777abfbb0f0fc6b4e461b06f]
+link Nutzer to Portfolio--><path d="M1058,140.8693 C1058,180.0693 1058,238.1993 1058,277.4693 " fill="none" id="Nutzer-Portfolio" style="stroke: #333333; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="41" x="1059" y="214.373">besitzt</text><polygon fill="#000000" points="1075,223.5088,1078,229.5088,1081,223.5088,1075,223.5088" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="5" x="1052.6172" y="161.284">1</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="23" x="1033.0953" y="266.7281">0..*</text><!--MD5=[c0880c06bb83895d642730836479c9e1]
+link Portfolio to Position--><path d="M1124.22,320.7793 C1165.09,320.7793 1216.06,320.7793 1250.18,320.7793 " fill="none" id="Portfolio-Position" style="stroke: #333333; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="42" x="1159.75" y="314.373">enthält</text><polygon fill="#000000" points="1204.75,308.144,1210.75,311.144,1204.75,314.144,1204.75,308.144" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="21" x="1132.1318" y="317.6497">0..1</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="20" x="1222.5587" y="317.2495">1..*</text><!--MD5=[b9c33488f222795e7e0f01d0bff087b0]
+link Position to Anlage--><path d="M1250.35,342.7093 C1174.62,384.8193 1011,475.7793 1011,475.7793 C1011,475.7793 883.74,651.3493 824.58,732.9693 " fill="none" id="Position-Anlage" style="stroke: #333333; stroke-width: 1.0;"/><polygon fill="#000000" points="1019,550.644,1013,553.644,1019,556.644,1019,550.644" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="99" x="1025" y="556.873">bezieht sich auf</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="23" x="1219.5167" y="342.6746">0..*</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="5" x="832.3995" y="718.5867">1</text><!--MD5=[5c505b048081870fddc26c7079a09e9f]
+link Anlage to Kurswert--><path d="M824.79,774.7793 C853.4,774.7793 896.75,774.7793 927.87,774.7793 " fill="none" id="Anlage-Kurswert" style="stroke: #333333; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="19" x="860.25" y="768.373">hat</text><polygon fill="#000000" points="882.25,762.144,888.25,765.144,882.25,768.144,882.25,762.144" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="5" x="832.6607" y="770.5879">1</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="23" x="896.9602" y="771.2248">0..*</text><!--MD5=[1cfeeef6c74d7438065f96b74b81c0f9]
+link Portfolio to Simulation--><path d="M1011,363.8593 C960.07,409.4593 886,475.7793 886,475.7793 C886,475.7793 730,714.7793 730,714.7793 C730,714.7793 687.31,879.5193 668.14,953.5193 " fill="none" id="Portfolio-Simulation" style="stroke: #333333; stroke-width: 1.0;"/><polygon fill="#000000" points="786.5,673.7793,789.5,667.7793,792.5,673.7793,786.5,673.7793" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="52" x="765" y="689.373">simuliert</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="21" x="981.1953" y="384.2725">0..1</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="23" x="644.6754" y="942.5255">0..*</text><!--MD5=[ec33f8396abea98799de960600c3770a]
+link Anlage to Simulation--><path d="M765.49,821.9993 C740.26,861.5193 704.48,917.5493 681.5,953.5293 " fill="none" id="Anlage-Simulation" style="stroke: #333333; stroke-width: 1.0;"/><polygon fill="#000000" points="754.5,880.7793,757.5,874.7793,760.5,880.7793,754.5,880.7793" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="52" x="733" y="896.373">simuliert</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="21" x="736.613" y="827.4476">0..1</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="23" x="688.1938" y="942.5375">0..*</text><!--MD5=[bf1b52adb8f9caca438e6d6d6a0369f9]
+link Simulation to Schätzung--><path d="M716.54,989.7793 C762.08,989.7793 824.86,989.7793 867.31,989.7793 " fill="none" id="Simulation-Schätzung" style="stroke: #333333; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="66" x="752.5" y="983.373">basiert auf</text><polygon fill="#000000" points="821.5,977.144,827.5,980.144,821.5,983.144,821.5,977.144" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="5" x="724.6079" y="986.3841">1</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="20" x="839.338" y="986.3599">1..*</text><!--MD5=[832141142236ed27aa4e327a72898928]
+link Anlage to Schätzung--><path d="M824.57,828.7093 C847.77,870.2293 879.17,926.4393 897.93,960.0093 " fill="none" id="Anlage-Schätzung" style="stroke: #333333; stroke-width: 1.0;"/><polygon fill="#000000" points="871.5,880.7793,874.5,874.7793,877.5,880.7793,871.5,880.7793" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="40" x="856" y="896.373">gilt für</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="5" x="832.3871" y="837.6633">1</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="23" x="868.5544" y="949.0527">0..*</text><!--MD5=[ff1e39990fafe752728f0f31f91aec23]
+link Simulation to Simulationsparameter--><path d="M624.93,1025.8793 C596.29,1055.3893 560,1092.7793 560,1092.7793 C560,1092.7793 539.21,1122.3993 518.83,1151.4493 " fill="none" id="Simulation-Simulationsparameter" style="stroke: #333333; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="67" x="561" y="1106.373">verwendet</text><polygon fill="#000000" points="590,1115.5088,593,1121.5088,596,1115.5088,590,1115.5088" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="5" x="612.9588" y="1046.8111">1</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="5" x="518.7118" y="1140.4896">1</text><!--MD5=[88cb3b273eb4e02e6b4baa4e18bb4cc3]
+link Simulation to Verlaufspunkt--><path d="M659,1025.9593 C659,1063.8593 659,1124.1393 659,1164.5693 " fill="none" id="Simulation-Verlaufspunkt" style="stroke: #333333; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="36" x="660" y="1106.373">ergibt</text><polygon fill="#000000" points="673.5,1115.5088,676.5,1121.5088,679.5,1115.5088,673.5,1115.5088" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="5" x="653.5234" y="1046.9064">1</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="20" x="637.2813" y="1153.5308">1..*</text><!--MD5=[c077a49da02550a6a0620d6aecef0935]
+link Simulation to Kennzahlen--><path d="M688.16,1025.9593 C714.71,1057.9993 754.52,1106.0393 786.43,1144.5493 " fill="none" id="Simulation-Kennzahlen" style="stroke: #333333; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="36" x="755" y="1106.373">liefert</text><polygon fill="#000000" points="768.5,1115.5088,771.5,1121.5088,774.5,1115.5088,768.5,1115.5088" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="5" x="688.2421" y="1046.9064">1</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="5" x="774.8402" y="1133.5864">1</text><!--MD5=[1429ef78d5754b283a5bed1958510307]
+link GespeicherteSimulation to Simulation--><path d="M344.79,989.7793 C419.13,989.7793 533.03,989.7793 601.35,989.7793 " fill="none" id="GespeicherteSimulation-Simulation" style="stroke: #333333; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="75" x="429" y="983.373">bewahrt auf</text><polygon fill="#000000" points="507,977.144,513,980.144,507,983.144,507,977.144" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="21" x="352.4683" y="986.7089">0..1</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="5" x="588.6433" y="986.4301">1</text><!--MD5=[c6d78a1325b1645e1151fe5558afa4fe]
+link Beispielportfolio to Position--><path d="M534.77,123.3493 C572.73,142.4693 619,165.7793 619,165.7793 C619,165.7793 1159,252.7793 1159,252.7793 C1159,252.7793 1212.26,280.4393 1250.34,300.2193 " fill="none" id="Beispielportfolio-Position" style="stroke: #333333; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="42" x="939" y="214.373">enthält</text><polygon fill="#000000" points="984,208.144,990,211.144,984,214.144,984,208.144" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="21" x="542.364" y="123.2961">0..1</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="20" x="1222.4463" y="293.2402">1..*</text><!--MD5=[8844ac1fd50541a3dcd835790b6eee7f]
+link Beispielportfolio to Simulation--><path d="M486,127.6693 C486,187.5793 486,319.7793 486,319.7793 C486,319.7793 486,319.7793 486,775.7793 C486,775.7793 581.3,893.1093 630.43,953.6093 " fill="none" id="Beispielportfolio-Simulation" style="stroke: #333333; stroke-width: 1.0;"/><polygon fill="#000000" points="508.5,554.2793,511.5,548.2793,514.5,554.2793,508.5,554.2793" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="52" x="487" y="569.873">simuliert</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="21" x="462.8344" y="148.0357">0..1</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="23" x="599.5412" y="942.6332">0..*</text><!--MD5=[cee7bdd21f97fc64da88acd75617b155]
+reverse link Monatsauswertung to Kennzahlwert--><path d="M2021.65,367.9393 C2053.21,413.9793 2100.72,483.2693 2127.26,521.9893 " fill="none" id="Monatsauswertung&lt;-Kennzahlwert" style="stroke: #333333; stroke-width: 1.0;"/><polygon fill="#333333" points="2014.19,357.0593,2014.2824,364.2698,2020.9738,366.9578,2020.8814,359.7473,2014.19,357.0593" style="stroke: #333333; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="49" x="2070" y="437.373">umfasst</text><polygon fill="#000000" points="2090,446.5088,2093,452.5088,2096,446.5088,2090,446.5088" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="5" x="2013.1891" y="377.7509">1</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="8" x="2113.7701" y="511.028">9</text><!--MD5=[0969b9f40b36a98d4f534a60fa0c2c5c]
+link Monatsauswertung to Nutzungsereignis--><path d="M1992.17,356.8693 C1997.54,443.4693 2011.33,666.0493 2016.23,745.2693 " fill="none" id="Monatsauswertung-Nutzungsereignis" style="stroke: #333333; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="29" x="2010" y="556.873">zählt</text><polygon fill="#000000" points="2020,566.0088,2023,572.0088,2026,566.0088,2020,566.0088" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="23" x="1967.3915" y="377.7992">0..*</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="23" x="1990.1613" y="734.3728">0..*</text><!--MD5=[68f35851017ada3e36e28309a8805a3b]
+link Nutzer to Monatsauswertung--><path d="M1098.59,123.7293 C1129.58,142.7793 1167,165.7793 1167,165.7793 C1167,165.7793 1745.47,274.0193 1932.46,309.0093 " fill="none" id="Nutzer-Monatsauswertung" style="stroke: #333333; stroke-width: 1.0;"/><polygon fill="#000000" points="1442,208.144,1436,211.144,1442,214.144,1442,208.144" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="239" x="1448" y="214.373">Geschäftsführung sieht und exportiert</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="23" x="1106.5663" y="124.2226">0..*</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="23" x="1901.4773" y="304.3912">0..*</text><!--MD5=[58beb0ad76e91ba9d43a8616e67b7d52]
+link Kennzahlwert to Nutzungsereignis--><!--MD5=[760b1d909484a17d80aef6aed0d02b2f]
+reverse link Vergleich to Vergleichseintrag--><path d="M1729.82,592.8193 C1757.1,636.8293 1800.25,706.4193 1824.3,745.2293 " fill="none" id="Vergleich&lt;-Vergleichseintrag" style="stroke: #333333; stroke-width: 1.0;"/><polygon fill="#333333" points="1722.91,581.6693,1722.6728,588.8765,1729.2344,591.8674,1729.4716,584.6602,1722.91,581.6693" style="stroke: #333333; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="73" x="1783" y="676.373">besteht aus</text><polygon fill="#000000" points="1815,685.5088,1818,691.5088,1821,685.5088,1815,685.5088" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="5" x="1721.0883" y="602.0357">1</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="8" x="1811.2819" y="734.3235">2</text><!--MD5=[9c701d1f86edda14c854422b8fb83f4f]
+link Vergleichseintrag to Simulation--><path d="M1798.8,804.4193 C1776.13,819.4493 1753,834.7793 1753,834.7793 C1753,834.7793 832,921.7793 832,921.7793 C832,921.7793 766.93,946.9793 716.61,966.4693 " fill="none" id="Vergleichseintrag-Simulation" style="stroke: #333333; stroke-width: 1.0;"/><polygon fill="#000000" points="1383,877.144,1377,880.144,1383,883.144,1383,877.144" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="135" x="1389" y="883.373">wird berechnet durch</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="5" x="1783.8031" y="825.202">1</text><text fill="#000000" font-family="Arial" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="5" x="724.6873" y="959.9418">1</text><!--MD5=[94eca4b95112c6b580d316dc1e70dba0]
+link Position to Vergleich--><!--MD5=[a7a66ada3d20af47460d1298842ba8c7]
+link GMN42 to Nutzer--><path d="M947.55,97.7793 C961.51,97.7793 972.33,97.7793 972.33,97.7793 C972.33,97.7793 995.28,97.7793 1017.42,97.7793 " fill="none" id="GMN42-Nutzer" style="stroke: #333333; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><!--MD5=[f3aa02caf06ecfd03a363d918b5a47c8]
+link Anmeldung to GMN45--><path d="M1294.22,97.7793 C1318.25,97.7793 1342.67,97.7793 1342.67,97.7793 C1342.67,97.7793 1351.45,97.7793 1363.68,97.7793 " fill="none" id="Anmeldung-GMN45" style="stroke: #333333; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><!--MD5=[7f1b740fb1e18b5cf4d7c5c914d77549]
+link GMN48 to Portfolio--><path d="M922.01,320.7793 C941.42,320.7793 957.67,320.7793 957.67,320.7793 C957.67,320.7793 973.13,320.7793 991.92,320.7793 " fill="none" id="GMN48-Portfolio" style="stroke: #333333; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><!--MD5=[da7f98b6199f3616542097ae3f3d9546]
+link GMN51 to Position--><path d="M1796.2,157.9293 C1736.22,187.7993 1676,217.7793 1676,217.7793 C1676,217.7793 1422.93,284.3093 1325.56,309.9093 " fill="none" id="GMN51-Position" style="stroke: #333333; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><!--MD5=[eef1da9a2c5a2927c618f7ae2295e3e2]
+link Kurswert to GMN54--><path d="M1004.16,774.7793 C1027.54,774.7793 1053,774.7793 1053,774.7793 C1053,774.7793 1061.93,774.7793 1074.06,774.7793 " fill="none" id="Kurswert-GMN54" style="stroke: #333333; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><!--MD5=[21cbf98878b1663b6c3261f7c2db8ea9]
+link Simulation to GMN60--><path d="M716.66,958.8693 C778.22,925.8693 867,878.2793 867,878.2793 C867,878.2793 960,878.2793 960,878.2793 C960,878.2793 999.34,898.4893 1044.52,921.7093 " fill="none" id="Simulation-GMN60" style="stroke: #333333; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><!--MD5=[6b6798b23ceb1456a6d258739a4e2146]
+link GMN75 to Vergleich--><path d="M1545.64,551.7793 C1568.49,551.7793 1587.67,551.7793 1587.67,551.7793 C1587.67,551.7793 1599.56,551.7793 1615.77,551.7793 " fill="none" id="GMN75-Vergleich" style="stroke: #333333; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><!--MD5=[3f35120bacfc7883dce7770cc27ba0b8]
+link Nutzungsereignis to GMN81--><path d="M2070.58,774.7793 C2093.25,774.7793 2114.67,774.7793 2114.67,774.7793 C2114.67,774.7793 2125.7,774.7793 2140.32,774.7793 " fill="none" id="Nutzungsereignis-GMN81" style="stroke: #333333; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><!--MD5=[be014cf610c65111bcd149b144407161]
+link Monatsauswertung to GMN84--><path d="M2047.59,320.7793 C2069.37,320.7793 2089,320.7793 2089,320.7793 C2089,320.7793 2101.37,320.7793 2117.37,320.7793 " fill="none" id="Monatsauswertung-GMN84" style="stroke: #333333; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><!--MD5=[e48602db4775e4afb5da78786db80110]
+link GMN90 to Vergleichseintrag--><path d="M1718.53,774.7793 C1738.04,774.7793 1756,774.7793 1756,774.7793 C1756,774.7793 1771.02,774.7793 1788.51,774.7793 " fill="none" id="GMN90-Vergleichseintrag" style="stroke: #333333; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><rect fill="#DDDDDD" height="162.4551" rx="5" ry="5" style="stroke: #000000; stroke-width: 1.0;" width="1246" x="8" y="1495.7793"/><text fill="#000000" font-family="Arial" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="59" x="14" y="1514.3418">Legende</text><text fill="#000000" font-family="Arial" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="853" x="14" y="1531.2813">Konzeptionelles Modell nach Larman: Fachbegriffe, Attribute und Beziehungen, keine Operationen und keine technischen Klassen.</text><text fill="#000000" font-family="Arial" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="440" x="14" y="1548.2207">/attribut = abgeleiteter (berechneter) Wert · {…} = fachliche Regel ·</text><text fill="#000000" filter="url(#bfcmp9kpl8fyy0)" font-family="Arial" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="96" x="462" y="1548.2207">grün hinterlegt</text><text fill="#000000" font-family="Arial" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="174" x="566" y="1548.2207">= neuer Fachbegriff in v5 ·</text><text fill="#2E7D32" font-family="Arial" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="85" x="744" y="1548.2207">grüne Schrift</text><text fill="#000000" font-family="Arial" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="415" x="833" y="1548.2207">= in v5 ergänztes Attribut oder ergänzte Regel (Sprint 4 und 5)</text><text fill="#000000" font-family="Arial" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="717" x="14" y="1565.1602">Anlagen sind nicht nutzerbezogen: Alle Nutzer und Gäste greifen auf denselben Anlagenbestand zu (US-02).</text><text fill="#000000" font-family="Arial" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="1106" x="14" y="1582.0996">Simulation und gespeicherte Simulation gehören über ihr Portfolio indirekt zum Nutzer. Ein Vergleich wird vom angemeldeten Nutzer durchgeführt und nicht gespeichert.</text><text fill="#000000" font-family="Arial" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="1165" x="14" y="1599.0391">Nutzungsereignisse sind bewusst ohne Beziehung zu Nutzer, Portfolio oder Simulation (anonym, E36). Die CSV-Datei (US-12) enthält dieselben Werte wie die Monatsauswertung.</text><text fill="#000000" font-family="Arial" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="283" x="14" y="1615.9785">Bewusst nicht umgesetzt (Won't, CR-01):</text><text fill="#000000" font-family="Arial" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="811" x="301" y="1615.9785">gespeicherter Vergleich (Rest von US-08), mehr als zwei Vergleichseinträge (US-10), automatischer Monatsbericht (US-13).</text><text fill="#000000" font-family="Arial" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="1135" x="14" y="1632.918">Finanzdaten-API ist Akteur (Use-Case-Diagramm), kein Fachbegriff. Token, Cache, Queue und die Aufteilung in Dienste sind technische Lösungen und daher nicht enthalten.</text><text fill="#000000" font-family="Arial" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="337" x="14" y="1649.8574">Vorversion: diagramme/archiv/domaenenmodell_v4</text><!--MD5=[c91c91eaf16dcccdfedcfeb69e6c9962]
+@startuml domaenenmodell_v5
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype polyline
+skinparam nodesep 70
+skinparam ranksep 70
+skinparam defaultFontName Arial
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+  ArrowColor #333333
+}
+skinparam note {
+  BackgroundColor #FFFBE6
+  BorderColor #999999
+}
+hide circle
+hide methods
+hide empty members
+
+title Domänenmodell v5 - LookUpStock (Sprint 5: US-01 bis US-09, US-11, US-12)
+
+class Nutzer {
+  email
+  passwort
+  registriertAm
+  <color:#2E7D32>rolle</color>
+}
+
+class Anmeldung {
+  angemeldetAm
+  gültigBis
+  /istGültig
+}
+
+class Portfolio {
+  name
+  erstelltAm
+  geändertAm
+  /summeGewichtungen
+}
+
+class Position {
+  gewichtung
+}
+
+class Anlage {
+  name
+  ticker
+  isin
+  börse
+  währung
+  art
+}
+
+class Kurswert {
+  datum
+  schlusskurs
+}
+
+class Simulation {
+  durchgeführtAm
+  schätzzeitraumVon
+  schätzzeitraumBis
+}
+
+class "Gespeicherte Simulation" as GespeicherteSimulation {
+  name
+  gespeichertAm
+}
+
+class Simulationsparameter {
+  startkapital
+  monatlicheSparrate
+  anlagehorizontJahre
+  pfadanzahl
+  seed
+  zielbetrag
+}
+
+class Schätzung {
+  jahresrendite
+  jahresvolatilität
+}
+
+class Verlaufspunkt {
+  monat
+  p5
+  p50
+  p95
+}
+
+class Kennzahlen {
+  summeEinzahlungen
+  endwertP5
+  endwertMedian
+  endwertP95
+  valueAtRisk95
+  maxDrawdownMedian
+  /zielwahrscheinlichkeit
+}
+
+class Vergleich {
+  durchgeführtAm
+  /wahrscheinlichkeitErsterHöher
+}
+
+class Vergleichseintrag {
+  bezeichnung
+  position
+}
+
+class Beispielportfolio #EAF4E4 {
+  name
+  beschreibung
+}
+
+class Nutzungsereignis #EAF4E4 {
+  art
+  zeitpunkt
+}
+
+class Monatsauswertung #EAF4E4 {
+  monat
+  erfasstSeit
+  /vorläufig
+}
+
+class Kennzahlwert #EAF4E4 {
+  bezeichnung
+  /wert
+}
+
+Nutzer "1" -right- "0..*" Anmeldung : hat >
+Nutzer "1" -down- "0..*" Portfolio : besitzt >
+
+Portfolio "0..1" -right- "1..*" Position : enthält >
+Position "0..*" -right- "1" Anlage : bezieht sich auf >
+Anlage "1" -right- "0..*" Kurswert : hat >
+
+Portfolio "0..1" -down- "0..*" Simulation : < simuliert
+Anlage "0..1" - - "0..*" Simulation : < simuliert
+Simulation "1" -right- "1..*" Schätzung : basiert auf >
+Anlage "1" -down- "0..*" Schätzung : < gilt für
+Simulation "1" -down- "1" Simulationsparameter : verwendet >
+Simulation "1" -down- "1..*" Verlaufspunkt : ergibt >
+Simulation "1" -down- "1" Kennzahlen : liefert >
+GespeicherteSimulation "0..1" -right- "1" Simulation : bewahrt auf >
+
+Beispielportfolio "0..1" - - "1..*" Position : enthält >
+Beispielportfolio "0..1" - - "0..*" Simulation : < simuliert
+
+Monatsauswertung "1" *-down- "9" Kennzahlwert : umfasst >
+Monatsauswertung "0..*" - - "0..*" Nutzungsereignis : zählt >
+Nutzer "0..*" - - "0..*" Monatsauswertung : < Geschäftsführung sieht und exportiert
+Kennzahlwert -[hidden]down- Nutzungsereignis
+
+Vergleich "1" *-down- "2" Vergleichseintrag : besteht aus >
+Vergleichseintrag "1" - - "1" Simulation : wird berechnet durch >
+Position -down[hidden]- Vergleich
+
+note left of Nutzer
+  {email: Pflicht, gültiges Format (E12),
+   eindeutig ohne Unterscheidung von
+   Groß- und Kleinschreibung (E11)}
+  {passwort: mindestens 8 Zeichen,
+   nur als Hash gespeichert (NF-03)}
+  <color:#2E7D32>{rolle: Nutzer oder Geschäftsführung;</color>
+  <color:#2E7D32> bei der Registrierung immer Nutzer,</color>
+  <color:#2E7D32> Geschäftsführung vergibt das Team (E40)}</color>
+end note
+
+note right of Anmeldung
+  {gültigBis = angemeldetAm + 24 Stunden (NF-16)}
+  {endet vorzeitig durch Abmelden}
+  /istGültig = noch nicht abgelaufen
+  und nicht abgemeldet
+end note
+
+note left of Portfolio
+  {name: Pflicht, höchstens 100 Zeichen}
+  {ein Name nur aus Leerzeichen gilt als leer}
+  {nur für den besitzenden Nutzer
+   sichtbar, änderbar und löschbar (NF-04)}
+  {beim Bearbeiten gelten dieselben Regeln
+   wie beim Erstellen; geändertAm wird aktualisiert}
+  {beim Löschen werden die gespeicherten
+   Simulationen des Portfolios mitgelöscht (E28)}
+end note
+
+note top of Position
+  {gewichtung > 0 %, höchstens
+   2 Nachkommastellen}
+  {Summe der Gewichtungen je Portfolio
+   = 100 % (Toleranz ± 0,01 Prozentpunkte)}
+  {jede Anlage höchstens einmal je Portfolio}
+  <color:#2E7D32>{gehört genau einem Portfolio oder</color>
+  <color:#2E7D32> genau einem Beispielportfolio (xor)}</color>
+end note
+
+note right of Kurswert
+  {ein Kurswert je Monat (Monatsschlusskurs)}
+  {für eine Simulation sind je Anlage
+   mindestens 36 Monatswerte nötig}
+end note
+
+note bottom of Simulationsparameter
+  {anlagehorizontJahre: ganze Zahl, 1 bis 40}
+  {startkapital ≥ 0, monatlicheSparrate ≥ 0,
+   nicht beide 0}
+  {pfadanzahl: 1.000 bis 50.000, Standard 10.000}
+  {seed: optional; ohne Angabe vom System
+   erzeugt und dem Nutzer angezeigt}
+  {zielbetrag: optional, > 0 (E27)}
+end note
+
+note right of Simulation
+  {simuliert genau ein eigenes Portfolio oder,
+   nur im Vergleich, genau eine Anlage
+   (xor; Anlage = Portfolio mit 100 %, E30)}
+  <color:#2E7D32>{oder, ohne Anmeldung, genau ein</color>
+  <color:#2E7D32> Beispielportfolio (US-09)}</color>
+  {Schätzzeitraum gilt gemeinsam
+   für alle Anlagen der Simulation}
+  {nur für eigene Portfolios (NF-04)}
+end note
+
+note bottom of Schätzung
+  {genau eine Schätzung je simulierter Anlage}
+  {wird aus den Kurswerten der Anlage
+   im Schätzzeitraum ermittelt}
+end note
+
+note bottom of Verlaufspunkt
+  {ein Verlaufspunkt je Monat,
+   von 0 bis anlagehorizontJahre × 12}
+  p5, p50, p95 = 5., 50. und 95. Perzentil
+  des Portfoliowerts über alle Pfade
+  (Grundlage des Fächerdiagramms)
+end note
+
+note bottom of Kennzahlen
+  <b>Werte zum Ende des Anlagehorizonts (E24)</b>
+  summeEinzahlungen = startkapital +
+  anlagehorizontJahre × 12 × monatlicheSparrate (E19)
+  valueAtRisk95 = max(0, summeEinzahlungen − endwertP5) (E25)
+  maxDrawdownMedian = Median des größten Rückgangs
+  vom Höchststand je Pfad (E26)
+  /zielwahrscheinlichkeit = Anteil der Pfade mit
+  Endwert ≥ zielbetrag; nur mit Zielbetrag (E27)
+end note
+
+note bottom of GespeicherteSimulation
+  {name: Pflicht, höchstens 100 Zeichen}
+  {zeigt beim Aufrufen dieselben Werte
+   wie beim Speichern, ohne Neuberechnung (E32)}
+  {nur für den besitzenden Nutzer
+   sichtbar und löschbar (NF-04)}
+end note
+
+note left of Vergleich
+  {genau zwei Einträge (US-07)}
+  {die Simulationen aller Einträge verwenden
+   dieselben Parameterwerte, denselben Seed
+   und einen gemeinsamen Schätzzeitraum
+   für alle Anlagen (E29, NF-08)}
+  /wahrscheinlichkeitErsterHöher = Anteil der
+  Pfade, in denen Eintrag 1 am Ende mehr wert
+  ist als Eintrag 2 (E31)
+  {wird nicht gespeichert (E34; Speichern ist Won't, CR-01)}
+end note
+
+note bottom of Beispielportfolio
+  {vom Team vorgegeben, gehört keinem Nutzer}
+  {Gäste können es ohne Anmeldung simulieren,
+   höchstens 10.000 Pfade; das Ergebnis
+   wird nicht gespeichert (US-09)}
+  {Gewichtungen wie beim Portfolio, Summe 100 %}
+end note
+
+note right of Nutzungsereignis
+  {art: Registrierung, Anmeldung, Portfolio angelegt,
+   Simulation durchgeführt, Simulation gespeichert,
+   Vergleich durchgeführt, Beispielsimulation,
+   Anlagensuche (E37)}
+  {nur nach einer erfolgreichen Aktion (E37)}
+  {anonym: kein Bezug zu Nutzer, Portfolio
+   oder Eingaben (E36)}
+end note
+
+note right of Monatsauswertung
+  {monat: Kalendermonat nach deutscher Zeit (E38)}
+  {nur Monate ab Beginn der Erfassung,
+   keine künftigen Monate}
+  /vorläufig = monat ist der laufende Monat
+  {nur für die Geschäftsführung sichtbar
+   und exportierbar (E40, E41)}
+end note
+
+note bottom of Kennzahlwert
+  {genau neun Kennzahlen in fester
+   Reihenfolge (E39): acht Anzahlen von
+   Nutzungsereignissen je Art im Monat und
+   die Zahl der Nutzerkonten am Monatsende}
+  /wert = Anzahl im Monat bzw. Konten
+  am Monatsende (laufender Monat: jetzt)
+end note
+
+note left of Vergleichseintrag
+  {bezeichnung: ohne Eingabe Name des
+   simulierten Portfolios bzw. der Anlage}
+  {position: 1 oder 2 (Reihenfolge)}
+end note
+
+legend bottom left
+  <b>Legende</b>
+  Konzeptionelles Modell nach Larman: Fachbegriffe, Attribute und Beziehungen, keine Operationen und keine technischen Klassen.
+  /attribut = abgeleiteter (berechneter) Wert · {…} = fachliche Regel · <back:#EAF4E4> grün hinterlegt </back> = neuer Fachbegriff in v5 · <color:#2E7D32>grüne Schrift</color> = in v5 ergänztes Attribut oder ergänzte Regel (Sprint 4 und 5)
+  Anlagen sind nicht nutzerbezogen: Alle Nutzer und Gäste greifen auf denselben Anlagenbestand zu (US-02).
+  Simulation und gespeicherte Simulation gehören über ihr Portfolio indirekt zum Nutzer. Ein Vergleich wird vom angemeldeten Nutzer durchgeführt und nicht gespeichert.
+  Nutzungsereignisse sind bewusst ohne Beziehung zu Nutzer, Portfolio oder Simulation (anonym, E36). Die CSV-Datei (US-12) enthält dieselben Werte wie die Monatsauswertung.
+  <b>Bewusst nicht umgesetzt (Won't, CR-01):</b> gespeicherter Vergleich (Rest von US-08), mehr als zwei Vergleichseinträge (US-10), automatischer Monatsbericht (US-13).
+  Finanzdaten-API ist Akteur (Use-Case-Diagramm), kein Fachbegriff. Token, Cache, Queue und die Aufteilung in Dienste sind technische Lösungen und daher nicht enthalten.
+  Vorversion: diagramme/archiv/domaenenmodell_v4
+endlegend
+
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 11:22:07 CET 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 21.0.12.1+1-1-24.04.4-Ubuntu
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>
