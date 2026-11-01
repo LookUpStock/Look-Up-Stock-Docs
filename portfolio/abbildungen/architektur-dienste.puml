@@ -1,0 +1,37 @@
+@startuml architektur-dienste
+' Architektur nach Sprint 5 (ADR-07): 2 Dienste, 1 Datenbank, 2 Schemas
+' Portfolio Kapitel 3 (Docs #175), nachgebaut nach der Abbildung von Paul Kaufmann
+' KI-Nutzung: siehe KI-Log
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam componentStyle rectangle
+skinparam ArrowColor #888888
+skinparam rectangle {
+  BorderColor #999999
+  BackgroundColor #FFFFFF
+}
+title Synchron laufen nur Suche und Kurse, alles andere geht über die Queue\n<size:11>LookUpStock nach Sprint 5 (ADR-07): zwei Heroku-Apps, eine Datenbank mit zwei Schemas</size>
+
+rectangle "**Browser: MPA und SPA**\nFrontend-App lookupstockfrontend" as fe
+rectangle "**Twelve Data**\nexterne Kursdaten-API" as td
+rectangle "**core-service (App lookupstock)**\nREST und GraphQL, Anmeldung,\nPortfolios, Simulation, Vergleich,\nAuswertungen" as core #E8F1FB;line:2a6fdb;line.bold
+rectangle "**marktdaten-service**\nSuche und Kurse über Twelve Data,\nSuch-Cache und Kurs-Cache (24 h),\nVerbraucher kursdaten.vorladen" as md
+
+rectangle "PostgreSQL auf Heroku, an beide Apps angehängt" as pg #F0F0EE {
+  rectangle "**Schema public**\nportfolio, simulation, asset,\napp_user, usage_event" as pub
+  rectangle "**queue_message**\nnutzung.ereignis\nkursdaten.vorladen" as q #DCE6F2;line:2a6fdb;line.bold
+  rectangle "**Schema marktdaten**\nprice_cache" as mdschema
+}
+
+fe -down-> core : REST oder GraphQL, Bearer-Token
+core -right-> md : HTTP, synchron, 5 s\nX-Internal-Api-Key
+md -up-> td : API-Key nur hier
+core -down-> pub
+core -[#2a6fdb,dashed]-> q : stellt ein
+md -[#2a6fdb,dashed]-> q : holt ab, alle 15 s
+md -down-> mdschema
+
+legend bottom left
+  durchgezogen: synchron (HTTP bzw. Datenbankzugriff) · gestrichelt: asynchron über die Tabelle queue_message
+endlegend
+@enduml
