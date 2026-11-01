@@ -1,0 +1,50 @@
+@startuml architektur
+' Architektur von LookUpStock nach ADR-07 und ADR-08 (Portfolio Webprogrammierung, Docs #174)
+' KI-Nutzung: siehe KI-Log
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam componentStyle rectangle
+skinparam ArrowColor #444444
+skinparam rectangle {
+  BorderColor #555555
+}
+top to bottom direction
+
+actor "Nutzer / Gast /\nGeschäftsführung" as user
+
+rectangle "Frontend (Heroku-App lookupstockfrontend)\nHTML, CSS, JavaScript ohne Framework" as fe #EAF2FB {
+  component "MPA\nindex, portfolio, compare,\nlogin, dashboard" as mpa
+  component "SPA\napp.html mit Hash-Router\n(ADR-08)" as spa
+}
+
+rectangle "core-service (Heroku-App lookupstock)\nSpring Boot" as core #EAF4E4 {
+  component "REST /api/v1\nGraphQL /graphql" as api
+  component "Simulation, Vergleich,\nPortfolios, Anmeldung,\nAuswertungen" as logic
+  component "MarktdatenClient\n(MarketDataProvider)" as client
+  component "UsageEventConsumer" as consumer
+}
+
+rectangle "marktdaten-service\n(Heroku-App lookupstock-marktdaten)\nSpring Boot" as md #FFF4DD {
+  component "/internal/search\n/internal/prices" as internal
+  component "Such-Cache und\nKurs-Cache (24 h)" as cache
+  component "PricePreloadConsumer" as preload
+}
+
+database "PostgreSQL (eine Datenbank)\nSchema public | Schema marktdaten\nqueue_message" as db
+cloud "Twelve Data\n(Fremdservice)" as td
+
+user --> mpa
+user --> spa
+mpa --> api : HTTPS, JSON\nBearer-Token
+spa --> api : HTTPS, JSON\nBearer-Token
+api --> logic
+logic --> client
+client --> internal : synchron (Ausnahme),\nX-Internal-Api-Key, 5 s
+internal --> cache
+cache --> td : HTTPS, API-Key
+logic ..> db : Queue: nutzung.ereignis,\nkursdaten.vorladen (asynchron)
+consumer ..> db : abholen alle 5 s
+preload ..> db : abholen alle 15 s
+logic --> db : Portfolios, Simulationen,\nNutzungsereignisse
+cache --> db : Kurs-Cache
+@enduml
