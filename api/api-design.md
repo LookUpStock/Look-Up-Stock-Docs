@@ -1,6 +1,6 @@
 # API-Design – LookUpStock
 
-Stand: 30.10.2026 · Basis-URL `/api/v1` · Datenformat JSON
+Stand: 01.11.2026 · Basis-URL `/api/v1` · Datenformat JSON
 
 Diese Markdown-Datei ist die bearbeitbare Fassung des API-Designs. Sie übernimmt den vollständigen Inhalt von `api-design.pdf` (Stand 02.10.2026; die PDF-Datei wurde am 25.10.2026 entfernt, maßgeblich ist diese Datei) und ergänzt die Entscheidungen des Product Owners vom 02.10.2026 (E1 bis E7) sowie die einzelnen Fehlerfälle für Portfolios und Simulationen.
 
@@ -11,6 +11,8 @@ Diese Markdown-Datei ist die bearbeitbare Fassung des API-Designs. Sie übernimm
 **Änderung 25.10.2026 (Docs #149, BE #94):** Neuer Abschnitt „GraphQL (lesend)“: `POST /graphql` für Anlagensuche, eigene Portfolios und gespeicherte Simulationen; Anmeldung wie bei REST über den `Authorization`-Header (ADR-06). Schreibende Operationen laufen weiter über REST.
 
 Änderung 30.10.2026 (Docs #165, CR-01, US-11, US-12): Neuer Abschnitt „Auswertungen“: GET /reports/usage liefert die neun Nutzungskennzahlen eines Monats (E39), GET /reports/usage/export dieselben Werte als CSV-Datei (E41). Beide nur mit der Rolle Geschäftsführung (E40); neuer Fehlercode 403 FORBIDDEN. POST /auth/login liefert zusätzlich das Feld role.
+
+**Änderung 01.11.2026 (Docs #159, BE #108, ADR-07):** Abschnitt GraphQL um schreibende Operationen (Mutations) ergänzt: Portfolios anlegen, ändern und löschen, Simulation durchführen und speichern, gespeicherte Simulation löschen, Vergleich durchführen. Neuer Abschnitt „Interne Schnittstellen“ mit den Endpunkten des marktdaten-service und den Themen der Queue. Abschnitt „Anbindung der Finanzdaten-API“ an die Aufteilung in zwei Dienste angepasst. Für Aufrufer des core-service ändern sich Pfade und Antworten nicht.
 
 **Fehlerformat:** Fehler haben immer das Format `{ "error": { "code", "message", "details" } }`. `message` ist ein deutscher Text zur direkten Anzeige im Frontend. Gewichtungen in Prozent (Summe 100), Anteile in Ergebnissen als Dezimalzahl (0.31 = 31 %).
 
@@ -24,8 +26,8 @@ Diese Markdown-Datei ist die bearbeitbare Fassung des API-Designs. Sie übernimm
 
 - Primärer Anbieter der Kurs- und Stammdaten ist **Twelve Data**.
 - Ein Fallback-Anbieter ist **noch nicht entschieden**.
-- Das Frontend greift nie direkt auf die Finanzdaten-API zu. Der Zugriff erfolgt nur im Backend über das Interface `MarketDataProvider`; der API-Key liegt ausschließlich als Umgebungsvariable im Backend (NF-06).
-- Ist die Finanzdaten-API nicht erreichbar, werden Kursdaten jünger als 24 h aus dem Cache weiterverwendet; andernfalls antworten die betroffenen Endpunkte mit `503 UPSTREAM_UNAVAILABLE` (NF-07).
+- Das Frontend greift nie direkt auf die Finanzdaten-API zu. Seit ADR-07 ist die Anbindung in einem eigenen Dienst gekapselt, dem **marktdaten-service**. Der core-service, also die hier beschriebene API, fragt Suche und Kurse über das Interface `MarketDataProvider` beim marktdaten-service ab (`MarktdatenClient`, siehe Abschnitt „Interne Schnittstellen“). Der API-Key von Twelve Data liegt ausschließlich als Umgebungsvariable beim marktdaten-service (NF-06).
+- Such-Cache und Kurs-Cache (jeweils 24 h) liegen im marktdaten-service. Ist Twelve Data nicht erreichbar, werden Kursdaten jünger als 24 h aus dem Cache weiterverwendet; andernfalls antworten die betroffenen Endpunkte mit `503 UPSTREAM_UNAVAILABLE` (NF-07). Dasselbe gilt, wenn der marktdaten-service selbst nicht erreichbar ist.
 
 ---
 
@@ -1609,13 +1611,13 @@ Dieselben Bezeichnungen, Werte und Reihenfolge wie <code>GET /reports/usage</cod
 </table>
 Auswertungen gibt es nur über REST, nicht über GraphQL.
 
-## GraphQL (lesend, BE #94)
+## GraphQL (BE #94, BE #108)
 
-Ergänzend zu REST gibt es eine lesende GraphQL-Schnittstelle. Sie liefert dieselben Daten wie die lesenden REST-Endpunkte, aber der Client wählt die Felder selbst und kann z. B. eine gespeicherte Simulation samt Portfolio und Kennzahlen in einer Anfrage abrufen. Schreibende Operationen (Mutations) gibt es nicht; Anlegen, Ändern, Löschen und Berechnen laufen über REST. Das Schema steht in `src/main/resources/graphql/schema.graphqls` (Backend).
+Ergänzend zu REST gibt es eine GraphQL-Schnittstelle mit vergleichbarem Funktionsumfang. Abfragen (Queries) liefern dieselben Daten wie die lesenden REST-Endpunkte, aber der Client wählt die Felder selbst und kann z. B. eine gespeicherte Simulation samt Portfolio und Kennzahlen in einer Anfrage abrufen. Schreibende Operationen (Mutations, seit Sprint 5) rufen dieselben Services mit denselben Prüfregeln und Meldungen auf wie die REST-Endpunkte. Ausgenommen sind Registrieren, Anmelden, Gastmodus und Auswertungen; sie gibt es nur über REST. Das Schema steht in `core-service/src/main/resources/graphql/schema.graphqls` (Backend).
 
 **Anmeldung (ADR-06):** wie bei REST über den Header `Authorization: Bearer <token>`. Der Header wird zentral gelesen; geprüft wird er erst in den Abfragen, die eine Anmeldung brauchen. `searchAssets` ist ohne Anmeldung nutzbar.
 
-**Fehlerformat:** GraphQL antwortet auch bei Fehlern mit `200 OK`. Fehler stehen im Feld `errors`; `message` ist derselbe deutsche Text wie bei REST, `extensions.code` derselbe Code (`UNAUTHORIZED`, `NOT_FOUND`, `VALIDATION_ERROR`, `UPSTREAM_UNAVAILABLE`). Das betroffene Feld in `data` ist dann `null`; bei Listen-Abfragen wie `savedSimulations` ist `data` insgesamt `null`, weil das Feld laut Schema nicht `null` sein darf (`!`).
+**Fehlerformat:** GraphQL antwortet auch bei Fehlern mit `200 OK`. Fehler stehen im Feld `errors`; `message` ist derselbe deutsche Text wie bei REST, `extensions.code` derselbe Code (`UNAUTHORIZED`, `NOT_FOUND`, `VALIDATION_ERROR`, `INSUFFICIENT_DATA`, `CONFLICT`, `UPSTREAM_UNAVAILABLE`). Die Einzelfehler, bei REST in `error.details`, stehen in `extensions.details`, z. B. `[{ "field": "name", "message": "…" }]` oder bei `INSUFFICIENT_DATA` `[{ "field": "assetId", "assetId": 8, "name": "…", "message": "…" }]`. Das betroffene Feld in `data` ist dann `null`; bei Listen-Abfragen wie `savedSimulations` ist `data` insgesamt `null`, weil das Feld laut Schema nicht `null` sein darf (`!`).
 
 <table>
 <tr><th>Method</th><th>Ressource</th><th>Data In</th><th>Data Out</th></tr>
@@ -1685,4 +1687,229 @@ Optional <code>variables</code> für Argumente, z. B. <code>{ "query": "query($i
 | `SavedSimulation` | `id`, `name`, `portfolioId`, `createdAt`, `portfolio` und `metrics` (werden nur geladen, wenn die Abfrage sie anfordert) |
 | `Metrics` | `totalContributions`, `medianEndValue`, `p5EndValue`, `p95EndValue`, `valueAtRisk95`, `maxDrawdownMedian` (Anteil, 0.31 = 31 %), `targetProbability` (`null` ohne Zielbetrag) |
 
-IDs sind im GraphQL-Typ `ID` und kommen daher als Zeichenkette (`"12"`). Die Oberfläche GraphiQL zum Ausprobieren ist auf Heroku ausgeschaltet und lässt sich lokal mit `GRAPHIQL_ENABLED=true` in der `.env` einschalten.
+IDs sind im GraphQL-Typ `ID` und kommen daher als Zeichenkette (`"12"`). Als Argument sind Zahl und Zeichenkette erlaubt (`id: 5` oder `id: "5"`). Die Oberfläche GraphiQL zum Ausprobieren ist auf Heroku ausgeschaltet und lässt sich lokal mit `GRAPHIQL_ENABLED=true` in der `.env` einschalten.
+
+### Mutations (BE #108)
+
+Alle Mutations erfordern die Anmeldung über den Header `Authorization: Bearer <token>`; ohne gültigen Header folgt der Fehler `UNAUTHORIZED`, bevor etwas geprüft oder geändert wird. Die Felder der Eingabetypen sind bewusst optional: Ein fehlender Wert liefert dieselbe Meldung wie bei REST (z. B. „Bitte einen Namen mit höchstens 100 Zeichen eingeben.“) statt eines allgemeinen GraphQL-Fehlers.
+
+<table>
+<tr><th>Method</th><th>Ressource</th><th>Data In</th><th>Data Out</th></tr>
+<tr>
+<td><b>POST</b></td>
+<td><code>/graphql</code><br>Portfolio anlegen · Sprint 5 · Anmeldung erforderlich</td>
+<td>
+Header: <code>Authorization: Bearer &lt;token&gt;</code>
+<pre>
+{
+  "query": "mutation($input: PortfolioInput!) { createPortfolio(input: $input) { id name positions { symbol weight } } }",
+  "variables": {
+    "input": {
+      "name": "Mein Weltportfolio",
+      "positions": [
+        { "assetId": "1", "weight": 70 },
+        { "assetId": "2", "weight": 30 }
+      ]
+    }
+  }
+}
+</pre>
+</td>
+<td>
+<b>200 OK</b>
+<pre>
+{
+  "data": {
+    "createPortfolio": {
+      "id": "5",
+      "name": "Mein Weltportfolio",
+      "positions": [
+        { "symbol": "URTH", "weight": 70.0 },
+        { "symbol": "IEMG", "weight": 30.0 }
+      ]
+    }
+  }
+}
+</pre>
+<b>200 OK mit Fehler</b> (Gewichtungen ergeben nicht 100)
+<pre>
+{
+  "errors": [
+    {
+      "message": "Die Gewichtungen müssen zusammen 100 % ergeben.",
+      "path": ["createPortfolio"],
+      "extensions": {
+        "classification": "BAD_REQUEST",
+        "code": "VALIDATION_ERROR",
+        "details": [
+          { "field": "positions", "message": "Die Gewichtungen müssen zusammen 100 % ergeben." },
+          { "field": "positions", "message": "Summe der Gewichtungen ist 95 %." }
+        ]
+      }
+    }
+  ],
+  "data": null
+}
+</pre>
+</td>
+</tr>
+<tr>
+<td><b>POST</b></td>
+<td><code>/graphql</code><br>Simulation durchführen und speichern · Sprint 5 · Anmeldung erforderlich</td>
+<td>
+Header: <code>Authorization: Bearer &lt;token&gt;</code>
+<pre>
+{
+  "query": "mutation($input: SimulationInput!) { simulate(input: $input) { id name parameters { seed paths } metrics { medianEndValue p5EndValue p95EndValue } runtimeMs } }",
+  "variables": {
+    "input": {
+      "portfolioId": "5",
+      "parameters": {
+        "startCapital": 10000,
+        "monthlyContribution": 200,
+        "horizonYears": 20,
+        "seed": 42
+      },
+      "save": true,
+      "name": "Sparplan 20 Jahre"
+    }
+  }
+}
+</pre>
+Ohne <code>save</code> oder mit <code>save: false</code> wird nur gerechnet; <code>id</code>, <code>name</code> und <code>createdAt</code> sind dann <code>null</code>.
+</td>
+<td>
+<b>200 OK</b>
+<pre>
+{
+  "data": {
+    "simulate": {
+      "id": "12",
+      "name": "Sparplan 20 Jahre",
+      "parameters": { "seed": 42.0, "paths": 10000 },
+      "metrics": {
+        "medianEndValue": 104250.6,
+        "p5EndValue": 71230.4,
+        "p95EndValue": 168900.1
+      },
+      "runtimeMs": 412.0
+    }
+  }
+}
+</pre>
+<b>200 OK mit Fehler</b> (weniger als 3 Jahre Kursdaten)
+<pre>
+{
+  "errors": [
+    {
+      "message": "Für folgende Anlagen liegen weniger als 3 Jahre Kursdaten vor: Junger ETF.",
+      "path": ["simulate"],
+      "extensions": {
+        "classification": "BAD_REQUEST",
+        "code": "INSUFFICIENT_DATA",
+        "details": [
+          { "field": "assetId", "assetId": 8, "name": "Junger ETF", "message": "Weniger als 3 Jahre Kursdaten." }
+        ]
+      }
+    }
+  ],
+  "data": null
+}
+</pre>
+</td>
+</tr>
+</table>
+
+| Mutation | Liefert | Entspricht REST |
+|---|---|---|
+| `createPortfolio(input: PortfolioInput!)` | `Portfolio` | `POST /portfolios` |
+| `updatePortfolio(id: ID!, input: PortfolioInput!)` | `Portfolio`; fremde oder unbekannte ID → `NOT_FOUND` (NF-04) | `PUT /portfolios/{id}` |
+| `deletePortfolio(id: ID!)` | `true`; fremde oder unbekannte ID → `NOT_FOUND` | `DELETE /portfolios/{id}` (204) |
+| `simulate(input: SimulationInput!)` | `SimulationResult`; mit `save: true` zusätzlich gespeichert, `name` dann Pflicht und vor dem Rechnen geprüft | `POST /simulations` |
+| `deleteSavedSimulation(id: ID!)` | `true`; fremde oder unbekannte ID → `NOT_FOUND` | `DELETE /simulations/{id}` (204) |
+| `compare(input: ComparisonInput!)` | `ComparisonResult` mit gemeinsamem Seed und Schätzzeitraum (ADR-05) | `POST /comparisons` |
+
+Unterschied zu REST: GraphQL kennt keine HTTP-Statuscodes je Fehler. Statt 400, 404, 422 oder 503 steht der Code in `extensions.code`; statt `204 No Content` beim Löschen liefert die Mutation `true`.
+
+**Eingabetypen**
+
+| Typ | Felder |
+|---|---|
+| `PortfolioInput` | `name`, `positions` (Liste von `PositionInput`) |
+| `PositionInput` | `assetId` (`ID`), `weight` (Prozent, höchstens 2 Nachkommastellen) |
+| `SimulationParametersInput` | `startCapital`, `monthlyContribution`, `horizonYears` (`Int`, 1 bis 40), `paths` (`Int`, 1.000 bis 50.000, Standard 10.000), `seed` (`Float`, ganze Zahl; exakt bis 2^53), `targetAmount` |
+| `SimulationInput` | `portfolioId` (`ID`), `parameters`, `save` (`Boolean`), `name` |
+| `ComparisonInput` | `items` (Liste von `ComparisonItemInput`), `parameters` |
+| `ComparisonItemInput` | `label`, genau eines von `portfolioId` und `assetId` |
+
+**Ergebnistypen**
+
+| Typ | Felder |
+|---|---|
+| `SimulationResult` | `id`, `name`, `createdAt` (alle `null`, wenn nicht gespeichert), `portfolioId`, `parameters`, `estimates`, `timeline`, `metrics`, `runtimeMs` |
+| `SimulationParameters` | `startCapital`, `monthlyContribution`, `horizonYears`, `paths`, `seed` (der verwendete, auch wenn keiner angegeben war; NF-08), `targetAmount` |
+| `Estimates` | `historyFrom`, `historyTo` (Schätzzeitraum, ISO-8601), `assets` (Liste von `AssetEstimate`: `assetId`, `annualReturn`, `annualVolatility`) |
+| `TimelinePoint` | `month` (ab 0), `p5`, `p50`, `p95` |
+| `ComparisonResult` | `parameters`, `estimates`, `results` (Liste von `ComparisonItem`: `label`, `portfolioId`, `assetId`, `timeline`, `metrics`), `pairwise` (Liste von `PairwiseComparison`: `a`, `b`, `probabilityAOutperformsB`), `runtimeMs`, `createdAt` |
+
+Ganze Zahlen über 32 Bit (`seed`, `runtimeMs`) sind als `Float` typisiert, weil GraphQL-`Int` auf 32 Bit begrenzt ist.
+
+## Interne Schnittstellen (ADR-07)
+
+Diese Schnittstellen nutzt nur der core-service. Sie sind nicht Teil der öffentlichen API und für das Frontend nicht erreichbar.
+
+### marktdaten-service
+
+Eigene Heroku-App; Basisadresse in der Umgebungsvariable `MARKTDATEN_URL` des core-service. Jede Anfrage an `/internal/**` braucht den Header `X-Internal-Api-Key` mit dem gemeinsamen Schlüssel aus `INTERNAL_API_KEY`; fehlt er oder passt er nicht, folgt `401 UNAUTHORIZED`. Fehler haben dasselbe Format wie die öffentliche API. Der core-service wartet höchstens 5 Sekunden und gibt jeden Fehler des marktdaten-service als `503 UPSTREAM_UNAVAILABLE` weiter (synchrone Ausnahme laut ADR-07).
+
+<table>
+<tr><th>Method</th><th>Ressource</th><th>Data In</th><th>Data Out</th></tr>
+<tr>
+<td><b>GET</b></td>
+<td><code>/internal/search?q=msci</code><br>Anlagensuche · Such-Cache 24 h (NF-02)</td>
+<td>Header <code>X-Internal-Api-Key</code>. Query-Parameter <code>q</code> (Pflicht). Mindestlänge und <code>limit</code> prüft der core-service.</td>
+<td>
+<b>200 OK</b>
+<pre>
+[
+  {
+    "symbol": "URTH",
+    "name": "iShares MSCI World ETF",
+    "exchange": "NYSE",
+    "micCode": "ARCX",
+    "currency": "USD",
+    "type": "ETF"
+  }
+]
+</pre>
+<b>400</b> ohne <code>q</code> · <b>401</b> ohne gültigen Schlüssel · <b>503</b> Twelve Data nicht erreichbar
+</td>
+</tr>
+<tr>
+<td><b>GET</b></td>
+<td><code>/internal/prices?symbol=URTH&amp;mic=ARCX&amp;interval=1month&amp;outputsize=120</code><br>Historische Kurse · Kurs-Cache 24 h für Monatswerte (NF-07)</td>
+<td>Header <code>X-Internal-Api-Key</code>. <code>symbol</code> Pflicht; <code>mic</code> optional (ohne Angabe Standardbörse des Anbieters); <code>interval</code> Standard <code>1month</code>; <code>outputsize</code> 1 bis 5000, Standard 120. Symbol als Query-Parameter, damit auch Symbole mit „/“ funktionieren.</td>
+<td>
+<b>200 OK</b>, aufsteigend nach Datum, 6 Nachkommastellen
+<pre>
+[
+  { "date": "2016-11-01", "close": 71.235000 },
+  { "date": "2016-12-01", "close": 72.880000 }
+]
+</pre>
+Enthält auch den laufenden Monat; abgeschlossene Monate wählt der core-service aus (E22). Unbekanntes Symbol oder Börse außerhalb des Tarifs: leere Liste.<br>
+<b>400</b> ohne <code>symbol</code> oder <code>outputsize</code> außerhalb · <b>401</b> · <b>503</b>
+</td>
+</tr>
+</table>
+
+Ohne Schlüssel erreichbar ist nur `GET /actuator/health`.
+
+### Queue (asynchrone Kommunikation)
+
+Nachrichten liegen als Zeilen in der Tabelle `queue_message` (Migration V10 des core-service). Verbraucher holen sie in festen Abständen mit `FOR UPDATE SKIP LOCKED` ab, löschen sie nach erfolgreicher Verarbeitung und markieren sie nach drei Fehlversuchen als fehlgeschlagen. Der Absender wartet nicht auf die Verarbeitung; schlägt das Einstellen fehl, bleibt die eigentliche Aktion trotzdem erfolgreich.
+
+| Thema | Absender → Verbraucher | Auslöser | Inhalt (`payload`) | Verarbeitung |
+|---|---|---|---|---|
+| `nutzung.ereignis` | core-service → core-service (`UsageEventConsumer`) | erfolgreiche Aktion an einer der acht Stellen aus E37 | `{ "type": "PORTFOLIO_CREATED", "occurredAt": "2026-11-01T14:21:00Z" }` | alle 5 s höchstens 50 Nachrichten; Übertrag in die Tabelle der Nutzungsereignisse (US-11) |
+| `kursdaten.vorladen` | core-service → marktdaten-service (`PricePreloadConsumer`) | Portfolio angelegt oder geändert | `{ "instruments": [ { "symbol": "URTH", "micCode": "ARCX" } ] }` | alle 15 s höchstens 3 Nachrichten; fehlende oder veraltete Monatswerte in den Kurs-Cache laden (NF-07). Wenige Nachrichten je Durchlauf wegen des Kontingents von Twelve Data |
