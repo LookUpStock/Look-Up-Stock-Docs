@@ -1,0 +1,348 @@
+@startuml domaenenmodell_v5
+' Domänenmodell v5 – LookUpStock, Sprint 5 (US-01 bis US-09, US-11, US-12)
+' Issue Docs #163 · Stand 01.11.2026
+' Grundlagen: Domänenmodell v4, Kurzformat Sprint 4 (US-09; CR-01 mit US-11, US-12, E36 bis E43),
+'             Change Request CR-01, API-Design (Gastmodus, Auswertungen), Glossar, ADR-07
+' Änderungen gegenüber v4:
+'   - Nutzer um die Rolle ergänzt (Nutzer | Geschäftsführung, E40)
+'   - Neuer Fachbegriff Beispielportfolio (US-09): vom Team vorgegeben, gehört keinem Nutzer,
+'     Gäste können es simulieren; Simulation simuliert daher Portfolio, Beispielportfolio oder Anlage
+'   - Neue Fachbegriffe Nutzungsereignis, Monatsauswertung und Kennzahlwert (US-11, E36 bis E39);
+'     Export als Datei (US-12) ist eine Darstellung der Monatsauswertung, kein eigener Fachbegriff
+'   - Legende: gespeicherter Vergleich und US-10 als bewusst nicht umgesetzt (Won't, CR-01) vermerkt
+'   - Grün markiert ist nur, was seit v4 neu ist; die Markierungen aus v4 sind entfernt
+'   - Unverändert: Anmeldung, Portfolio, Position, Anlage, Kurswert, Simulation, Schätzung, Verlaufspunkt,
+'     Kennzahlen, Vergleich, Vergleichseintrag, Gespeicherte Simulation
+' KI-Nutzung: siehe KI-Log (Eintrag Domänenmodell v5)
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype polyline
+skinparam nodesep 70
+skinparam ranksep 70
+skinparam defaultFontName Arial
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+  ArrowColor #333333
+}
+skinparam note {
+  BackgroundColor #FFFBE6
+  BorderColor #999999
+}
+hide circle
+hide methods
+hide empty members
+
+title Domänenmodell v5 – LookUpStock (Sprint 5: US-01 bis US-09, US-11, US-12)
+
+class Nutzer {
+  email
+  passwort
+  registriertAm
+  <color:#2E7D32>rolle</color>
+}
+
+class Anmeldung {
+  angemeldetAm
+  gültigBis
+  /istGültig
+}
+
+class Portfolio {
+  name
+  erstelltAm
+  geändertAm
+  /summeGewichtungen
+}
+
+class Position {
+  gewichtung
+}
+
+class Anlage {
+  name
+  ticker
+  isin
+  börse
+  währung
+  art
+}
+
+class Kurswert {
+  datum
+  schlusskurs
+}
+
+class Simulation {
+  durchgeführtAm
+  schätzzeitraumVon
+  schätzzeitraumBis
+}
+
+class "Gespeicherte Simulation" as GespeicherteSimulation {
+  name
+  gespeichertAm
+}
+
+class Simulationsparameter {
+  startkapital
+  monatlicheSparrate
+  anlagehorizontJahre
+  pfadanzahl
+  seed
+  zielbetrag
+}
+
+class Schätzung {
+  jahresrendite
+  jahresvolatilität
+}
+
+class Verlaufspunkt {
+  monat
+  p5
+  p50
+  p95
+}
+
+class Kennzahlen {
+  summeEinzahlungen
+  endwertP5
+  endwertMedian
+  endwertP95
+  valueAtRisk95
+  maxDrawdownMedian
+  /zielwahrscheinlichkeit
+}
+
+class Vergleich {
+  durchgeführtAm
+  /wahrscheinlichkeitErsterHöher
+}
+
+class Vergleichseintrag {
+  bezeichnung
+  position
+}
+
+class Beispielportfolio #EAF4E4 {
+  name
+  beschreibung
+}
+
+class Nutzungsereignis #EAF4E4 {
+  art
+  zeitpunkt
+}
+
+class Monatsauswertung #EAF4E4 {
+  monat
+  erfasstSeit
+  /vorläufig
+}
+
+class Kennzahlwert #EAF4E4 {
+  bezeichnung
+  /wert
+}
+
+' Nutzer und Portfolios
+Nutzer "1" -right- "0..*" Anmeldung : hat >
+Nutzer "1" -down- "0..*" Portfolio : besitzt >
+
+Portfolio "0..1" -right- "1..*" Position : enthält >
+Position "0..*" -right- "1" Anlage : bezieht sich auf >
+Anlage "1" -right- "0..*" Kurswert : hat >
+
+' Simulation (US-04, US-05, US-08)
+Portfolio "0..1" -down- "0..*" Simulation : < simuliert
+Anlage "0..1" -- "0..*" Simulation : < simuliert
+Simulation "1" -right- "1..*" Schätzung : basiert auf >
+Anlage "1" -down- "0..*" Schätzung : < gilt für
+Simulation "1" -down- "1" Simulationsparameter : verwendet >
+Simulation "1" -down- "1..*" Verlaufspunkt : ergibt >
+Simulation "1" -down- "1" Kennzahlen : liefert >
+GespeicherteSimulation "0..1" -right- "1" Simulation : bewahrt auf >
+
+' Beispielsimulation (US-09)
+Beispielportfolio "0..1" -- "1..*" Position : enthält >
+Beispielportfolio "0..1" -- "0..*" Simulation : < simuliert
+
+' Auswertungen (US-11, US-12)
+Monatsauswertung "1" *-down- "9" Kennzahlwert : umfasst >
+Monatsauswertung "0..*" -- "0..*" Nutzungsereignis : zählt >
+Nutzer "0..*" -- "0..*" Monatsauswertung : < Geschäftsführung sieht und exportiert
+Kennzahlwert -[hidden]down- Nutzungsereignis
+
+' Vergleich (US-07)
+Vergleich "1" *-down- "2" Vergleichseintrag : besteht aus >
+Vergleichseintrag "1" -- "1" Simulation : wird berechnet durch >
+Position -down[hidden]- Vergleich
+
+note left of Nutzer
+  {email: Pflicht, gültiges Format (E12),
+   eindeutig ohne Unterscheidung von
+   Groß- und Kleinschreibung (E11)}
+  {passwort: mindestens 8 Zeichen,
+   nur als Hash gespeichert (NF-03)}
+  <color:#2E7D32>{rolle: Nutzer oder Geschäftsführung;</color>
+  <color:#2E7D32> bei der Registrierung immer Nutzer,</color>
+  <color:#2E7D32> Geschäftsführung vergibt das Team (E40)}</color>
+end note
+
+note right of Anmeldung
+  {gültigBis = angemeldetAm + 24 Stunden (NF-16)}
+  {endet vorzeitig durch Abmelden}
+  /istGültig = noch nicht abgelaufen
+  und nicht abgemeldet
+end note
+
+note left of Portfolio
+  {name: Pflicht, höchstens 100 Zeichen}
+  {ein Name nur aus Leerzeichen gilt als leer}
+  {nur für den besitzenden Nutzer
+   sichtbar, änderbar und löschbar (NF-04)}
+  {beim Bearbeiten gelten dieselben Regeln
+   wie beim Erstellen; geändertAm wird aktualisiert}
+  {beim Löschen werden die gespeicherten
+   Simulationen des Portfolios mitgelöscht (E28)}
+end note
+
+note top of Position
+  {gewichtung > 0 %, höchstens
+   2 Nachkommastellen}
+  {Summe der Gewichtungen je Portfolio
+   = 100 % (Toleranz ± 0,01 Prozentpunkte)}
+  {jede Anlage höchstens einmal je Portfolio}
+  <color:#2E7D32>{gehört genau einem Portfolio oder</color>
+  <color:#2E7D32> genau einem Beispielportfolio (xor)}</color>
+end note
+
+note right of Kurswert
+  {ein Kurswert je Monat (Monatsschlusskurs)}
+  {für eine Simulation sind je Anlage
+   mindestens 36 Monatswerte nötig}
+end note
+
+note bottom of Simulationsparameter
+  {anlagehorizontJahre: ganze Zahl, 1 bis 40}
+  {startkapital ≥ 0, monatlicheSparrate ≥ 0,
+   nicht beide 0}
+  {pfadanzahl: 1.000 bis 50.000, Standard 10.000}
+  {seed: optional; ohne Angabe vom System
+   erzeugt und dem Nutzer angezeigt}
+  {zielbetrag: optional, > 0 (E27)}
+end note
+
+note right of Simulation
+  {simuliert genau ein eigenes Portfolio oder,
+   nur im Vergleich, genau eine Anlage
+   (xor; Anlage = Portfolio mit 100 %, E30)}
+  <color:#2E7D32>{oder, ohne Anmeldung, genau ein</color>
+  <color:#2E7D32> Beispielportfolio (US-09)}</color>
+  {Schätzzeitraum gilt gemeinsam
+   für alle Anlagen der Simulation}
+  {nur für eigene Portfolios (NF-04)}
+end note
+
+note bottom of Schätzung
+  {genau eine Schätzung je simulierter Anlage}
+  {wird aus den Kurswerten der Anlage
+   im Schätzzeitraum ermittelt}
+end note
+
+note bottom of Verlaufspunkt
+  {ein Verlaufspunkt je Monat,
+   von 0 bis anlagehorizontJahre × 12}
+  p5, p50, p95 = 5., 50. und 95. Perzentil
+  des Portfoliowerts über alle Pfade
+  (Grundlage des Fächerdiagramms)
+end note
+
+note bottom of Kennzahlen
+  <b>Werte zum Ende des Anlagehorizonts (E24)</b>
+  summeEinzahlungen = startkapital +
+  anlagehorizontJahre × 12 × monatlicheSparrate (E19)
+  valueAtRisk95 = max(0, summeEinzahlungen − endwertP5) (E25)
+  maxDrawdownMedian = Median des größten Rückgangs
+  vom Höchststand je Pfad (E26)
+  /zielwahrscheinlichkeit = Anteil der Pfade mit
+  Endwert ≥ zielbetrag; nur mit Zielbetrag (E27)
+end note
+
+note bottom of GespeicherteSimulation
+  {name: Pflicht, höchstens 100 Zeichen}
+  {zeigt beim Aufrufen dieselben Werte
+   wie beim Speichern, ohne Neuberechnung (E32)}
+  {nur für den besitzenden Nutzer
+   sichtbar und löschbar (NF-04)}
+end note
+
+note left of Vergleich
+  {genau zwei Einträge (US-07)}
+  {die Simulationen aller Einträge verwenden
+   dieselben Parameterwerte, denselben Seed
+   und einen gemeinsamen Schätzzeitraum
+   für alle Anlagen (E29, NF-08)}
+  /wahrscheinlichkeitErsterHöher = Anteil der
+  Pfade, in denen Eintrag 1 am Ende mehr wert
+  ist als Eintrag 2 (E31)
+  {wird nicht gespeichert (E34; Speichern ist Won't, CR-01)}
+end note
+
+note bottom of Beispielportfolio
+  {vom Team vorgegeben, gehört keinem Nutzer}
+  {Gäste können es ohne Anmeldung simulieren,
+   höchstens 10.000 Pfade; das Ergebnis
+   wird nicht gespeichert (US-09)}
+  {Gewichtungen wie beim Portfolio, Summe 100 %}
+end note
+
+note right of Nutzungsereignis
+  {art: Registrierung, Anmeldung, Portfolio angelegt,
+   Simulation durchgeführt, Simulation gespeichert,
+   Vergleich durchgeführt, Beispielsimulation,
+   Anlagensuche (E37)}
+  {nur nach einer erfolgreichen Aktion (E37)}
+  {anonym: kein Bezug zu Nutzer, Portfolio
+   oder Eingaben (E36)}
+end note
+
+note right of Monatsauswertung
+  {monat: Kalendermonat nach deutscher Zeit (E38)}
+  {nur Monate ab Beginn der Erfassung,
+   keine künftigen Monate}
+  /vorläufig = monat ist der laufende Monat
+  {nur für die Geschäftsführung sichtbar
+   und exportierbar (E40, E41)}
+end note
+
+note bottom of Kennzahlwert
+  {genau neun Kennzahlen in fester
+   Reihenfolge (E39): acht Anzahlen von
+   Nutzungsereignissen je Art im Monat und
+   die Zahl der Nutzerkonten am Monatsende}
+  /wert = Anzahl im Monat bzw. Konten
+  am Monatsende (laufender Monat: jetzt)
+end note
+
+note left of Vergleichseintrag
+  {bezeichnung: ohne Eingabe Name des
+   simulierten Portfolios bzw. der Anlage}
+  {position: 1 oder 2 (Reihenfolge)}
+end note
+
+legend bottom left
+  <b>Legende</b>
+  Konzeptionelles Modell nach Larman: Fachbegriffe, Attribute und Beziehungen, keine Operationen und keine technischen Klassen.
+  /attribut = abgeleiteter (berechneter) Wert · {…} = fachliche Regel · <back:#EAF4E4> grün hinterlegt </back> = neuer Fachbegriff in v5 · <color:#2E7D32>grüne Schrift</color> = in v5 ergänztes Attribut oder ergänzte Regel (Sprint 4 und 5)
+  Anlagen sind nicht nutzerbezogen: Alle Nutzer und Gäste greifen auf denselben Anlagenbestand zu (US-02).
+  Simulation und gespeicherte Simulation gehören über ihr Portfolio indirekt zum Nutzer. Ein Vergleich wird vom angemeldeten Nutzer durchgeführt und nicht gespeichert.
+  Nutzungsereignisse sind bewusst ohne Beziehung zu Nutzer, Portfolio oder Simulation (anonym, E36). Die CSV-Datei (US-12) enthält dieselben Werte wie die Monatsauswertung.
+  <b>Bewusst nicht umgesetzt (Won't, CR-01):</b> gespeicherter Vergleich (Rest von US-08), mehr als zwei Vergleichseinträge (US-10), automatischer Monatsbericht (US-13).
+  Finanzdaten-API ist Akteur (Use-Case-Diagramm), kein Fachbegriff. Token, Cache, Queue und die Aufteilung in Dienste sind technische Lösungen und daher nicht enthalten.
+  Vorversion: diagramme/archiv/domaenenmodell_v4
+endlegend
+
+@enduml

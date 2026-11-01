@@ -1,0 +1,230 @@
+@startuml er-diagramm_v6
+' LookUpStock – ER-Diagramm v6 (PostgreSQL)
+' Sprint 5 · Stand 01.11.2026 · Issue Docs #163
+' Grundlagen: Flyway-Migrationen core-service V1 bis V11 und marktdaten-service V1, Backend main
+'             Stand 01.11.2026 (BE #105, #106, #110, #114, #125), ER-Diagramm v5, ADR-07, CR-01 (E36, E40)
+' Änderungen gegenüber v5:
+'   - Zwei Dienste, eine Datenbank, zwei Schemas (ADR-07): public (core-service) und marktdaten (marktdaten-service)
+'   - Neu (V9, BE #110): app_user.role (USER | MANAGER, E40) und Tabelle usage_event (anonym, E36)
+'   - Neu (V10, BE #114): Tabelle queue_message für die asynchrone Kommunikation (Themen nutzung.ereignis, kursdaten.vorladen)
+'   - Neu (marktdaten V1, BE #106): marktdaten.price_cache ersetzt price_history; Schlüssel Symbol und MIC-Code statt asset.id
+'   - Entfernt (V11, BE #107): price_history
+'   - Unverändert: auth_token, portfolio, position, asset, simulation
+' Notation: Krähenfuß (Information Engineering) · Werkzeug: PlantUML
+
+hide circle
+skinparam linetype polyline
+skinparam nodesep 50
+skinparam ranksep 60
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+  ArrowColor #333333
+  BackgroundColor<<neu>> #EAF4E4
+}
+skinparam package {
+  BorderColor #666666
+  FontStyle bold
+}
+skinparam note {
+  BackgroundColor #FFFBE6
+  BorderColor #999999
+}
+hide stereotype
+
+title ER-Diagramm v6 – LookUpStock (Sprint 5: zwei Dienste, Queue, Nutzungsereignisse)
+
+package "Schema public (core-service, Flyway V1 bis V11)" as PUB {
+
+  entity "app_user" as app_user {
+    * id : BIGSERIAL <<PK>>
+    --
+    * email : VARCHAR(255)
+    * password_hash : VARCHAR(100)
+    * created_at : TIMESTAMP = now()
+    * <back:#EAF4E4>role : VARCHAR(20) = 'USER'</back> «neu, V9»
+    ..
+    UNIQUE (email)
+    CHECK (role IN ('USER', 'MANAGER'))
+  }
+
+  entity "auth_token" as auth_token {
+    * id : BIGSERIAL <<PK>>
+    --
+    * token : VARCHAR(64)
+    * user_id : BIGINT <<FK>>
+    * created_at : TIMESTAMP = now()
+    * expires_at : TIMESTAMP
+    ..
+    UNIQUE (token)
+    INDEX (user_id)
+  }
+
+  entity "portfolio" as portfolio {
+    * id : BIGSERIAL <<PK>>
+    --
+    * name : VARCHAR(100)
+    * user_id : BIGINT <<FK>>
+    * created_at : TIMESTAMP = now()
+    * updated_at : TIMESTAMP = now()
+    ..
+    INDEX (user_id)
+  }
+
+  entity "position" as position {
+    * id : BIGSERIAL <<PK>>
+    --
+    * portfolio_id : BIGINT <<FK>>
+    * asset_id : BIGINT <<FK>>
+    * weight : NUMERIC(5,2)
+    ..
+    CHECK (weight > 0)
+    UNIQUE (portfolio_id, asset_id)
+  }
+
+  entity "asset" as asset {
+    * id : BIGSERIAL <<PK>>
+    --
+    * symbol : VARCHAR(20)
+    isin : VARCHAR(12)
+    * name : VARCHAR(255)
+    exchange : VARCHAR(50)
+    currency : VARCHAR(3)
+    type : VARCHAR(20)
+    mic_code : VARCHAR(50)
+    ..
+    UNIQUE (symbol, mic_code)
+  }
+
+  entity "simulation" as simulation {
+    * id : BIGSERIAL <<PK>>
+    --
+    * user_id : BIGINT <<FK>>
+    * portfolio_id : BIGINT <<FK>>
+    * name : VARCHAR(100)
+    * start_capital : NUMERIC(19,2)
+    * monthly_contribution : NUMERIC(19,2)
+    * horizon_years : INTEGER
+    * paths : INTEGER
+    * seed : BIGINT
+    target_amount : NUMERIC(19,2)
+    * result : JSONB
+    * runtime_ms : BIGINT
+    * created_at : TIMESTAMP = now()
+    ..
+    INDEX (user_id)
+  }
+
+  entity "usage_event" as usage_event <<neu>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    * event_type : VARCHAR(30)
+    * occurred_at : TIMESTAMP
+    ..
+    INDEX (occurred_at)
+  }
+
+  entity "queue_message" as queue_message <<neu>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    * topic : VARCHAR(50)
+    * payload : JSONB
+    * created_at : TIMESTAMP = now()
+    * attempts : INTEGER = 0
+    * failed : BOOLEAN = false
+    last_error : VARCHAR(500)
+    ..
+    INDEX (topic, id) WHERE failed = false
+  }
+}
+
+package "Schema marktdaten (marktdaten-service, Flyway V1)" as MD {
+  entity "price_cache" as price_cache <<neu>> {
+    * id : BIGSERIAL <<PK>>
+    --
+    * symbol : VARCHAR(50)
+    * mic_code : VARCHAR(50) = ''
+    * price_date : DATE
+    * close_price : NUMERIC(19,6)
+    * fetched_at : TIMESTAMPTZ
+    ..
+    UNIQUE (symbol, mic_code, price_date)
+  }
+}
+
+app_user ||--o{ auth_token : "hat\n(ON DELETE CASCADE)"
+app_user ||--o{ portfolio : "besitzt\n(ON DELETE CASCADE)"
+portfolio ||--|{ position : "enthält\n(ON DELETE CASCADE)"
+asset ||--o{ position : "ist enthalten in"
+app_user ||--o{ simulation : "speichert\n(ON DELETE CASCADE)"
+portfolio ||--o{ simulation : "wird simuliert in\n(ON DELETE CASCADE)"
+asset .. price_cache : "symbol + mic_code\n(kein Fremdschlüssel)"
+
+usage_event -[hidden]down- queue_message
+
+note left of app_user
+  "user" ist in PostgreSQL reserviert, daher app_user.
+  E-Mail klein geschrieben (E11), daher reicht UNIQUE.
+  password_hash: nur BCrypt-Hash (NF-03).
+  <b>role (V9, E40):</b> USER bei der Registrierung;
+  MANAGER (Geschäftsführung) vergibt das Team
+  direkt in der Datenbank, nicht über die API.
+end note
+
+note bottom of portfolio
+  Abfragen filtern immer nach user_id,
+  fremde IDs → 404 (NF-04, ADR-04).
+  Löschen entfernt Positionen und
+  gespeicherte Simulationen mit.
+end note
+
+note bottom of usage_event
+  <b>Nutzungsereignisse (US-11, V9)</b>
+  anonym: nur Art und Zeitpunkt,
+  bewusst kein Fremdschlüssel auf app_user (E36).
+  event_type: REGISTRATION, LOGIN, PORTFOLIO_CREATED,
+  SIMULATION_RUN, SIMULATION_SAVED, COMPARISON_RUN,
+  DEMO_SIMULATION_RUN, ASSET_SEARCH (E37).
+  occurred_at = Zeitpunkt der Aktion, nicht
+  der Verarbeitung; Auswertung je Monat nach
+  Europe/Berlin (E38).
+end note
+
+note bottom of queue_message
+  <b>Queue (ADR-07, Variante B2, V10)</b>
+  eine Zeile je Nachricht; Verbraucher holen
+  mit FOR UPDATE SKIP LOCKED ab und löschen
+  nach Erfolg; nach 3 Fehlversuchen failed = true.
+  topic nutzung.ereignis: core → core (usage_event)
+  topic kursdaten.vorladen: core → marktdaten-service
+  (füllt price_cache). Gemeinsame Infrastruktur
+  beider Dienste, keine Fachtabelle.
+end note
+
+note bottom of price_cache
+  <b>Kurs-Cache (NF-07, ADR-07)</b>
+  gehört dem marktdaten-service, der die
+  Tabellen in public nicht liest (Ausnahme:
+  queue_message). Schlüssel Symbol + MIC-Code,
+  '' = Standardbörse des Anbieters.
+  fetched_at = Abruf bei Twelve Data,
+  Grundlage der 24-h-Regel; neuer Abruf
+  ersetzt alle Zeilen von Symbol + MIC.
+  close_price mit 6 Nachkommastellen (NF-08).
+end note
+
+legend bottom left
+  <b>Legende</b>
+  * = NOT NULL · PK = Primärschlüssel · FK = Fremdschlüssel · gepunktete Linie = fachliche Zuordnung ohne Fremdschlüssel
+  Weiß = bereits in v5 vorhanden · <back:#EAF4E4> Grün </back> = neu in v6 (Sprint 5: V9, V10, marktdaten V1)
+  <b>Entfernt:</b> price_history (V6) mit V11 (BE #107); der Kurs-Cache liegt jetzt in marktdaten.price_cache (ADR-07).
+  Eine PostgreSQL-Datenbank auf Heroku, an beide Apps angehängt; jeder Dienst hat eine eigene Flyway-Historie
+  (public.flyway_schema_history, marktdaten.flyway_schema_history).
+  Nicht enthalten: Such-Cache (im Arbeitsspeicher des marktdaten-service), Beispielportfolios (US-09, im Code).
+  Vorversion: diagramme/archiv/er-diagramm_v5
+endlegend
+
+@enduml
