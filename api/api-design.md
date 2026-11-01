@@ -86,7 +86,7 @@ Diese Markdown-Datei ist die bearbeitbare Fassung des API-Designs. Sie übernimm
 <td>
 <b>200 OK</b>
 <pre> { "token": "q8Z1vN3xR0tK7mW2pL5sA9dF4hJ6cB1eY0uG8iT3oQw", "expiresAt": "2026-10-13T10:00:00Z", "role": "USER" } </pre>
-<code>role</code> ist <code>USER</code> oder <code>MANAGEMENT</code> (Geschäftsführung, E40). Das Frontend blendet damit den Navigationseintrag „Auswertungen“ ein; geschützt wird allein durch die Prüfung im Backend.
+<code>role</code> ist <code>USER</code> oder <code>MANAGER</code> (Geschäftsführung, E40). Das Frontend blendet damit den Navigationseintrag „Auswertungen“ ein; geschützt wird allein durch die Prüfung im Backend.
 <b>401 Unauthorized</b>
 <pre>
 {
@@ -1494,7 +1494,7 @@ Body wie bei <code>POST /simulations</code> ohne Speichern: <code>id</code>, <co
  
 Nutzungskennzahlen für die Geschäftsführung (Change Request CR-01). Grundlage sind die anonym erfassten Nutzungsereignisse (E36, E37), die über die Queue übertragen werden (ADR-07); neue Ereignisse erscheinen deshalb mit einigen Sekunden Verzögerung.
  
-**Zugriff (E40):** Beide Endpunkte erfordern den Header `Authorization: Bearer <token>` (ADR-06) und die Rolle `MANAGEMENT`. Ohne Anmeldung `401 UNAUTHORIZED`, angemeldet ohne die Rolle `403 FORBIDDEN`. Die Rolle wird vom Team in der Datenbank vergeben (README des Backends), nicht über die API.
+**Zugriff (E40):** Beide Endpunkte erfordern den Header `Authorization: Bearer <token>` (ADR-06) und die Rolle `MANAGER`. Ohne Anmeldung `401 UNAUTHORIZED`, angemeldet ohne die Rolle `403 FORBIDDEN`. Die Rolle wird vom Team in der Datenbank vergeben (README des Backends), nicht über die API.
  
 **Monat (E38):** Parameter `month` im Format `JJJJ-MM`, Kalendermonat nach deutscher Zeit (Europe/Berlin). Ohne `month` gilt der laufende Monat; er ist mit `"preliminary": true` gekennzeichnet. Monate vor dem Beginn der Erfassung und künftige Monate werden mit 400 abgelehnt, es werden keine Nullwerte geliefert.
  
