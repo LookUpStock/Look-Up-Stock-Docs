@@ -3,11 +3,11 @@
 | | |
 |---|---|
 | **Projekt** | LookUpStock |
-| **Issue** | Docs #131 Auswirkungsanalyse, Entscheidung, Product Backlog vorher und nachher (Ereigniskarte: Docs #114) |
+| **Issue** | Version 2: Docs #166 Diagrammversionen v6, Change Log; Version 1: Docs #131 Auswirkungsanalyse, Entscheidung, Product Backlog vorher und nachher (Ereigniskarte: Docs #114) |
 | **Verantwortlich** | Mert Eminel (KujoBaraka), Product Owner |
-| **Version** | 1 |
-| **Stand** | 25.10.2026 |
-| **Grundlagen** | Aufgabenbeschreibung Kapitel III.1 (Change Request), Ereigniskarte Nr. 8 „Reporting für die Geschäftsführung“, Product Backlog (Stand 02.10.2026), Sprint-Planning-Protokoll Sprint 4 (Abschnitte 2, 7, 9, 10), Abnahmeprotokolle Sprint 2 und Sprint 3, Akteursbeschreibung v3, NFRs Version 3, ER-Diagramm v4, Klassendiagramm v4, API-Design (Stand 25.10.2026), ADR-04, ADR-06 |
+| **Version** | 2 |
+| **Stand** | 01.11.2026 |
+| **Grundlagen** | Aufgabenbeschreibung Kapitel III.1 (Change Request), Ereigniskarte Nr. 8 „Reporting für die Geschäftsführung“, Product Backlog (Stand 02.10.2026), Sprint-Planning-Protokoll Sprint 4 (Abschnitte 2, 7, 9, 10), Abnahmeprotokolle Sprint 2 und Sprint 3, Akteursbeschreibung v3, NFRs Version 3, ER-Diagramm v4, Klassendiagramm v4, API-Design (Stand 25.10.2026), ADR-04, ADR-06; ab Version 2 zusätzlich Sprint-Planning-Protokoll Sprint 5, ADR-07, Domänenmodell v5, ER-Diagramm v6, Klassendiagramm v6, API-Design (Stand 01.11.2026) und die Backend-Umsetzung BE #110 bis #112 und #114 |
 | **KI-Nutzung** | Entwurf mit KI-Unterstützung erstellt und vom Product Owner geprüft, siehe KI-Log |
 
 Dieses Dokument beschreibt den Change Request aus der Ereigniskarte und den Umgang des Teams damit. Es folgt den fünf Schritten aus Kapitel III.1 der Aufgabenbeschreibung: Dokumentation (Abschnitt 1), Impact-Analyse (Abschnitte 2 bis 4), Entscheidung mit dem Product Owner (Abschnitt 5), Nachvollziehbarkeit mit Product Backlog vorher und nachher und Change Log (Abschnitte 6 bis 8). Die Reflexion folgt in der Retrospektive (Abschnitt 9).
@@ -82,10 +82,12 @@ Die Karte nennt ausdrücklich die Datenbasis. Die Prüfung der Migrationen V1 bi
 | Diagramm | Auswirkung | Zeitpunkt |
 |---|---|---|
 | Use-Case-Diagramm | Neuer Akteur Geschäftsführung mit den Anwendungsfällen „Nutzungskennzahlen anzeigen“ und „Nutzungskennzahlen exportieren“ (`<<extend>>`). **Gegenüberstellung vorher (v3) und nachher (v4)** laut III.1.4 | Sprint 4, Docs #141 |
-| Domänenmodell | Neuer Fachbegriff Nutzungsereignis (ohne Beziehung zum Nutzer); Nutzer erhält eine Rolle | Sprint 5, mit der Umsetzung |
-| ER-Diagramm | Neue Tabelle für Nutzungsereignisse (ohne Fremdschlüssel auf `app_user`); neue Spalte für die Rolle in `app_user` | Sprint 5, mit der Migration |
-| Klassendiagramm | Neue Klassen für das Erfassen und Auswerten der Ereignisse, neuer Controller mit Rollenprüfung | Sprint 5, mit der Umsetzung |
+| Domänenmodell (v4 → v5) | Neuer Fachbegriff Nutzungsereignis (ohne Beziehung zum Nutzer); Nutzer erhält eine Rolle | Sprint 5, Docs #163 |
+| ER-Diagramm (v5 → v6) | Neue Tabelle für Nutzungsereignisse (ohne Fremdschlüssel auf `app_user`); neue Spalte für die Rolle in `app_user` | Sprint 5, Docs #163 |
+| Klassendiagramm (v5 → v6) | Neue Klassen für das Erfassen und Auswerten der Ereignisse, neuer Controller mit Rollenprüfung | Sprint 5, Docs #163 |
 | Aktivitäts- und Sequenzdiagramme US-04, US-07 | Inhaltlich nicht betroffen; das Zählen nach erfolgreicher Berechnung ist ein technisches Detail und wird nicht dargestellt | – |
+
+ER-Diagramm und Klassendiagramm lagen nach Sprint 4 bereits in Version 5 vor (ER-Diagramm: Migration V8; Klassendiagramm: US-09 und GraphQL lesend). Die Änderungen aus CR-01 stehen deshalb in Version 6; Version 1 dieses Dokuments nannte noch Version 5 (korrigiert in Version 2).
 
 ### 3.3 Codebestandteile
 
@@ -127,7 +129,7 @@ Die Schätzung enthält den Aufschlag von 50 % auf neue Aufgabentypen aus dem Sp
 | Frontend | Export-Button und Download | 0,5 | 1 |
 | Docs | Change Request, Kurzformat, Glossar, NFRs (dieses Issue) | 3 | 3 |
 | Docs | Use-Case-Diagramm v4, Akteure v4 | 1 | 1 |
-| Docs | API-Design, Domänenmodell v5, ER-Diagramm v5, Klassendiagramm v5 | 2,5 | 2,5 |
+| Docs | API-Design, Domänenmodell v5, ER-Diagramm v6, Klassendiagramm v6 | 2,5 | 2,5 |
 | Docs | Abnahmetestfälle, Testkonzept, Abnahme | 2 | 2 |
 | **Summe Teilumsetzung** (Entscheidung, Abschnitt 5) | | **17,5** | **22** |
 | zusätzlich bei vollständiger Umsetzung | Automatischer monatlicher Versand (Zeitsteuerung, E-Mail-Dienst, Empfängerverwaltung), Diagramme über mehrere Monate | 5 | 7,5 |
@@ -176,23 +178,27 @@ Reserviert waren im Sprint 4 nur 6,5 Stunden (3 h Analyse beim Product Owner, 3,
 
 ### 5.3 Offene Punkte für das Sprint-5-Planning
 
-- Ob das Erfassen der Ereignisse bei der Aufteilung in getrennte Dienste (ADR-07) in einem eigenen Dienst gebündelt wird, entscheidet das Team mit ADR-07.
-- Wer im Team das Konto mit der Rolle Geschäftsführung für die Abnahme einrichtet.
+| Offener Punkt (Stand 25.10.2026) | Ergebnis (Stand 01.11.2026) |
+|---|---|
+| Ob das Erfassen der Ereignisse bei der Aufteilung in getrennte Dienste (ADR-07) in einem eigenen Dienst gebündelt wird, entscheidet das Team mit ADR-07. | **Entschieden in ADR-07 (27.10.2026):** Es gibt keinen eigenen Dienst für die Erfassung. Der Dienst, der die Aktion abschließt, legt nach dem Erfolg (E37) ein Ereignis mit Art und Zeitpunkt (E36) in die Queue (Thema `nutzung.ereignis`) und wartet nicht auf die Verarbeitung. Ein Verbraucher im core-service überträgt die Ereignisse in die Tabelle der Nutzungsereignisse. Schlägt das Einstellen fehl, bleibt die Aktion erfolgreich. Auswertung und Export liegen im core-service (BE #110, BE #111, BE #112, BE #114). |
+| Wer im Team das Konto mit der Rolle Geschäftsführung für die Abnahme einrichtet. | **Festgelegt im Sprint-Planning-Protokoll Sprint 5 (Abschnitt 7):** Der Product Owner (KujoBaraka) richtet das Konto auf Heroku ein. Die Rolle heißt im Code `MANAGER` (Migration V9, `POST /auth/login` liefert das Feld `role`) und wird nur per Datenbank vergeben (E42). |
 
 ### 5.4 Vorschlag zur Aufteilung von BE #92 und Folge-Tasks
 
-Die Issues werden im Sprint-5-Planning angelegt; Zuordnung und Schätzung legt das Team dort fest.
+Die Issues werden im Sprint-5-Planning angelegt; Zuordnung und Schätzung legt das Team dort fest. Angelegt wurden sie am 26.10.2026 (Spalte „Issue“, Sprint-Planning-Protokoll Sprint 5, Abschnitt 5); BE #92 wurde durch BE #110 ersetzt.
 
-| Repo | Task | Story | Std. (mit Aufschlag) |
-|---|---|---|---|
-| BE | Migration Nutzungsereignisse und Rolle; Ereignisse an 8 Stellen erfassen, inkl. Tests | US-11 | 4 |
-| BE | Auswertung je Monat und Endpunkt mit Rollenprüfung, inkl. Tests | US-11 | 3,5 |
-| BE | CSV-Export, inkl. Test | US-12 | 1,5 |
-| FE | Dashboard-Seite mit Monatsauswahl, Navigation nach Rolle, inkl. Tests | US-11 | 3,5 |
-| FE | Export-Button und Download | US-12 | 1 |
-| Docs | API-Design Abschnitt „Auswertungen“ | US-11, US-12 | 0,5 |
-| Docs | Domänenmodell v5, ER-Diagramm v5, Klassendiagramm v5 | US-11 | 2 |
-| Docs | Abnahmetestfälle AT-11/AT-12, Testkonzept Version 5, Abnahme | US-11, US-12 | 2 |
+| Repo | Task | Story | Std. (mit Aufschlag) | Issue |
+|---|---|---|---|---|
+| BE | Migration Nutzungsereignisse und Rolle; Ereignisse an 8 Stellen erfassen, inkl. Tests | US-11 | 4 | BE #110 |
+| BE | Auswertung je Monat und Endpunkt mit Rollenprüfung, inkl. Tests | US-11 | 3,5 | BE #111 |
+| BE | CSV-Export, inkl. Test | US-12 | 1,5 | BE #112 |
+| FE | Dashboard-Seite mit Monatsauswahl, Navigation nach Rolle, inkl. Tests | US-11 | 3,5 | FE #51 |
+| FE | Export-Button und Download | US-12 | 1 | FE #52 |
+| Docs | API-Design Abschnitt „Auswertungen“ | US-11, US-12 | 0,5 | Docs #165 |
+| Docs | Domänenmodell v5, ER-Diagramm v6, Klassendiagramm v6 | US-11 | 2 | Docs #163 |
+| Docs | Abnahmetestfälle AT-11/AT-12, Testkonzept Version 5, Abnahme | US-11, US-12 | 2 | Docs #167, Docs #170 |
+
+Zusätzlich im Sprint-5-Planning angelegt: BE #114 Queue für die Nutzungsereignisse (ADR-07), Docs #164 Wireframe Dashboard und Export, Docs #166 Fortschreibung dieses Dokuments.
 
 ---
 
@@ -256,11 +262,22 @@ Geänderte und neue Einträge sind **fett** markiert. Nicht genannte Einträge s
 | 25.10.2026 | `anforderungen/nfr_furps.md` | 3 → 4 | NF-04 um die Rollenprüfung erweitert, NF-14 b um Nutzungsereignisse präzisiert | Docs #131 |
 | 25.10.2026 | `diagramme/use-case-diagramm` | v3 → v4 | Akteur Geschäftsführung, zwei neue Anwendungsfälle; **Gegenüberstellung vorher und nachher** | Docs #141 |
 | 25.10.2026 | `anforderungen/akteure.md` | 3 → 4 | Neuer Akteur Geschäftsführung | Docs #141 |
-| Sprint 5 | `api/api-design.md` | – | Neuer Abschnitt „Auswertungen“ | folgt |
-| Sprint 5 | Domänenmodell, ER-Diagramm, Klassendiagramm | v4 → v5 | Nutzungsereignis, Rolle, neue Klassen | folgt |
-| Sprint 5 | Testkonzept, Abnahmetestfälle | – | AT-11-xx, AT-12-xx | folgt |
+| 27.10.2026 | `adr/ADR-07.md` | – → entschieden | Ort der Ereigniserfassung: Einstellen in die Queue (`nutzung.ereignis`) durch den auslösenden Dienst, Verarbeitung im core-service (Abschnitt 5.3) | Docs #162 |
+| 28.10.2026 | Frontend: `dashboard.html`, `dashboard.js`, `dashboard.css`, Navigation | – | Dashboard-Seite mit Monatsauswahl, Navigationseintrag „Auswertungen“ nur mit Rolle; Anbindung an `GET /reports/usage` folgt | FE #51 |
+| 31.10.2026 | Datenbank core-service | V8 → V10 | V9 Tabelle der Nutzungsereignisse (ohne Fremdschlüssel auf `app_user`) und Spalte `role` (`USER`, `MANAGER`) in `app_user`; V10 Queue-Tabelle `queue_message` | BE #110, BE #114 |
+| 31.10.2026 | `api/api-design.md` | – | Neuer Abschnitt „Auswertungen“: `GET /reports/usage`, `GET /reports/usage/export`, Fehlercode 403, Feld `role` in `POST /auth/login` | Docs #165 |
+| 01.11.2026 | `api/api-design.md` | – | Rolle heißt `MANAGER` statt `MANAGEMENT` | Docs-Fix (PR #192) |
+| 01.11.2026 | Backend core-service | – | Erfassung an den 8 Stellen über die Queue, Auswertung je Monat mit Rollenprüfung, CSV-Export | BE #110, BE #111, BE #112, BE #114 |
+| 01.11.2026 | Frontend: Navigation | – | Eintrag „Auswertungen“ nur für die Rolle `MANAGER` | FE-Fix (PR #61) |
+| 01.11.2026 | `diagramme/domaenenmodell` | v4 → v5 | Nutzungsereignis (ohne Beziehung zum Nutzer), Rolle am Nutzer | Docs #163 |
+| 01.11.2026 | `diagramme/er-diagramm` | v5 → v6 | Tabelle der Nutzungsereignisse, Spalte `role`, Queue-Tabelle; dazu ADR-07: Schema `marktdaten`, `price_history` entfernt | Docs #163 |
+| 01.11.2026 | `diagramme/klassendiagramm` | v5 → v6 | Klassen für Erfassung, Queue und Auswertung, `ReportController` mit Rollenprüfung; dazu ADR-07 und GraphQL-Mutations | Docs #163 |
+| 01.11.2026 | `anforderungen/change-request.md` | 1 → 2 | Diagrammversionen auf v6 korrigiert, offene Punkte aus 5.3 beantwortet, Issues in 5.4, Change Log fortgeschrieben | Docs #166 |
+| Sprint 5 | Frontend: Export-Button | – | Download der CSV-Datei | FE #52, folgt |
+| Sprint 5 | `testkonzept/testkonzept.md`, `testkonzept/abnahmetestfaelle-sprint-5.md` | 4 → 5 | AT-11-xx, AT-12-xx | Docs #167, folgt |
+| Sprint 5 | `testkonzept/abnahmeprotokoll-sprint-5.md` | – | Abnahme von US-11 und US-12 | Docs #170, folgt |
 
-Weitere Einträge werden bei der Umsetzung in Sprint 5 ergänzt.
+Die mit „folgt“ markierten Einträge werden nach der Abnahme von Sprint 5 ergänzt.
 
 ### 8.1 Gegenüberstellung vorher und nachher: Use-Case-Diagramm v3 → v4
 
@@ -289,3 +306,16 @@ Laut III.1.5 greift das Team in der Retrospektive auf, ob Scrum den Umgang mit d
 
 - **Erleichtert:** Die Karte wurde ohne formalen Änderungsantrag als neue Einträge in den Product Backlog aufgenommen und neu priorisiert. Die vorab reservierte Zeit (Sprint-Planning-Protokoll Sprint 4, Abschnitt 2) hat eine sofortige Analyse ermöglicht.
 - **Erschwert:** Die kurzen Sprints und der bereits volle Sprint 5 lassen wenig Spielraum; die Umsetzung musste mit dem Verzicht auf „Vergleiche speichern“ erkauft werden.
+
+---
+
+## Änderungshistorie
+
+| Version | Datum | Abschnitt | Änderung | Anlass |
+|---|---|---|---|---|
+| 1 | 25.10.2026 | alle | Erstfassung | Docs #131 |
+| 2 | 01.11.2026 | Kopf | Version 2, Grundlagen um Sprint 5 ergänzt | Docs #166 |
+| 2 | 01.11.2026 | 3.2, 4.1, 5.4 | ER-Diagramm und Klassendiagramm v6 statt v5, weil Version 5 bereits aus Sprint 4 stammt | Docs #166, Docs #163 |
+| 2 | 01.11.2026 | 5.3 | Offene Punkte beantwortet: Ort der Ereigniserfassung (ADR-07), Konto mit Rolle `MANAGER` (Sprint-Planning-Protokoll Sprint 5) | ADR-07, Sprint-Planning-Protokoll Sprint 5 |
+| 2 | 01.11.2026 | 5.4 | Spalte „Issue“ mit den angelegten Tasks | Sprint-Planning-Protokoll Sprint 5 |
+| 2 | 01.11.2026 | 8 | Change Log um die Umsetzung in Sprint 5 fortgeschrieben | Docs #166 |
