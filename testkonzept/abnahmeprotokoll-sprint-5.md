@@ -167,11 +167,13 @@ Priorität nach Testkonzept, Abschnitt 11. Die Nummerierung setzt Sprint 3 und 4
 
 ## 7. Folgen
 
-- **US-11 bleibt offen (Docs #156).** Für B8 und B9 werden Issues mit Label `bug` angelegt (Testkonzept, Abschnitt 11). Nach dem Merge werden AT-11-03 und AT-11-06 wiederholt und hier nachgetragen.
+Das Team hat am 03.11.2026 beschlossen, die offenen Punkte in einem kurzen Sprint 6 zu bearbeiten. Die Nachtests stehen deshalb nicht in diesem Protokoll, sondern in den Abnahmetestfällen und im Abnahmeprotokoll Sprint 6.
+
+- **US-11 bleibt offen (Docs #156)** und geht in Sprint 6. Für B8 und B9 werden Issues mit Label `bug` angelegt (Testkonzept, Abschnitt 11). Nach dem Merge werden AT-11-03 und AT-11-06 in der Abnahme Sprint 6 wiederholt.
   - **B9 (FE):** Den festen Eintrag „Auswertungen“ aus `dashboard.html` entfernen und „App (SPA)“ wie auf den übrigen Seiten ergänzen.
-  - **B8:** Zwei Wege sind möglich: (a) Das Backend erfasst bei `save: true` nur `SIMULATION_SAVED`, weil die Oberfläche vorher immer simuliert; E37 wird dann für Speichern ohne vorherige Simulation (nur über die API) präzisiert. (b) Ein eigener Endpunkt speichert ein bereits berechnetes Ergebnis ohne Neuberechnung; das ist aufwendiger und ändert das API-Design. Empfehlung: (a), Entscheidung des Product Owners im Issue.
+  - **B8:** Zwei Wege sind möglich: (a) Das Backend erfasst bei `save: true` nur `SIMULATION_SAVED`, weil die Oberfläche vorher immer simuliert; E37 wird dann für Speichern ohne vorherige Simulation (nur über die API) präzisiert. (b) Ein eigener Endpunkt speichert ein bereits berechnetes Ergebnis ohne Neuberechnung; das ist aufwendiger und ändert das API-Design. Empfehlung: (a); die Entscheidung trifft der Product Owner im Sprint Planning Sprint 6.
 - **US-12 ist abgenommen;** Docs #157 ist bereits geschlossen.
-- **ADR-07, GraphQL schreibend und SPA-Touchpoint sind umgesetzt;** Docs #158 kann geschlossen werden, #159 und #160 sind bereits geschlossen. B10 ist behoben.
-- **H8 bis H12** werden als Issues angelegt (Priorität niedrig). Mit H8 wird H6 erneut geprüft.
+- **ADR-07, GraphQL schreibend und SPA-Touchpoint sind umgesetzt;** Docs #158 wird geschlossen, #159 und #160 sind bereits geschlossen. B10 ist behoben.
+- **H8 bis H12** werden als Issues angelegt (Priorität niedrig) und in Sprint 6 bearbeitet. Mit H8 wird H6 erneut geprüft.
 - **NF-01, NF-09, NF-10 und NF-14 (b)** sind nachgewiesen.
-- **Docs #170** ist mit diesem Protokoll erledigt, sobald die Nachtests zu B8 und B9 eingetragen sind.
+- **Docs #170** ist mit diesem Protokoll erledigt.
