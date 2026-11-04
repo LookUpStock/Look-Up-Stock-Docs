@@ -74,7 +74,7 @@ Nach dem Merge aller Frontend-Befunde werden die in Sprint 3 fehlgeschlagenen un
 
 | ID | Bezug | Art | Durchführung | Schritte / Eingabe | Erwartetes Ergebnis | Status |
 |---|---|---|---|---|---|---|
-| AT-04-17 | B5 (BE #87): Nur abgeschlossene Monate zählen; E22 | Grenzwert | automatisiert (`PriceHistoryServiceTest`) | Feste Uhr; Kursreihe mit Wert im laufenden Monat; Cache vor und nach dem Monatswechsel; Wert am letzten Tag des Monats | Der Wert des laufenden Monats wird gespeichert, aber weder zur Schätzung noch zu den 36 Monatswerten gezählt; nach dem Monatswechsel zählt der gerade abgeschlossene Monat; der letzte Tag gehört noch zum laufenden Monat (`laufenderMonatWirdBeimAbrufAusgeschlossenAberGespeichert`, `laufenderMonatAusDemCacheWirdAusgeschlossen`, `nachDemMonatswechselZaehltDerAbgeschlosseneMonat`, `letzterTagDesMonatsGehoertNochZumLaufendenMonat`). | bestanden (`PriceHistoryServiceTest`, CI) |
+| AT-04-17 | B5 (BE #87): Nur abgeschlossene Monate zählen; E22 | Grenzwert | automatisiert (`PriceHistoryServiceTest`) | Feste Uhr; Kursreihe mit Wert im laufenden Monat; Cache vor und nach dem Monatswechsel; Wert am letzten Tag des Monats | Der Wert des laufenden Monats wird gespeichert, aber weder zur Schätzung noch zu den 36 Monatswerten gezählt; nach dem Monatswechsel zählt der gerade abgeschlossene Monat; der letzte Tag gehört noch zum laufenden Monat (`laufenderMonatWirdAusgeschlossen`, `nachDemMonatswechselZaehltDerAbgeschlosseneMonat`, `letzterTagDesMonatsGehoertNochZumLaufendenMonat`; das Speichern prüft seit ADR-07 `withoutCachePricesAreFetchedSortedRoundedAndStored` in `PriceServiceTest` des marktdaten-service). | bestanden (`PriceHistoryServiceTest`, CI) |
 
 ---
 

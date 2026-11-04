@@ -35,6 +35,7 @@ Vorgehen: Scrum mit einwöchigen Sprints (Sprint 1 bis 5 vom 28.09. bis 01.11.20
 | `api/` | API-Design: REST und GraphQL zwischen Frontend und Backend, interne Schnittstellen zwischen den Diensten (`api-design.md`) |
 | `testkonzept/` | Testkonzept, Abnahmetestfälle und Abnahmeprotokolle je Sprint, Testabdeckung, Bedienbarkeitstest NF-09 |
 | `sprints/` | je Sprint ein Ordner `sprint-<n>/` mit Sprint-Planning-Protokoll und Sprint Review (mit Retrospektive) |
+| `ki-log/` | KI-Log je Teammitglied (`KI-Log-<Vorname>-<Nachname>.docx`) nach der Vorlage aus der Aufgabenstellung |
 | `portfolio/` | Portfolio Webprogrammierung, ein Kapitel je Datei (Aufbau in `portfolio/README.md`) |
 | `Wireframe` | Links zu den Wireframes in Figma |
 | `CONTRIBUTING.md` | Arbeitsweise im Team: Branches, Pull Requests, Definition of Done, KI-Nutzung |
@@ -53,7 +54,7 @@ Vorgehen: Scrum mit einwöchigen Sprints (Sprint 1 bis 5 vom 28.09. bis 01.11.20
 |---|---|
 | Diagramme (UML, Domänenmodell, ER) | PlantUML; die Quellen liegen als `.puml` neben den Bildern. Die Aufgabenbeschreibung empfiehlt Visual Paradigm Online und erlaubt ein selbst gewähltes Werkzeug, wenn es genannt wird. Das Team hat PlantUML gewählt, weil die Diagramme so wie Code versioniert und im Pull Request geprüft werden können. |
 | Wireframes | Figma |
-| Projektmanagement | GitHub Issues, GitHub Projects, Milestones je Sprint |
+| Projektmanagement | GitHub Issues und GitHub Projects; welche Issues zu welchem Sprint gehören, steht im Sprint-Planning-Protokoll (Milestones nur in Sprint 1 und 2) |
 | Versionsverwaltung und Review | Git, GitHub mit Pull Requests; `main` ist in allen drei Repositories geschützt (Pull Request mit Freigabe) |
 | CI | GitHub Actions: Tests bei jedem Pull Request, im Backend mit Abdeckungsbericht (JaCoCo) |
 | Betrieb | Heroku: drei Apps (Frontend, core-service, marktdaten-service) mit Heroku Postgres |

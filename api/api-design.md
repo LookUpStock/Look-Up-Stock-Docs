@@ -16,6 +16,8 @@ Diese Markdown-Datei ist die bearbeitbare Fassung des API-Designs. Sie übernimm
 
 **Änderung 04.11.2026 (Docs #213, BE #128, BE #129):** `GET /assets/{assetId}` gestrichen; der Endpunkt war seit Sprint 1 beschrieben, wurde aber nie umgesetzt und vom Frontend nicht gebraucht. Die nie dokumentierten Endpunkte `/assets/{symbol}/stats` und `/prices` sind im Code entfernt (Entscheidung im Sprint-Planning Sprint 6). Zählung von `POST /simulations` mit `save: true` nach E37 präzisiert (B8). Feld `micCode` in den Suchergebnissen ergänzt (wie im Code).
 
+**Änderung 04.11.2026 (Docs #213, Abschlussprüfung):** In den Beispielen für `400` bei Portfolios stehen in `details` jetzt dieselben Texte wie im Code (`Messages`): Die Detailmeldungen wiederholen die Meldung des Fehlers, nennen aber keine einzelnen `assetId`s; bei falscher Summe gibt es zwei Einträge. Technische Endpunkte `GET /ping`, `GET /api/health` und `/actuator/health` ergänzt.
+
 **Fehlerformat:** Fehler haben immer das Format `{ "error": { "code", "message", "details" } }`. `message` ist ein deutscher Text zur direkten Anzeige im Frontend. Gewichtungen in Prozent (Summe 100), Anteile in Ergebnissen als Dezimalzahl (0.31 = 31 %).
 
 ## Grundsätze und Regeln
@@ -248,6 +250,10 @@ Header: <code>Authorization: Bearer &lt;token&gt;</code>
     "details": [
       {
         "field": "positions",
+        "message": "Die Gewichtungen müssen zusammen 100 % ergeben."
+      },
+      {
+        "field": "positions",
         "message": "Summe der Gewichtungen ist 95 %."
       }
     ]
@@ -263,7 +269,7 @@ Header: <code>Authorization: Bearer &lt;token&gt;</code>
     "details": [
       {
         "field": "name",
-        "message": "Der Name hat 101 Zeichen."
+        "message": "Bitte einen Namen mit höchstens 100 Zeichen eingeben."
       }
     ]
   }
@@ -278,7 +284,7 @@ Header: <code>Authorization: Bearer &lt;token&gt;</code>
     "details": [
       {
         "field": "positions",
-        "message": "Das Portfolio enthält keine Position."
+        "message": "Bitte mindestens eine Anlage hinzufügen."
       }
     ]
   }
@@ -293,7 +299,7 @@ Header: <code>Authorization: Bearer &lt;token&gt;</code>
     "details": [
       {
         "field": "positions",
-        "message": "Gewichtung für assetId 23 ist 0 %."
+        "message": "Jede Gewichtung muss größer als 0 % sein."
       }
     ]
   }
@@ -308,7 +314,7 @@ Header: <code>Authorization: Bearer &lt;token&gt;</code>
     "details": [
       {
         "field": "positions",
-        "message": "Gewichtung für assetId 23 ist 33.333 %."
+        "message": "Gewichtungen dürfen höchstens 2 Nachkommastellen haben."
       }
     ]
   }
@@ -323,7 +329,7 @@ Header: <code>Authorization: Bearer &lt;token&gt;</code>
     "details": [
       {
         "field": "positions",
-        "message": "assetId 17 ist mehrfach enthalten."
+        "message": "Jede Anlage darf nur einmal im Portfolio enthalten sein."
       }
     ]
   }
@@ -518,7 +524,7 @@ Regeln für <code>name</code> und <code>positions</code> wie bei <code>POST /por
     "details": [
       {
         "field": "name",
-        "message": "Der Name fehlt."
+        "message": "Bitte einen Namen mit höchstens 100 Zeichen eingeben."
       }
     ]
   }
@@ -533,7 +539,7 @@ Regeln für <code>name</code> und <code>positions</code> wie bei <code>POST /por
     "details": [
       {
         "field": "positions",
-        "message": "Das Portfolio enthält keine Position."
+        "message": "Bitte mindestens eine Anlage hinzufügen."
       }
     ]
   }
@@ -548,7 +554,7 @@ Regeln für <code>name</code> und <code>positions</code> wie bei <code>POST /por
     "details": [
       {
         "field": "positions",
-        "message": "Gewichtung für assetId 23 ist -10 %."
+        "message": "Jede Gewichtung muss größer als 0 % sein."
       }
     ]
   }
@@ -563,7 +569,7 @@ Regeln für <code>name</code> und <code>positions</code> wie bei <code>POST /por
     "details": [
       {
         "field": "positions",
-        "message": "Gewichtung für assetId 17 ist 80.005 %."
+        "message": "Gewichtungen dürfen höchstens 2 Nachkommastellen haben."
       }
     ]
   }
@@ -578,7 +584,7 @@ Regeln für <code>name</code> und <code>positions</code> wie bei <code>POST /por
     "details": [
       {
         "field": "positions",
-        "message": "assetId 23 ist mehrfach enthalten."
+        "message": "Jede Anlage darf nur einmal im Portfolio enthalten sein."
       }
     ]
   }
@@ -1585,6 +1591,16 @@ Dieselben Bezeichnungen, Werte und Reihenfolge wie <code>GET /reports/usage</cod
 </tr>
 </table>
 Auswertungen gibt es nur über REST, nicht über GraphQL.
+
+## Technische Endpunkte
+
+Diese Endpunkte gehören zu keiner User Story. Sie dienen der Prüfung, ob ein Dienst erreichbar ist, und brauchen keine Anmeldung.
+
+| Methode | Pfad | Antwort | Zweck |
+|---|---|---|---|
+| GET | `/ping` (also `/api/v1/ping`) | `200 OK` mit `{ "status": "ok" }` | Statusanzeige „Backend verbunden“ in den Seiten der MPA (`fetchHealth` in `api.js`, aufgerufen in `main.js`) |
+| GET | `/api/health` (außerhalb der Basis-URL) | `200 OK` mit `{ "status": "ok" }` | einfacher Erreichbarkeitstest des core-service |
+| GET | `/actuator/health` (außerhalb der Basis-URL, beide Dienste) | `200 OK` mit `{ "status": "UP" }` | Zustand der Anwendung für Deployment und Abnahme (AT-ADR7-01, AT-NF13-01) |
 
 ## GraphQL (BE #94, BE #108)
 

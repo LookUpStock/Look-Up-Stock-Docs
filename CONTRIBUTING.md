@@ -100,7 +100,7 @@ Diese Regeln sind in allen drei Repositories als Branch-Schutz für `main` einge
 
 ## Umgang mit Issues
 
-- Jede Aufgabe ist ein Issue mit verantwortlicher Person, Milestone (Sprint) und passenden Labels.
+- Jede Aufgabe ist ein Issue mit verantwortlicher Person und passenden Labels. Welche Issues zu einem Sprint gehören, legt das Sprint-Planning-Protokoll fest; Milestones wurden nur in Sprint 1 und 2 genutzt.
 - Tasks hängen als Sub-Issues unter ihrer User Story.
 - Status im Project „Docs“ pflegen: **TODO → In Progress → In Review → Done**.
   - *In Progress*, sobald du mit der Arbeit beginnst.
@@ -121,11 +121,11 @@ Eine User Story gilt als erledigt, wenn
 
 ## KI-Nutzung
 
-- Jede KI-Nutzung, deren Ergebnis in ein abgegebenes Artefakt einfließt, wird im KI-Log eingetragen. Jedes Teammitglied führt ein eigenes KI-Log nach der gemeinsamen Vorlage; am Projektende werden die Logs zusammengeführt. Die Nummer im Kommentar ist die Nummer im KI-Log der Person, die den Abschnitt erstellt hat (z. B. `ME-12` im KI-Log von Mert Eminel).
+- Jede KI-Nutzung, deren Ergebnis in ein abgegebenes Artefakt einfließt, wird im KI-Log eingetragen. Jedes Teammitglied führt ein eigenes KI-Log nach der gemeinsamen Vorlage und legt es als `ki-log/KI-Log-<Vorname>-<Nachname>.docx` im Docs-Repository ab; am Projektende werden die Logs zusammengeführt. Die Nummer im Kommentar ist die Nummer im KI-Log der Person, die den Abschnitt erstellt hat (z. B. `ME-12` im KI-Log von Mert Eminel).
 - Wesentliche KI-generierte Codeabschnitte werden im Quellcode per Kommentar mit der Nummer aus dem KI-Log gekennzeichnet:
 
 ```
-// KI-Log Nr. 14: Grundgerüst der Monte-Carlo-Schleife mit KI erstellt, angepasst und getestet
+// KI-Log ME-14: Grundgerüst der Monte-Carlo-Schleife mit KI erstellt, angepasst und getestet
 ```
 
 - Keine personenbezogenen oder vertraulichen Daten (z. B. aus dem Ausbildungsbetrieb) in KI-Werkzeuge eingeben.

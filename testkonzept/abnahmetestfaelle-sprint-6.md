@@ -6,10 +6,10 @@
 | **Sprint** | 6 (03.11.2026 – 09.11.2026), Nachtest-Sprint vor der Abgabe |
 | **Issue** | Docs #214 Abnahmetests Sprint 6, Abnahmeprotokoll Sprint 6 |
 | **Verantwortlich** | Mert Eminel (KujoBaraka), Product Owner |
-| **Stand** | 04.11.2026, vor der Abnahme; Tests zu AT-11-08 nach dem Merge von BE #128 eingetragen |
+| **Stand** | 04.11.2026, vor der Abnahme; automatisierte Tests nach dem Merge von BE #128, FE #67 bis FE #71 eingetragen |
 | **Durchführung** | Nachtest von AT-11-03 und AT-11-06 nach dem Deploy (BE #130), übrige Testfälle danach; Ergebnis im Abnahmeprotokoll Sprint 6 (Docs #214) |
 | **Stories** | US-11 Nutzungskennzahlen anzeigen (Docs #156), nach den Fehlern B8 und B9 nicht abgenommen; Hinweise H6 und H8 bis H12 aus der Abnahme Sprint 5 |
-| **Grundlagen** | `anforderungen/nfr_furps.md` Version 5 (NF-05, NF-13), [Abnahmeprotokoll Sprint 5](abnahmeprotokoll-sprint-5.md) (Abschnitte „Befunde“ und „Folgen“), [Abnahmetestfälle Sprint 5](abnahmetestfaelle-sprint-5.md), Sprint-Planning-Protokoll Sprint 6 (Docs #210; Entscheidung zu B8: Variante a), `anforderungen/kurzformat_sprint-4.md` (US-11, E37, E40), Umsetzung BE #128 (B8), BE #130 (Deploy), FE #67 (B9), FE #68 (H8), FE #69 (H9), FE #70 (H10), FE #71 (H12), Docs #213 (H11), [Testkonzept](testkonzept.md) Version 6 |
+| **Grundlagen** | `anforderungen/nfr_furps.md` Version 5 (NF-05, NF-13), [Abnahmeprotokoll Sprint 5](abnahmeprotokoll-sprint-5.md) (Abschnitte „Befunde“ und „Folgen“), [Abnahmetestfälle Sprint 5](abnahmetestfaelle-sprint-5.md), Sprint-Planning-Protokoll Sprint 6 (Docs #210; Entscheidung zu B8: Variante a), `anforderungen/kurzformat_sprint-4.md` (US-11, E37, E40), Umsetzung BE #128 (B8), BE #130 (Deploy), FE #67 (B9), FE #68 (H8), FE #69 (H9), FE #70 (H10), FE #71 (H12), Docs #213 (H11), BE #135 und FE #81 (B11, NF-05), [Testkonzept](testkonzept.md) Version 6 |
 | **KI-Nutzung** | Entwurf mit KI-Unterstützung erstellt und vom Product Owner geprüft, siehe KI-Log |
 
 Diese Datei setzt [abnahmetestfaelle-sprint-5.md](abnahmetestfaelle-sprint-5.md) fort. In Sprint 6 gibt es keine neuen User Stories. Sie enthält den Nachtest der Testfälle, die in Sprint 5 fehlgeschlagen sind oder einen Hinweis ergeben haben, einen neuen Testfall für die präzisierte Zählung gespeicherter Simulationen (E37, Variante a) und die Nachweise für NF-05 und NF-13, die bisher keinem Testfall zugeordnet waren (NFRs Version 5).
@@ -76,6 +76,8 @@ Nach bestandenem Nachtest von AT-11-01, AT-11-03 und AT-11-06 und bestandenem AT
 
 Die Adressen der drei Heroku-Apps stehen im Abnahmeprotokoll Sprint 5 (Abschnitt „Umgebung“). Für AT-NF13-01 ist Zugriff auf das Heroku-Dashboard nötig; ihn hat Carl Stibbe. Er zeigt die Angaben in einer Bildschirmfreigabe oder schickt Screenshots.
 
+Ein Vortest zu AT-NF05-01 am 04.11.2026 ergab über `http://` die Antwort `200` statt einer Umleitung. Der Befund ist als B11 erfasst (BE #135, FE #81, Priorität hoch); AT-NF05-01 wird nach Merge und Deploy der Behebung durchgeführt.
+
 | ID | Bezug | Art | Durchführung | Schritte / Eingabe | Erwartetes Ergebnis | Status |
 |---|---|---|---|---|---|---|
 | AT-NF05-01 | NF-05: nur über HTTPS erreichbar; Aufruf über `http://` wird auf `https://` umgeleitet; gültiges Zertifikat | NFR | manuell | In PowerShell nacheinander (`-I` zeigt nur die Kopfzeilen der Antwort):<br>1. `curl.exe -I http://lookupstockfrontend-96a9998805cb.herokuapp.com/`<br>2. `curl.exe -I http://lookupstock-da2951e42089.herokuapp.com/actuator/health`<br>3. `curl.exe -I http://lookupstock-marktdaten-12ca5b75c510.herokuapp.com/actuator/health`<br>4. Die drei Adressen mit `https://` im Browser öffnen und auf das Schloss-Symbol klicken | 1. bis 3. Antwort `301` oder `308` mit `Location: https://…`, **keine** Antwort `200` über `http://`.<br>4. Das Zertifikat ist gültig, der Browser zeigt keine Warnung. | offen |
@@ -91,4 +93,6 @@ Die Adressen der drei Heroku-Apps stehen im Abnahmeprotokoll Sprint 5 (Abschnitt
 | `simulation.test.js` | FE | Unit-Test (`node:test`) | Nachtest H8 (`leftMarginForLabels grows with the longest label`, `buildFanChartGeometry leaves room for eight-digit y labels in the comparison`) | ergänzt (FE #68) |
 | `portfolio-errors.test.js` | FE | Unit-Test (`node:test`) | Nachtest H9 (vier Tests „… (FE #69, H9)“, u. a. `the empty editor shows a neutral weight sum status`) | ergänzt (FE #69) |
 | `portfolio-save.test.js` | FE | Unit-Test (`node:test`) | Nachtest H12 (`formatPositionCount uses the singular for exactly one position`) | ergänzt (FE #71) |
-| `dashboard.test.js` | FE | Unit-Test (`node:test`) | Nachtest B9 und H10 | Ergänzung mit FE #67 und FE #70 offen |
+| `dashboard-navigation.test.js` | FE | Unit-Test (`node:test`) | Nachtest B9 (`dashboard link is inserted and active for an authenticated manager`, `dashboard link is not inserted for regular or unauthenticated users`, `dashboard navigation keeps the SPA entry and has no static manager-only link`) | ergänzt (FE #67) |
+
+Für H10 (FE #70) gibt es keinen eigenen automatisierten Test; der Nachtest erfolgt manuell in AT-11-01.

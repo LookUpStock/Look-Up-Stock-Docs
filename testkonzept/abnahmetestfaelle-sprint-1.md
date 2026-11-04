@@ -107,4 +107,6 @@ Vorbedingung aller Testfälle, wenn nicht anders angegeben: „Mein Weltportfoli
 | `SimulationControllerIT` | Integrationstest (`MockMvc`) | AT-04-05, AT-04-10 bis AT-04-12 |
 | Frontend-Tests (Jest) | Unit-Test | AT-02-04, AT-03-03, AT-03-05 |
 
+**Hinweis (Docs #213, 04.11.2026):** Die Namen in dieser Tabelle waren ein Vorschlag aus dem Planning. Umgesetzt heißen die Integrationstests `PortfolioControllerTest`, `AssetControllerTest` und `SimulationControllerTest`. Die Cache-Regel aus AT-04-07 prüfte zunächst `PriceHistoryServiceTest`; seit der Trennung der Dienste (ADR-07, Sprint 5) prüft sie `PriceServiceTest` im marktdaten-service. Die Frontend-Tests laufen mit `node:test` statt Jest (siehe `abnahmetestfaelle-sprint-2.md`).
+
 Alle automatisierten Tests laufen mit dem `MockMarketDataProvider` ohne Internetzugang (NF-12). Die Performancemessung AT-04-14 läuft nicht in der CI, weil die Laufzeit auf geteilten CI-Runnern schwankt.
