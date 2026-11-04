@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Projekt** | LookUpStock |
-| **Sprint** | 5 (26.10.2026 – 01.11.2026), letzter Sprint |
+| **Sprint** | 5 (26.10.2026 – 01.11.2026) |
 | **Issue** | Docs #170 Abnahmetests Sprint 5, Abnahmeprotokoll Sprint 5 |
 | **Verantwortlich** | Mert Eminel (KujoBaraka), Product Owner |
 | **Datum der Abnahme** | 03.11.2026, 09:20 bis 11:45 Uhr |

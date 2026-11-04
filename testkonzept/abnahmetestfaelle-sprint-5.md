@@ -3,10 +3,10 @@
 | | |
 |---|---|
 | **Projekt** | LookUpStock |
-| **Sprint** | 5 (26.10.2026 – 01.11.2026), letzter Sprint |
+| **Sprint** | 5 (26.10.2026 – 01.11.2026) |
 | **Issue** | Docs #167 Abnahmetestfälle AT-11/AT-12, Testkonzept v5 |
 | **Verantwortlich** | Mert Eminel (KujoBaraka), Product Owner |
-| **Stand** | 03.11.2026, nach der Abnahme (Docs #170), Ergebnis im [Abnahmeprotokoll Sprint 5](abnahmeprotokoll-sprint-5.md) |
+| **Stand** | 03.11.2026, nach der Abnahme (Docs #170), Ergebnis im [Abnahmeprotokoll Sprint 5](abnahmeprotokoll-sprint-5.md); 04.11.2026 Vorbemerkung zur SPA-Adresse ergänzt (H11, Docs #213). Der Nachtest von AT-11-03, AT-11-06 und H6 steht in den [Abnahmetestfällen Sprint 6](abnahmetestfaelle-sprint-6.md). |
 | **Durchführung** | Abnahme Sprint 5 durch den Product Owner (Docs #170); Ergebnis im Abnahmeprotokoll Sprint 5 |
 | **Stories** | US-11 Nutzungskennzahlen anzeigen (Docs #156) und US-12 Nutzungskennzahlen exportieren (Docs #157) aus dem Change Request CR-01; technische Stories ADR-07 getrennte Dienste und Queue (Docs #158), GraphQL schreibend (Docs #159), SPA-Touchpoint (Docs #160, ADR-08); Nachtest der Hinweise H2 bis H7 aus der Abnahme Sprint 4 |
 | **Grundlagen** | Sprint-Planning-Protokoll Sprint 5 (Abschnitte 4 und 7), `anforderungen/kurzformat_sprint-4.md` (US-11, US-12, E36 bis E43, Akzeptanzkriterien), `anforderungen/change-request.md` Version 2, ADR-07, ADR-08, API-Design (Stand 01.11.2026, Abschnitte „Auswertungen“, „GraphQL“, „Interne Schnittstellen“), Abnahmeprotokoll Sprint 4 (H2 bis H7), Backend-Umsetzung BE #105 bis #114 und #127, Frontend FE #51 bis #58, [Testkonzept](testkonzept.md) Version 5 |
@@ -27,6 +27,7 @@ Es gelten die Vorbemerkungen aus Sprint 1 bis 4 (Bezug, Durchführung, Darstellu
 - **Zwei Browserfenster:** M bleibt in einem normalen Fenster angemeldet. Aktionen anderer Nutzer und als Gast laufen in einem privaten Fenster, damit die Anmeldung von M nicht mitgezählt wird.
 - **GraphQL:** Anfragen per `fetch` an `POST /graphql` in der Konsole der Entwicklertools, mit dem Token aus der Sitzung im Header `Authorization: Bearer …`. GraphQL antwortet auch bei Fehlern mit `200 OK`; ein Fehler steht im Feld `errors` mit `message` und `extensions.code` wie bei REST (API-Design, Abschnitt „GraphQL“).
 - **Handyansicht (NF-10):** Jede neue Seite (Dashboard, `app.html`) wird zusätzlich bei 360 px Breite geprüft (AT-NF10-02).
+- **SPA-Adresse (H11, ergänzt am 04.11.2026):** Die Testfälle nennen die Einstiegsseite `app.html#/…`, so wie die Links in der Anwendung. Auf Heroku liefert `serve` das Frontend aus und leitet `app.html` mit `301` auf `/app` um; der Hash bleibt dabei erhalten. In der Adresszeile steht deshalb `/app#/…` (siehe ADR-08). Die erwarteten Ergebnisse gelten für beide Adressen.
 
 **Anzahl der neuen Testfälle**
 
