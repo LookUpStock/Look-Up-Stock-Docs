@@ -6,56 +6,62 @@ Dieses Dokument legt fest, wie wir im Team mit den Repositories arbeiten. Es gil
 
 | Repository | Inhalt |
 |---|---|
-| `Look-Up-Stock-BackEnd` | REST-API, Simulationslogik, Datenbankzugriff, Unit-Tests |
-| `Look-Up-Stock-FrontEnd` | Benutzeroberfläche, Unit-Tests der Oberfläche |
-| `Look-Up-Stock-Docs` | User Stories, Sprint-Dokumentation, Diagramme, ADRs, Testkonzept, KI-Log, Deployment |
+| `Look-Up-Stock-BackEnd` | Zwei Dienste (ADR-07): `core-service` mit REST- und GraphQL-API, Simulation, Vergleich, Anmeldung und Auswertungen; `marktdaten-service` mit Anbindung an Twelve Data und Kurs-Cache; Datenbankmigrationen, Tests |
+| `Look-Up-Stock-FrontEnd` | Benutzeroberfläche als MPA und SPA (ADR-08), Unit-Tests der Oberfläche |
+| `Look-Up-Stock-Docs` | Anforderungen, Sprint-Dokumentation, Diagramme, ADRs, API-Design, Testkonzept, Portfolio Webprogrammierung, KI-Log |
 
 Im Folgenden werden die Repositories mit **BE**, **FE** und **Docs** abgekürzt.
 
 ## Ordnerstruktur
 
-**BE**
+**BE** (je Dienst ein eigenes Maven-Projekt)
 
 ```
-src/main/java/        Quellcode (Paket com.lookupstock.backend und unterpakete
-src/main/resources/   Konfiguration (application.properties)
-src/test/java/        Automatisierte Tests
-.mvn/wrapper/         Maven Wrapper (legt die Maven-Version fest)
-mvnw, mvnw.cmd        Maven Wrapper für Linux/macOS bzw. Windows
-pom.xml               Maven-Projektdatei mit Abhängigkeiten
-.env.example          Vorgabe für Umgebungsvariablen
-.github/workflows/    CI-Pipeline
-Dockerfile
-README.md
+core-service/                   Dienst für Anmeldung, Portfolios, Simulation, Vergleich, Auswertungen
+  src/main/java/                Quellcode (Paket com.lookupstock.backend und Unterpakete)
+  src/main/resources/           Konfiguration, GraphQL-Schema, Flyway-Migrationen (db/migration)
+  src/test/java/                Automatisierte Tests
+  .mvn/wrapper/, mvnw, mvnw.cmd Maven Wrapper
+  pom.xml                       Maven-Projektdatei
+  .env.example                  Vorgabe für Umgebungsvariablen
+  Procfile, system.properties   Start und Java-Version auf Heroku
+  README.md                     Start, Konfiguration, Endpunkte
+marktdaten-service/             Dienst für Suche und Kurse über Twelve Data (gleicher Aufbau, Paket com.lookupstock.marktdaten)
+.github/workflows/              CI je Dienst (backend-ci.yml, marktdaten-ci.yml)
+README.md                       Überblick über beide Dienste und Deployment
 ```
 
 **FE**
 
 ```
-src/                  Quellcode
-tests/                Automatisierte Tests
+src/                  Seiten der MPA (*.html), SPA-Einstieg app.html, css/, js/ (js/spa/ für die SPA)
+tests/                Automatisierte Tests (node:test)
+package.json          Start auf Heroku (serve) und Testbefehle
+.env.example          Vorgabe für Umgebungsvariablen
 .github/workflows/    CI-Pipeline
-Dockerfile
 README.md
 ```
 
 **Docs**
 
 ```
-sprints/sprint-1/     Sprint Planning, Sprint Review, Screenshots
-diagramme/            Use-Case-, Domänen-, Klassen-, ER-, Aktivitäts- und Sequenzdiagramme
-adr/                  Architecture Decision Records (ADR-01.md, ADR-02.md, ...)
-api/                  Beschreibung der Schnittstelle zwischen FE und BE
-testkonzept/          Testkonzept und Abnahmetestfälle
-ki-log/               KI-Log und KI-Reflexion
-deployment/           docker-compose.yml und Server-Konfiguration
+anforderungen/        Kurzformat-Tabellen, Akteure, Glossar, NFRs, Simulationsmodell, Change Request
+diagramme/            Use-Case-, Domänen-, Klassen-, ER-, Aktivitäts- und Sequenzdiagramme (aktueller Stand)
+diagramme/archiv/     ältere Diagrammversionen
+adr/                  Architecture Decision Records (ADR-01.md bis ADR-08.md)
+api/                  API-Design: Schnittstelle zwischen FE und BE und zwischen den Diensten
+testkonzept/          Testkonzept, Abnahmetestfälle und Abnahmeprotokolle je Sprint, Testabdeckung
+sprints/sprint-<n>/   Sprint-Planning-Protokoll und Sprint Review je Sprint
+portfolio/            Portfolio Webprogrammierung
 ```
+
+Dateinamen in `sprints/`: `Sprint-Planning-Protokoll-Sprint-<n>.docx` und `Sprint-Review-Sprint-<n>.docx`.
 
 Diagramme werden nicht überschrieben, sondern versioniert abgelegt (z. B. `klassendiagramm_v1.png`, `klassendiagramm_v2.png`), damit das iterative Wachstum und der Stand vor und nach dem Change Request nachvollziehbar bleiben. Ersetzte Versionen werden im selben Pull Request nach diagramme/archiv/ verschoben; im Ordner diagramme/ liegt nur der aktuelle Stand.
 
 ## Branching-Strategie (GitHub Flow)
 
-- `main` ist immer lauffähig und geschützt. Direkte Pushes auf `main` sind nicht erlaubt.
+- `main` ist immer lauffähig und geschützt. Direkte Pushes auf `main` sind nicht möglich (Branch-Schutz, siehe Pull Requests).
 - Für jedes Issue wird ein eigener Branch von `main` erstellt.
 - Änderungen gelangen ausschließlich über einen Pull Request nach `main`.
 
@@ -71,11 +77,12 @@ Kleinbuchstaben, Wörter mit Bindestrich trennen, keine Umlaute.
 
 ## Commit-Nachrichten
 
-Am Ende die Issue-Nummer angeben.
+Die Issue-Nummer angeben, am Ende in Klammern oder als Präfix mit dem Repository.
 
 ```
 Portfolio-Endpunkt mit Gewichtungsprüfung ergänzt (#33)
 Unit-Tests für Monte-Carlo-Engine hinzugefügt (#41)
+Docs #213: Sequenz- und Aktivitätsdiagramme US-04 und US-07 v3
 ```
 
 Jedes Teammitglied committet seine Arbeit selbst, damit die Commit-Historie die Beiträge aller nachvollziehbar macht.
@@ -90,7 +97,7 @@ Jedes Teammitglied committet seine Arbeit selbst, damit die Commit-Historie die 
    - die CI-Pipeline erfolgreich durchgelaufen ist.
 5. Nach dem Merge wird der Branch gelöscht.
 
-Diese Regeln sind in BE und FE als Branch-Schutz für `main` eingerichtet.
+Diese Regeln sind in allen drei Repositories als Branch-Schutz für `main` eingerichtet (Docs #207): Merge nur über einen Pull Request mit mindestens einem Approval; im FE muss zusätzlich die CI durchlaufen. Im BE ist die CI kein Pflicht-Check, weil die beiden Workflows Pfadfilter haben und ein PR, der nur einen Dienst ändert, sonst auf den anderen Check warten würde; ein Merge mit roter CI ist trotzdem nicht erlaubt.
 
 ## Umgang mit Issues
 
@@ -115,7 +122,7 @@ Eine User Story gilt als erledigt, wenn
 
 ## KI-Nutzung
 
-- Jede KI-Nutzung, deren Ergebnis in ein abgegebenes Artefakt einfließt, wird im KI-Log (`Docs/ki-log/`) eingetragen.
+- Jede KI-Nutzung, deren Ergebnis in ein abgegebenes Artefakt einfließt, wird im KI-Log eingetragen. Jedes Teammitglied führt ein eigenes KI-Log nach der gemeinsamen Vorlage; am Projektende werden die Logs zusammengeführt. Die Nummer im Kommentar ist die Nummer im KI-Log der Person, die den Abschnitt erstellt hat (z. B. `ME-12` im KI-Log von Mert Eminel).
 - Wesentliche KI-generierte Codeabschnitte werden im Quellcode per Kommentar mit der Nummer aus dem KI-Log gekennzeichnet:
 
 ```
@@ -128,4 +135,6 @@ Eine User Story gilt als erledigt, wenn
 
 - API-Keys, Datenbankpasswörter und andere Zugangsdaten werden **niemals** committet.
 - Lokal liegen sie in einer `.env`-Datei, die in `.gitignore` eingetragen ist. Eine `.env.example` ohne echte Werte zeigt, welche Variablen benötigt werden.
-- In der CI-Pipeline werden sie als GitHub Secrets hinterlegt.
+- Die CI-Pipelines brauchen keine echten Zugangsdaten: Sie laufen mit Platzhaltern und ohne Zugriff auf Twelve Data (NF-12). Werden doch Zugangsdaten nötig, werden sie als GitHub Secrets hinterlegt.
+- Auf Heroku stehen alle Zugangsdaten nur in den Konfigurationsvariablen der jeweiligen App; der Key von Twelve Data nur beim marktdaten-service (NF-06).
+- Ist ein Schlüssel versehentlich committet worden, genügt Löschen nicht, weil er in der Git-Historie bleibt: Er wird sofort beim Anbieter ersetzt (Abnahmeprotokoll Sprint 5, B10).
