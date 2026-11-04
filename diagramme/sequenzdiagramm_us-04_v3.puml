@@ -1,0 +1,293 @@
+@startuml sequenzdiagramm_us-04_v3
+' LookUpStock – Sequenzdiagramm zur Kern-Story US-04 mit GRASP-Kennzeichnung
+' Issue Docs #213 · Sprint 6 · Stand 04.11.2026 (v1: Docs #22, v2: Docs #59)
+' Grundlagen: Sequenzdiagramm US-04 v2, Klassendiagramm v6, Aktivitätsdiagramm US-04 v3,
+'             ADR-02, ADR-03, ADR-06, ADR-07, simulationsmodell.md, API-Design (POST /simulations),
+'             Backend-Code main (Stand 04.11.2026): core-service (CurrentUserArgumentResolver, AuthService,
+'             SimulationController, SimulationService, PortfolioService, ParameterEstimator, PriceHistoryService,
+'             MarktdatenClient, MonteCarloEngine, MetricsCalculator, UsageEventRecorder, DatabaseMessagePublisher)
+'             und marktdaten-service (InternalController, PriceService, PriceCacheRepository, TwelveDataProvider),
+'             Frontend-Code main (api.js, simulation.js, chart.js),
+'             NF-04, NF-07, NF-08, NF-12, PO-Festlegungen E6, E8, E14, E22, E24 bis E27, E37
+' Änderungen gegenüber v2:
+'   - Anmeldung nach ADR-06: Token im Header „Authorization: Bearer …“; der CurrentUserArgumentResolver
+'     liest ihn und fragt den AuthService (bisher Token im Request-Body, ADR-04)
+'   - Getrennte Dienste nach ADR-07: Der core-service holt die Monatskurse über PriceHistoryService und
+'     MarktdatenClient (Interface MarketDataProvider) synchron beim marktdaten-service (GET /internal/prices);
+'     Kurs-Cache (24 h) und Twelve Data liegen dort (PriceService, PriceCacheRepository, TwelveDataProvider)
+'   - Kennzahlen (US-05): MetricsCalculator.metrics(paths, parameters) zusätzlich zu den Perzentilen
+'   - Nutzungsereignis (US-11, E37): UsageEventRecorder stellt SIMULATION_RUN asynchron in die Queue
+'     (Tabelle queue_message, Thema nutzung.ereignis)
+'   - ParameterEstimator lädt die Kurse selbst (PriceHistoryService); nur abgeschlossene Monate (E22)
+'   - Klassen- und Methodennamen an den Code angeglichen (CachingMarketDataProvider entfällt seit ADR-07)
+' Werkzeug: PlantUML
+
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam shadowing false
+skinparam sequenceMessageAlign left
+skinparam responseMessageBelowArrow true
+skinparam ParticipantBackgroundColor #FFFFFF
+skinparam ParticipantBorderColor #333333
+skinparam ActorBorderColor #333333
+skinparam ActorBackgroundColor #FFFFFF
+skinparam SequenceLifeLineBorderColor #888888
+skinparam NoteBackgroundColor #FFF8DC
+skinparam NoteBorderColor #999999
+skinparam SequenceGroupBorderColor #666666
+skinparam BoxPadding 8
+
+title Sequenzdiagramm US-04 – Monte-Carlo-Simulation durchführen (v3, Sprint 6)
+
+actor "Registrierter\nNutzer" as Nutzer
+participant "Frontend\n(Browser)" as FE
+
+box "core-service" #F7F9FC
+participant ":CurrentUser-\nArgumentResolver" as CUR
+participant ":AuthService" as AUTH
+participant ":Simulation-\nController" as SC
+participant ":SimulationService" as SS
+participant "parameters:\nSimulationParameters" as SP
+participant ":PortfolioService" as PS
+participant "portfolio:\nPortfolio" as P
+participant ":ParameterEstimator" as PE
+participant ":PriceHistory-\nService" as PHS
+participant ":MarktdatenClient" as MDC
+participant ":MonteCarloEngine" as MCE
+participant ":MetricsCalculator" as MC
+participant ":UsageEvent-\nRecorder" as UER
+participant ":DatabaseMessage-\nPublisher" as DMP
+participant ":SimulationResult" as SR
+end box
+
+box "marktdaten-service" #FCF8F2
+participant ":InternalController" as IC
+participant ":PriceService" as PRS
+participant ":PriceCache-\nRepository" as PCR
+participant ":TwelveData-\nProvider" as TDP
+end box
+
+participant "Twelve Data\n«extern»" as TWD
+
+autonumber
+
+Nutzer -> FE : Portfolio wählen, Eingaben machen,\n„Simulation starten“
+activate FE
+FE -> CUR : POST /api/v1/simulations\nAuthorization: Bearer <token>\n{portfolioId, parameters}
+activate CUR
+note right of CUR
+  <b>ADR-06</b>
+  Token aus dem Header
+  „Authorization: Bearer …“
+end note
+CUR -> AUTH : authenticate(token)
+activate AUTH
+note right of AUTH
+  <b>GRASP Information Expert</b>
+  AuthToken.isExpired(now)
+  prüft die Gültigkeit (24 h, NF-16)
+end note
+alt Header fehlt, Token unbekannt oder abgelaufen
+  AUTH --> CUR : UnauthorizedException
+  CUR --> FE : 401 UNAUTHORIZED\n„Bitte melde dich an.“
+  FE --> Nutzer : Weiterleitung zur Anmeldung (E14)
+end
+AUTH --> CUR : user: User
+deactivate AUTH
+CUR -> SC : simulate(user, request)
+deactivate CUR
+activate SC
+
+SC -> SS : simulate(portfolioId, parameters, user)
+activate SS
+note right of SS
+  <b>GRASP Controller (ADR-02)</b>
+  koordiniert die Systemoperation,
+  rechnet nicht selbst; der
+  SimulationController übersetzt nur HTTP
+end note
+
+SS -> SP : validate()
+activate SP
+note right of SP
+  <b>GRASP Information Expert (ADR-03)</b>
+  Horizont 1–40, Beträge ≥ 0 und nicht
+  beide 0, Pfade 1.000–50.000,
+  Zielbetrag > 0 (E27)
+end note
+alt Eingaben ungültig
+  SP --> SS : ValidationException
+  SS --> SC : ValidationException
+  SC --> FE : 400 VALIDATION_ERROR
+  FE --> Nutzer : Fehlermeldung am Feld,\nEingaben bleiben erhalten
+end
+deactivate SP
+
+SS -> PS : findById(portfolioId, user)
+activate PS
+note right of PS
+  PortfolioRepository.findByIdAndOwner;
+  fremdes Portfolio = nicht vorhanden (NF-04)
+end note
+alt Portfolio nicht vorhanden oder gehört anderem Nutzer
+  PS --> SS : NotFoundException
+  SS --> SC : NotFoundException
+  SC --> FE : 404 NOT_FOUND\n„Portfolio nicht gefunden.“
+end
+PS --> SS : portfolio
+deactivate PS
+
+SS -> SS : ensureSeed(parameters)
+opt ohne Seed
+  SS -> SP : withSeed(seed)
+  activate SP
+  SP --> SS : parameters (mit Seed, NF-08)
+  deactivate SP
+end
+
+SS -> P : getWeights()
+activate P
+note right of P
+  <b>GRASP Information Expert (ADR-03)</b>
+  Portfolio kennt seine Positionen und
+  liefert die Anteile nach Asset-ID sortiert
+end note
+P --> SS : List<WeightedAsset>
+deactivate P
+
+SS -> PE : estimate(assets)
+activate PE
+loop für jede Anlage des Portfolios
+  PE -> PHS : getMonthlyPrices(asset)
+  activate PHS
+  PHS -> MDC : getHistoricalPrices(symbol, micCode, "1month", 120)
+  activate MDC
+  note right of MDC
+    <b>GRASP Low Coupling (NF-12)</b>
+    PriceHistoryService kennt nur das
+    Interface MarketDataProvider.
+    <b>ADR-07:</b> einzige synchrone Verbindung
+    zwischen den Diensten (Timeout 5 s)
+  end note
+  MDC -> IC : GET /internal/prices?symbol=…&mic=…\n&interval=1month&outputsize=120\nX-Internal-Api-Key: <Schlüssel>
+  activate IC
+  IC -> PRS : getPrices(symbol, mic, "1month", 120)
+  activate PRS
+  PRS -> PCR : load(symbol, mic)
+  activate PCR
+  PCR --> PRS : Optional<CachedPrices>
+  deactivate PCR
+  alt im Cache und jünger als 24 h (NF-07)
+    PRS --> IC : List<PricePoint> (aus Cache)
+  else nicht im Cache oder älter als 24 h
+    PRS -> TDP : getHistoricalPrices(symbol, mic, "1month", 120)
+    activate TDP
+    TDP -> TWD : GET /time_series (interval=1month)
+    alt Twelve Data erreichbar
+      TWD --> TDP : Kursdaten
+      TDP --> PRS : List<PricePoint>
+      PRS -> PCR : replace(symbol, mic, prices, now)\n(6 Nachkommastellen)
+      activate PCR
+      deactivate PCR
+      PRS --> IC : List<PricePoint>
+    else nicht erreichbar (Timeout 3 s)
+      TWD --> TDP : Fehler / Zeitüberschreitung
+      TDP --> PRS : UpstreamUnavailableException
+      PRS --> IC : UpstreamUnavailableException
+      IC --> MDC : 503
+      MDC --> PHS : UpstreamUnavailableException
+      PHS --> PE : UpstreamUnavailableException
+      PE --> SS : UpstreamUnavailableException
+      SS --> SC : UpstreamUnavailableException
+      SC --> FE : 503 UPSTREAM_UNAVAILABLE\n„Kursdaten sind gerade nicht verfügbar.“
+    end
+    deactivate TDP
+  end
+  deactivate PRS
+  IC --> MDC : 200 OK [PricePoint …]
+  deactivate IC
+  MDC --> PHS : List<PricePoint>
+  deactivate MDC
+  PHS -> PHS : completedMonths(prices, YearMonth.now)\n(nur abgeschlossene Monate, E22)
+  PHS --> PE : List<PricePoint>
+  deactivate PHS
+end
+alt Anlage ohne Kurse oder < 36 Monatswerte (E6, E8)\noder gemeinsamer Schätzzeitraum < 36 Monatswerte
+  PE --> SS : InsufficientDataException (alle betroffenen Anlagen)
+  SS --> SC : InsufficientDataException
+  SC --> FE : 422 INSUFFICIENT_DATA\n„Für folgende Anlagen liegen weniger als\n3 Jahre Kursdaten vor: …“ bzw.\n„… liefert der Kursdatenanbieter keine Kurse: …“
+end
+PE --> SS : EstimationResult\n(gemeinsamer Schätzzeitraum, max. 120 Monate;\nRendite und Volatilität je Anlage)
+deactivate PE
+
+SS -> SS : run(weights, estimation, parameters)
+activate SS
+SS -> MCE : simulate(weights, estimation, parameters)
+activate MCE
+note right of MCE
+  <b>GRASP High Cohesion</b>
+  Engine erzeugt nur die Pfade,
+  MetricsCalculator nur Perzentile
+  und Kennzahlen (simulationsmodell.md)
+end note
+MCE --> SS : double[][] (Pfade × Monate)
+deactivate MCE
+SS -> MC : percentiles(paths)
+activate MC
+MC --> SS : List<TimelinePoint> (p5, p50, p95 je Monat)
+SS -> MC : metrics(paths, parameters)
+MC --> SS : Metrics (E24 bis E27)
+deactivate MC
+SS --> SS : SimulationRun (timeline, metrics, endValues)
+deactivate SS
+
+SS -> UER : record(SIMULATION_RUN)
+activate UER
+note right of UER
+  <b>ADR-07, US-11 (E37)</b>
+  asynchron: nur in die Queue stellen;
+  der UsageEventConsumer überträgt das
+  Ereignis alle 5 s in usage_event.
+  Ein Fehler hier bricht die Simulation
+  nicht ab.
+end note
+UER -> DMP : publish("nutzung.ereignis", UsageEventMessage)
+activate DMP
+DMP -> DMP : INSERT queue_message\n(eigene Transaktion)
+DMP --> UER
+deactivate DMP
+UER --> SS
+deactivate UER
+
+create SR
+SS -> SR : <<create>>
+note right of SR
+  <b>GRASP Creator</b>
+  SimulationService hat alle Daten
+  zur Initialisierung des Ergebnisses
+end note
+
+SS --> SC : SimulationResult
+deactivate SS
+SC --> FE : 200 OK\n{portfolioId, parameters (inkl. seed), estimates,\ntimeline, metrics, runtimeMs}
+deactivate SC
+FE -> FE : renderFanChart(chart, timeline)\nund Zusammenfassung mit Kennzahlen
+FE --> Nutzer : Fächerdiagramm (5., 50. und 95. Perzentil),\nKennzahlen, verwendeter Seed und Hinweise (E16, E21, NF-14)
+deactivate FE
+
+legend bottom left
+  <b>Legende</b>
+  Rückgaben gestrichelt · Fehler werden als Exception an den REST-Controller gegeben; der GlobalExceptionHandler wandelt sie in das
+  Fehlerformat des API-Designs um (nicht dargestellt). Im marktdaten-service prüft der InternalApiKeyFilter vorab den Header X-Internal-Api-Key
+  (falscher Schlüssel: 401, im core-service als 503 gemeldet; nicht dargestellt). Der MarktdatenClient meldet jeden Fehler des marktdaten-service
+  und jede Zeitüberschreitung als UpstreamUnavailableException (503, NF-07).
+  Die Erfassung des Nutzungsereignisses galt im Change Request (Abschnitt 3.2) als technisches Detail; sie ist seit v3 dargestellt,
+  weil die Diagramme nun die asynchrone Kommunikation über die Queue aus ADR-07 zeigen.
+  GRASP: Controller (ADR-02), Information Expert (ADR-03), Low Coupling (NF-12), High Cohesion, Creator.
+  <b>Stand 04.11.2026:</b> alle dargestellten Klassen und Methoden sind im Code umgesetzt. Dargestellt ist das Berechnen ohne Speichern
+  (save: false). Mit save: true speichert zusätzlich der SavedSimulationService (US-08); das Ereignis SIMULATION_SAVED und die Zählung
+  laut E37 gehören zu US-08 und US-11. Nicht dargestellt: das Vorladen der Kurse beim Anlegen eines Portfolios (Thema kursdaten.vorladen, ADR-07).
+  Vorversionen: diagramme/archiv/sequenzdiagramm_us-04_v1, diagramme/archiv/sequenzdiagramm_us-04_v2
+endlegend
+
+@enduml

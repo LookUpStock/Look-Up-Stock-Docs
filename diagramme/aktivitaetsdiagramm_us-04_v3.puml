@@ -1,0 +1,162 @@
+@startuml aktivitaetsdiagramm_us-04_v3
+' LookUpStock – Aktivitätsdiagramm zur Kern-Story US-04
+' Issue Docs #213 · Sprint 6 · Stand 04.11.2026 (v1: Docs #21, v2: Sprint 1)
+' Grundlagen: Aktivitätsdiagramm US-04 v2, Kurzformat-Tabellen US-04 (kurzformat_sprint-1.md) und
+'             US-05 (kurzformat_sprint-2.md), API-Design (POST /simulations), ADR-07,
+'             NFRs NF-04, NF-07, NF-08, PO-Festlegungen E6, E8, E22, E24 bis E27, E29, E37,
+'             Backend-Code main (Stand 04.11.2026: SimulationService, ParameterEstimator,
+'             PriceHistoryService, MarktdatenClient; marktdaten-service PriceService)
+' Änderungen gegenüber v2:
+'   - Getrennte Dienste nach ADR-07: eigene Bahnen für core-service und marktdaten-service;
+'     Kurs-Cache (24 h) und Abruf bei Twelve Data liegen im marktdaten-service
+'   - nur abgeschlossene Monate zählen (E22)
+'   - Anlage ohne Kurse beim Anbieter wird eigens gemeldet (Docs #80); gemeinsamer
+'     Schätzzeitraum mit mindestens 36 Monatswerten (E29, wie US-07)
+'   - optionaler Zielbetrag und Kennzahlen (US-05, E24 bis E27)
+'   - erfolgreiche Simulation wird für die Auswertungen erfasst (US-11, E37, asynchron über die Queue)
+' Werkzeug: PlantUML
+
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam ActivityBackgroundColor #FFFFFF
+skinparam ActivityBorderColor #333333
+skinparam ActivityDiamondBackgroundColor #F5F5F5
+skinparam NoteBackgroundColor #FFF8DC
+skinparam NoteBorderColor #999999
+skinparam SwimlaneTitleFontStyle bold
+
+title Aktivitätsdiagramm US-04 – Monte-Carlo-Simulation durchführen (v3, Sprint 6)
+
+|Nutzer|
+start
+:Portfolio auswählen;
+
+repeat
+  :Startkapital, monatliche Sparrate und
+  Anlagehorizont eingeben;
+  :optional Pfadanzahl, Seed und Zielbetrag festlegen;
+  :Simulation starten;
+  |LookUpStock core-service|
+  :Eingaben prüfen;
+  note right
+    **Prüfregeln**
+    • Startkapital und Sparrate: Pflicht, ≥ 0,
+      nicht beide 0
+    • Anlagehorizont: 1 bis 40 ganze Jahre
+    • Pfadanzahl (optional): 1.000 bis 50.000,
+      Standard 10.000
+    • Seed (optional): ganze Zahl
+    • Zielbetrag (optional): größer als 0 (E27)
+  end note
+  backward :Fehlermeldung zum ungültigen Feld anzeigen
+  (HTTP 400 VALIDATION_ERROR);
+repeat while () is ([Eingaben ungültig]) not ([Eingaben gültig])
+
+:Portfolio laden;
+if () then ([eigenes Portfolio vorhanden])
+else ([nicht vorhanden oder fremd])
+  :Meldung „Portfolio nicht gefunden.“ anzeigen
+  (HTTP 404 NOT_FOUND, NF-04);
+  stop
+endif
+
+if () then ([ohne Seed])
+  :Zufälligen Seed erzeugen;
+else ([mit Seed])
+endif
+
+:Monatskurse der enthaltenen Anlagen
+beim marktdaten-service anfordern;
+note right
+  **ADR-07:** einzige synchrone Verbindung
+  zwischen den Diensten (Timeout 5 s),
+  je Anlage eine Anfrage
+end note
+
+|LookUpStock marktdaten-service|
+:Kursdaten der Anlage im Cache suchen;
+note right
+  **Cache-Regel (NF-07)**
+  Kursdaten jünger als 24 h werden verwendet,
+  ältere nicht. Die Prüfung erfolgt je Anlage.
+end note
+
+if () then ([im Cache und jünger als 24 h])
+  :Kursdaten aus dem Cache verwenden;
+else ([nicht im Cache oder älter als 24 h])
+  :Historische Monatskurse
+  bei Twelve Data anfordern;
+  |Finanzdaten-API (Twelve Data)|
+  :Kursdaten bereitstellen;
+  |LookUpStock marktdaten-service|
+  if () then ([Kursdaten erhalten])
+    :Kursdaten im Cache speichern;
+  else ([nicht erreichbar oder\nZeitüberschreitung])
+    :Fehler an den core-service melden;
+    |LookUpStock core-service|
+    :Meldung anzeigen:
+    „Kursdaten sind gerade nicht verfügbar.“
+    (HTTP 503 UPSTREAM_UNAVAILABLE);
+    stop
+  endif
+endif
+
+|LookUpStock core-service|
+:Nur abgeschlossene Monate verwenden (E22);
+:Kurshistorie je Anlage prüfen;
+if () then ([alle Anlagen ≥ 36 Monatswerte])
+else ([Anlage ohne Kurse\noder < 36 Monatswerte])
+  :Meldung mit allen betroffenen Anlagen anzeigen:
+  „Für folgende Anlagen liegen weniger als
+  3 Jahre Kursdaten vor: …“ bzw.
+  „… liefert der Kursdatenanbieter keine Kurse: …“
+  (HTTP 422 INSUFFICIENT_DATA, E6, E8);
+  stop
+endif
+
+:Gemeinsamen Schätzzeitraum bestimmen
+(spätester Beginn bis frühestes Ende,
+höchstens 120 Monatswerte);
+if () then ([≥ 36 Monatswerte])
+else ([< 36 Monatswerte])
+  :Meldung „Für folgende Anlagen liegen weniger als
+  3 Jahre Kursdaten vor: …“ mit den Anlagen,
+  deren Historie am spätesten beginnt
+  (HTTP 422 INSUFFICIENT_DATA, E29);
+  stop
+endif
+
+:Rendite und Volatilität je Anlage
+im gemeinsamen Schätzzeitraum schätzen;
+:Wertverläufe in Monatsschritten simulieren
+(gewählte Pfadanzahl, Seed);
+:5., 50. und 95. Perzentil je Monat
+und Kennzahlen berechnen (E24 bis E26);
+if () then ([Zielbetrag angegeben])
+  :Wahrscheinlichkeit berechnen,
+  den Zielbetrag zu erreichen (E27);
+else ([kein Zielbetrag])
+endif
+:Durchgeführte Simulation für die
+Auswertungen erfassen (US-11, E37);
+note right
+  asynchron über die Queue (ADR-07);
+  ein Fehler dabei bricht die
+  Simulation nicht ab
+end note
+:Fächerdiagramm, Kennzahlen und
+verwendeten Seed anzeigen;
+
+|Nutzer|
+:Ergebnis ansehen;
+stop
+
+legend bottom left
+  **Vorbedingung, nicht im Diagramm:** gültige Anmeldung (sonst HTTP 401, AT-04-16)
+  **Nicht enthalten:** Speichern der Simulation (US-08) · Beispielsimulation ohne Anmeldung (US-09)
+  Angaben „HTTP …“ = Antwort von POST /simulations laut API-Design. Fehler des marktdaten-service und Zeitüberschreitungen
+  meldet der core-service als HTTP 503 (NF-07). Vorversionen: diagramme/archiv/aktivitaetsdiagramm_us-04_v1, _v2
+endlegend
+
+@enduml
