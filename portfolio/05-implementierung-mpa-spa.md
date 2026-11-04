@@ -98,5 +98,5 @@ Der wichtigste Kompromiss war der kleinere Funktionsumfang. Das war durch die Pr
 - [ADR-08: SPA-Touchpoint mit Hash-Routing](../adr/ADR-08.md)
 - [Sprint-Planning-Protokoll Sprint 5](../sprints/sprint-5/Sprint-Planning-Protokoll-Sprint-5.docx)
 - [Abnahmetestfälle Sprint 5, SPA-Touchpoint](../testkonzept/abnahmetestfaelle-sprint-5.md)
-- Sprint-Review 5, insbesondere Abschnitte 1, 2 und 5: `sprints/sprint-5/Sprintreview5.docx`
+- Sprint-Review 5, insbesondere Abschnitte 1, 2 und 5: `sprints/sprint-5/Sprint-Review-Sprint-5.docx`
 - Frontend-Implementierung im Repository `Look-Up-Stock-FrontEnd`: MPA-Seiten `src/index.html`, `src/login.html`, `src/portfolio.html`, `src/compare.html`; SPA `src/app.html`, `src/js/spa/router.js`, `src/js/spa/app.js`; Routertest `tests/router.test.js`.
