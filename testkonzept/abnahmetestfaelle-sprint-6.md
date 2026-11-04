@@ -3,10 +3,10 @@
 | | |
 |---|---|
 | **Projekt** | LookUpStock |
-| **Sprint** | 6 (ab 03.11.2026), Nachtest-Sprint vor der Abgabe |
+| **Sprint** | 6 (03.11.2026 – 09.11.2026), Nachtest-Sprint vor der Abgabe |
 | **Issue** | Docs #214 Abnahmetests Sprint 6, Abnahmeprotokoll Sprint 6 |
 | **Verantwortlich** | Mert Eminel (KujoBaraka), Product Owner |
-| **Stand** | 04.11.2026, vor der Abnahme |
+| **Stand** | 04.11.2026, vor der Abnahme; Tests zu AT-11-08 nach dem Merge von BE #128 eingetragen |
 | **Durchführung** | Nachtest von AT-11-03 und AT-11-06 nach dem Deploy (BE #130), übrige Testfälle danach; Ergebnis im Abnahmeprotokoll Sprint 6 (Docs #214) |
 | **Stories** | US-11 Nutzungskennzahlen anzeigen (Docs #156), nach den Fehlern B8 und B9 nicht abgenommen; Hinweise H6 und H8 bis H12 aus der Abnahme Sprint 5 |
 | **Grundlagen** | `anforderungen/nfr_furps.md` Version 5 (NF-05, NF-13), [Abnahmeprotokoll Sprint 5](abnahmeprotokoll-sprint-5.md) (Abschnitte „Befunde“ und „Folgen“), [Abnahmetestfälle Sprint 5](abnahmetestfaelle-sprint-5.md), Sprint-Planning-Protokoll Sprint 6 (Docs #210; Entscheidung zu B8: Variante a), `anforderungen/kurzformat_sprint-4.md` (US-11, E37, E40), Umsetzung BE #128 (B8), BE #130 (Deploy), FE #67 (B9), FE #68 (H8), FE #69 (H9), FE #70 (H10), FE #71 (H12), Docs #213 (H11), [Testkonzept](testkonzept.md) Version 6 |
@@ -66,7 +66,7 @@ Nach dem Merge der Behebungen werden die betroffenen Testfälle erneut durchgef�
 
 | ID | Bezug | Art | Durchführung | Schritte / Eingabe | Erwartetes Ergebnis | Status |
 |---|---|---|---|---|---|---|
-| AT-11-08 | E37 nach Variante (a): `POST /simulations` mit `save: true` erfasst nur „Gespeicherte Simulationen“, ohne `save` nur „Durchgeführte Simulationen“; GraphQL `simulate` wie REST | Alternativszenario | automatisiert (`SimulationServiceTest`, `SavedSimulationServiceTest`; Testnamen nach dem Merge von BE #128) | 1. Simulation ohne `save`<br>2. Simulation mit `save: true` und Namen<br>3. Mutation `simulate` mit `save: true` | 1. Genau ein Ereignis `SIMULATION_RUN`, kein `SIMULATION_SAVED`.<br>2. Genau ein Ereignis `SIMULATION_SAVED`, kein `SIMULATION_RUN`.<br>3. Wie 2. In jedem Fehlerfall kein Ereignis (wie AT-11-04). | offen |
+| AT-11-08 | E37 nach Variante (a): `POST /simulations` mit `save: true` erfasst nur „Gespeicherte Simulationen“, ohne `save` nur „Durchgeführte Simulationen“; GraphQL `simulate` wie REST | Alternativszenario | automatisiert (`SimulationServiceTest`, `SimulationControllerTest`, `MutationControllerTest`; BE #128) | 1. Simulation ohne `save`<br>2. Simulation mit `save: true` und Namen<br>3. Mutation `simulate` mit `save: true` | 1. Genau ein Ereignis `SIMULATION_RUN`, kein `SIMULATION_SAVED`.<br>2. Genau ein Ereignis `SIMULATION_SAVED`, kein `SIMULATION_RUN`.<br>3. Wie 2. In jedem Fehlerfall kein Ereignis (wie AT-11-04).<br>Tests: `simulateForSaveRechnetGleichZaehltAberKeineDurchgefuehrteSimulation`, `simulateForSavePrueftEingabenWieSimulate` (`SimulationServiceTest`), `simulateWithSave_returns201WithIdNameAndCreatedAt` (`SimulationControllerTest`, ruft bei `save: true` nur `simulateForSave` auf), `simulateWithSaveCountsNoSecondSimulationRun` (`MutationControllerTest`). | offen |
 
 Nach bestandenem Nachtest von AT-11-01, AT-11-03 und AT-11-06 und bestandenem AT-11-08 sind alle Testfälle von US-11 bestanden; US-11 (Docs #156) kann abgenommen werden.
 
@@ -87,7 +87,7 @@ Die Adressen der drei Heroku-Apps stehen im Abnahmeprotokoll Sprint 5 (Abschnitt
 
 | Testklasse | Repository | Teststufe | Abgedeckte Testfälle | Stand 04.11.2026 |
 |---|---|---|---|---|
-| `SimulationServiceTest`, `SavedSimulationServiceTest` | BE (core-service) | Unit-Test mit Mockito | AT-11-08 | Ergänzung mit BE #128 offen |
+| `SimulationServiceTest`, `SimulationControllerTest`, `MutationControllerTest` | BE (core-service) | Unit- und Integrationstest | AT-11-08 | ergänzt (BE #128) |
 | `simulation.test.js` | FE | Unit-Test (`node:test`) | Nachtest H8 (`leftMarginForLabels grows with the longest label`, `buildFanChartGeometry leaves room for eight-digit y labels in the comparison`) | ergänzt (FE #68) |
 | `portfolio-errors.test.js` | FE | Unit-Test (`node:test`) | Nachtest H9 (vier Tests „… (FE #69, H9)“, u. a. `the empty editor shows a neutral weight sum status`) | ergänzt (FE #69) |
 | `portfolio-save.test.js` | FE | Unit-Test (`node:test`) | Nachtest H12 (`formatPositionCount uses the singular for exactly one position`) | ergänzt (FE #71) |

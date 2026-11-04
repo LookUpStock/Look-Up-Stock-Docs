@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Projekt** | LookUpStock |
-| **Sprint** | 6 (ab 03.11.2026), Version 6 |
+| **Sprint** | 6 (03.11.2026 – 09.11.2026), Version 6 |
 | **Issue** | Docs #213 Testkonzept Version 6, Pfadabdeckung nach den Aktivitätsdiagrammen v3, und Docs #214 Abnahmetestfälle Sprint 6 (Version 6); Docs #167 Abnahmetestfälle AT-11/AT-12, Testkonzept v5 (Version 5); Docs #135 Fortschreibung des Testkonzepts (Version 4); Docs #100 (Version 3); Docs #61 (Version 2); Docs #23 Testkonzept v1 (Version 1) |
 | **Verantwortlich** | Version 1: Paul Kaufmann (Paul02112004); Version 2 und 3: Mert Eminel (KujoBaraka); Version 4: Peter Orban (Pixxels02); Version 5 und 6: Mert Eminel (KujoBaraka) |
 | **Stand** | 04.11.2026 |

@@ -37,7 +37,6 @@ README.md                       Überblick über beide Dienste und Deployment
 src/                  Seiten der MPA (*.html), SPA-Einstieg app.html, css/, js/ (js/spa/ für die SPA)
 tests/                Automatisierte Tests (node:test)
 package.json          Start auf Heroku (serve) und Testbefehle
-.env.example          Vorgabe für Umgebungsvariablen
 .github/workflows/    CI-Pipeline
 README.md
 ```

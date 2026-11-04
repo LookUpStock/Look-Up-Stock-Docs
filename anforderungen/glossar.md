@@ -3,10 +3,10 @@
 | | |
 |---|---|
 | **Projekt** | LookUpStock |
-| **Issue** | Docs #15 (Version 1), Docs #57 (Version 2), Docs #72 (Version 3), Docs #58 (Version 4), Docs #83 (Version 5), Docs #131 (Version 6); Version 7: Anpassung an die Umsetzung in Sprint 5 |
+| **Issue** | Docs #15 (Version 1), Docs #57 (Version 2), Docs #72 (Version 3), Docs #58 (Version 4), Docs #83 (Version 5), Docs #131 (Version 6); Version 7: Anpassung an die Umsetzung in Sprint 5; Version 8: Zählung gespeicherter Simulationen (Docs #213) |
 | **Verantwortlich** | Mert Eminel (KujoBaraka), Product Owner |
-| **Version** | 7 |
-| **Stand** | 01.11.2026 |
+| **Version** | 8 |
+| **Stand** | 04.11.2026 |
 | **Grundlagen** | Kurzformat-Tabellen Sprint 1 und Sprint 2 (Version 3, E11 bis E23), Domänenmodell v3, Aktivitätsdiagramm US-04 v2, NFRs Version 3, API-Design (Stand 02.10.2026), ADR-01 bis ADR-04, Testkonzept, `simulationsmodell.md` (Version 2), Kurzformat-Tabellen Sprint 3 (E24 bis E35), ADR-05, ADR-06, Change Request CR-01 und Kurzformat-Tabellen Sprint 4 (E36 bis E43); ab Version 7 zusätzlich ADR-07, ADR-08, API-Design (Stand 01.11.2026) und die Umsetzung BE #105 bis #114, FE #51 bis #53 |
 | **KI-Nutzung** | Mit KI-Unterstützung erstellt und vom Product Owner geprüft, siehe KI-Log |
 
@@ -79,7 +79,7 @@ Das Glossar erklärt Begriffe, die für eine einheitliche Beschreibung nötig si
 | **MPA (Multi-Page-Application)** | Touchpoint, bei dem jede Navigation eine neue HTML-Seite lädt: Simulation, Portfolios, Vergleich, Anmeldung und Auswertungen. | `index.html`, `portfolio.html`, `compare.html`, `login.html`, `dashboard.html` |
 | **Nutzerkonto** | Konto eines registrierten Nutzers, bestehend aus E-Mail-Adresse und Passwort. Die E-Mail-Adresse ist eindeutig, Groß- und Kleinschreibung spielen keine Rolle (E11). Das Passwort hat mindestens 8 Zeichen und wird nur als Hash gespeichert (NF-03). | `User`, Tabelle `app_user` |
 | **Nutzungsereignis** | Eintrag, der festhält, dass eine Funktion erfolgreich genutzt wurde, z. B. eine Simulation oder eine Anmeldung. Er besteht nur aus Ereignisart und Zeitpunkt, ohne Bezug zu einem Nutzer, IP-Adresse, Suchbegriff oder Anlage (E36, E37, NF-14 b). Grundlage der Nutzungskennzahlen. Wird über die Queue übertragen und erscheint deshalb mit einigen Sekunden Verzögerung (ADR-07). | `UsageEvent`, `UsageEventType`, Tabelle `usage_event` |
-| **Nutzungskennzahlen** | Zahlen zur Nutzung von LookUpStock in einem Kalendermonat: neue Registrierungen, Anmeldungen, angelegte Portfolios, durchgeführte und gespeicherte Simulationen, Vergleiche, Beispielsimulationen, Anlagensuchen und Nutzerkonten am Monatsende (E39). Nicht zu verwechseln mit den Kennzahlen einer Simulation (US-05). | `UsageMetric`, `UsageReport`, `GET /reports/usage` |
+| **Nutzungskennzahlen** | Zahlen zur Nutzung von LookUpStock in einem Kalendermonat: neue Registrierungen, Anmeldungen, angelegte Portfolios, durchgeführte und gespeicherte Simulationen, Vergleiche, Beispielsimulationen, Anlagensuchen und Nutzerkonten am Monatsende (E39). Eine über die Oberfläche gespeicherte Simulation zählt einmal als durchgeführte (beim Simulieren) und einmal als gespeicherte (beim Speichern), nicht doppelt als durchgeführte (E37, B8). Nicht zu verwechseln mit den Kennzahlen einer Simulation (US-05). | `UsageMetric`, `UsageReport`, `GET /reports/usage` |
 | **Passwort-Hash** | Aus dem Passwort berechneter Wert, aus dem sich das Passwort nicht zurückrechnen lässt. Bei der Anmeldung wird das eingegebene Passwort erneut gehasht und verglichen (NF-03). | BCrypt, `password_hash` |
 | **Queue** | Warteschlange für Nachrichten zwischen den Komponenten, damit der Absender nicht auf die Verarbeitung warten muss (asynchrone Kommunikation, ADR-07). Umgesetzt als Tabelle in der Datenbank mit den Themen Nutzungsereignis und Vorladen der Kurse. | Tabelle `queue_message`, `MessagePublisher`, Themen `nutzung.ereignis`, `kursdaten.vorladen` |
 | **Registrierter Nutzer** | Person mit Nutzerkonto, siehe Akteursbeschreibung (`akteure.md`). Im Domänenmodell als „Nutzer“ bezeichnet. | `User` |
@@ -115,3 +115,4 @@ Das Glossar erklärt Begriffe, die für eine einheitliche Beschreibung nötig si
 | 5 | 18.10.2026 | Neu: Endwert, Maximaler Drawdown, Value at Risk (95 %), Zielbetrag, Zielwahrscheinlichkeit, Gespeicherte Simulation. Kennzahlen ausformuliert. Vergleich an US-07 angepasst (zwei Einträge, einzelne Anlage, gemeinsamer Schätzzeitraum, Wahrscheinlichkeit für den ersten Eintrag) | Docs #83, Festlegungen E24 bis E34 |
 | 6 | 25.10.2026 | Neu: CSV-Export, Dashboard, Geschäftsführung, Nutzungsereignis, Nutzungskennzahlen, Rolle. Geändert: Token und Geschützte Funktion (Übertragung im Header, ADR-06), Vergleich (US-10 wird nicht umgesetzt), Cache (Suchergebnisse im Arbeitsspeicher, Bezeichnungen im Code) | Docs #131, Change Request CR-01, ADR-06, Sprint-Planning-Protokoll Sprint 4 |
 | 7 | 01.11.2026 | Neu: core-service, GraphQL, marktdaten-service, MPA, Queue, SPA. Geändert: API-Key, Backend, Cache, Finanzdaten-API und Frontend (Aufteilung in zwei Dienste, ADR-07); Bezeichnungen im Code für CSV-Export, Dashboard, Geschäftsführung, Nutzungsereignis, Nutzungskennzahlen und Rolle aus der Umsetzung übernommen | Umsetzung Sprint 5 (BE #105 bis #114, FE #51 bis #53), ADR-07, ADR-08 |
+| 8 | 04.11.2026 | Geändert: Nutzungskennzahlen (Zählung einer gespeicherten Simulation nach E37, B8) | Docs #213, BE #128 |

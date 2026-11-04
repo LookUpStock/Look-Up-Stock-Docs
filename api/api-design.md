@@ -1,6 +1,6 @@
 # API-Design – LookUpStock
 
-Stand: 01.11.2026 · Basis-URL `/api/v1` · Datenformat JSON
+Stand: 04.11.2026 · Basis-URL `/api/v1` · Datenformat JSON
 
 Diese Markdown-Datei ist die bearbeitbare Fassung des API-Designs. Sie übernimmt den vollständigen Inhalt von `api-design.pdf` (Stand 02.10.2026; die PDF-Datei wurde am 25.10.2026 entfernt, maßgeblich ist diese Datei) und ergänzt die Entscheidungen des Product Owners vom 02.10.2026 (E1 bis E7) sowie die einzelnen Fehlerfälle für Portfolios und Simulationen.
 
@@ -14,6 +14,8 @@ Diese Markdown-Datei ist die bearbeitbare Fassung des API-Designs. Sie übernimm
 
 **Änderung 01.11.2026 (Docs #159, BE #108, ADR-07):** Abschnitt GraphQL um schreibende Operationen (Mutations) ergänzt: Portfolios anlegen, ändern und löschen, Simulation durchführen und speichern, gespeicherte Simulation löschen, Vergleich durchführen. Neuer Abschnitt „Interne Schnittstellen“ mit den Endpunkten des marktdaten-service und den Themen der Queue. Abschnitt „Anbindung der Finanzdaten-API“ an die Aufteilung in zwei Dienste angepasst. Für Aufrufer des core-service ändern sich Pfade und Antworten nicht.
 
+**Änderung 04.11.2026 (Docs #213, BE #128, BE #129):** `GET /assets/{assetId}` gestrichen; der Endpunkt war seit Sprint 1 beschrieben, wurde aber nie umgesetzt und vom Frontend nicht gebraucht. Die nie dokumentierten Endpunkte `/assets/{symbol}/stats` und `/prices` sind im Code entfernt (Entscheidung im Sprint-Planning Sprint 6). Zählung von `POST /simulations` mit `save: true` nach E37 präzisiert (B8). Feld `micCode` in den Suchergebnissen ergänzt (wie im Code).
+
 **Fehlerformat:** Fehler haben immer das Format `{ "error": { "code", "message", "details" } }`. `message` ist ein deutscher Text zur direkten Anzeige im Frontend. Gewichtungen in Prozent (Summe 100), Anteile in Ergebnissen als Dezimalzahl (0.31 = 31 %).
 
 ## Grundsätze und Regeln
@@ -25,7 +27,7 @@ Diese Markdown-Datei ist die bearbeitbare Fassung des API-Designs. Sie übernimm
 ## Anbindung der Finanzdaten-API
 
 - Primärer Anbieter der Kurs- und Stammdaten ist **Twelve Data**.
-- Ein Fallback-Anbieter ist **noch nicht entschieden**.
+- Ein Fallback-Anbieter wurde **nicht festgelegt**; fällt Twelve Data aus, greifen Kurs-Cache und `503` (NF-07).
 - Das Frontend greift nie direkt auf die Finanzdaten-API zu. Seit ADR-07 ist die Anbindung in einem eigenen Dienst gekapselt, dem **marktdaten-service**. Der core-service, also die hier beschriebene API, fragt Suche und Kurse über das Interface `MarketDataProvider` beim marktdaten-service ab (`MarktdatenClient`, siehe Abschnitt „Interne Schnittstellen“). Der API-Key von Twelve Data liegt ausschließlich als Umgebungsvariable beim marktdaten-service (NF-06).
 - Such-Cache und Kurs-Cache (jeweils 24 h) liegen im marktdaten-service. Ist Twelve Data nicht erreichbar, werden Kursdaten jünger als 24 h aus dem Cache weiterverwendet; andernfalls antworten die betroffenen Endpunkte mit `503 UPSTREAM_UNAVAILABLE` (NF-07). Dasselbe gilt, wenn der marktdaten-service selbst nicht erreichbar ist.
 
@@ -136,6 +138,7 @@ Query: <code>q</code> (Pflicht, mind. 2 Zeichen: Ticker, ISIN oder Name), <code>
       "isin": "IE00B4L5Y983",
       "name": "iShares Core MSCI World UCITS ETF",
       "exchange": "XETRA",
+      "micCode": "XETR",
       "currency": "EUR",
       "type": "ETF"
     }
@@ -179,34 +182,6 @@ Query: <code>q</code> (Pflicht, mind. 2 Zeichen: Ticker, ISIN oder Name), <code>
   "error": {
     "code": "UPSTREAM_UNAVAILABLE",
     "message": "Kursdaten sind gerade nicht verfügbar."
-  }
-}
-</pre>
-</td>
-</tr>
-<tr>
-<td><b>GET</b></td>
-<td><code>/assets/{assetId}</code><br>Details einer Anlage · Sprint 1 · ohne Anmeldung</td>
-<td>Pfad: <code>assetId</code>, z. B. <code>/assets/17</code>. Kein Body.</td>
-<td>
-<b>200 OK</b>
-<pre>
-{
-  "id": 17,
-  "symbol": "EUNL",
-  "isin": "IE00B4L5Y983",
-  "name": "iShares Core MSCI World UCITS ETF",
-  "exchange": "XETRA",
-  "currency": "EUR",
-  "type": "ETF"
-}
-</pre>
-<b>404 Not Found</b>
-<pre>
-{
-  "error": {
-    "code": "NOT_FOUND",
-    "message": "Anlage nicht gefunden."
   }
 }
 </pre>
@@ -701,7 +676,7 @@ Header: <code>Authorization: Bearer &lt;token&gt;</code>
   "name": null
 }
 </pre>
-Pflicht: <code>portfolioId</code>, <code>startCapital</code>, <code>monthlyContribution</code>, <code>horizonYears</code>. Optional: <code>paths</code> (Standard 10.000, 1.000–50.000), <code>seed</code>, <code>targetAmount</code>. <code>save: true</code> speichert (ab Sprint 3, dann ist <code>name</code> Pflicht).<br>
+Pflicht: <code>portfolioId</code>, <code>startCapital</code>, <code>monthlyContribution</code>, <code>horizonYears</code>. Optional: <code>paths</code> (Standard 10.000, 1.000–50.000), <code>seed</code>, <code>targetAmount</code>. <code>save: true</code> speichert (ab Sprint 3, dann ist <code>name</code> Pflicht). Für die Nutzungskennzahlen zählt <code>save: true</code> nur als gespeicherte Simulation, ohne <code>save</code> nur als durchgeführte Simulation (E37, B8).<br>
 Regeln: <code>startCapital</code> und <code>monthlyContribution</code> ≥ 0, nicht beide 0; <code>horizonYears</code> ganze Zahl von 1 bis 40; <code>seed</code> ganze Zahl; ohne <code>seed</code> erzeugt das System einen Seed und gibt ihn in <code>parameters.seed</code> zurück.
 </td>
 <td>
@@ -1542,7 +1517,7 @@ Für den laufenden Monat ist `totalAccounts` der Stand zum Zeitpunkt der Abfrage
   ]
 }
 </pre>
-<code>trackingSince</code> ist der Tag des ersten erfassten Ereignisses (Beginn der Erfassung). Eine gespeicherte Simulation zählt in <code>simulationsRun</code> und <code>simulationsSaved</code> (E37).<br>
+<code>trackingSince</code> ist der Tag des ersten erfassten Ereignisses (Beginn der Erfassung). Eine über die Oberfläche gespeicherte Simulation zählt einmal in <code>simulationsRun</code> (beim Simulieren) und einmal in <code>simulationsSaved</code> (beim Speichern mit <code>save: true</code>); das Speichern selbst erhöht <code>simulationsRun</code> nicht (E37, B8).<br>
 <b>400 Bad Request</b> (Monat vor Beginn der Erfassung oder in der Zukunft)
 <pre>
 {

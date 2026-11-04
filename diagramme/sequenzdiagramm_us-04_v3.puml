@@ -1,7 +1,7 @@
 @startuml sequenzdiagramm_us-04_v3
 ' LookUpStock – Sequenzdiagramm zur Kern-Story US-04 mit GRASP-Kennzeichnung
-' Issue Docs #213 · Sprint 6 · Stand 04.11.2026 (v1: Docs #22, v2: Docs #59)
-' Grundlagen: Sequenzdiagramm US-04 v2, Klassendiagramm v6, Aktivitätsdiagramm US-04 v3,
+' Issue Docs #213 · Sprint 6 · Stand 04.11.2026, nach BE #128 (v1: Docs #22, v2: Docs #59)
+' Grundlagen: Sequenzdiagramm US-04 v2, Klassendiagramm v7, Aktivitätsdiagramm US-04 v3,
 '             ADR-02, ADR-03, ADR-06, ADR-07, simulationsmodell.md, API-Design (POST /simulations),
 '             Backend-Code main (Stand 04.11.2026): core-service (CurrentUserArgumentResolver, AuthService,
 '             SimulationController, SimulationService, PortfolioService, ParameterEstimator, PriceHistoryService,
@@ -241,6 +241,14 @@ deactivate MC
 SS --> SS : SimulationRun (timeline, metrics, endValues)
 deactivate SS
 
+create SR
+SS -> SR : <<create>>
+note right of SR
+  <b>GRASP Creator</b>
+  SimulationService hat alle Daten
+  zur Initialisierung des Ergebnisses
+end note
+
 SS -> UER : record(SIMULATION_RUN)
 activate UER
 note right of UER
@@ -259,14 +267,6 @@ deactivate DMP
 UER --> SS
 deactivate UER
 
-create SR
-SS -> SR : <<create>>
-note right of SR
-  <b>GRASP Creator</b>
-  SimulationService hat alle Daten
-  zur Initialisierung des Ergebnisses
-end note
-
 SS --> SC : SimulationResult
 deactivate SS
 SC --> FE : 200 OK\n{portfolioId, parameters (inkl. seed), estimates,\ntimeline, metrics, runtimeMs}
@@ -284,9 +284,10 @@ legend bottom left
   Die Erfassung des Nutzungsereignisses galt im Change Request (Abschnitt 3.2) als technisches Detail; sie ist seit v3 dargestellt,
   weil die Diagramme nun die asynchrone Kommunikation über die Queue aus ADR-07 zeigen.
   GRASP: Controller (ADR-02), Information Expert (ADR-03), Low Coupling (NF-12), High Cohesion, Creator.
-  <b>Stand 04.11.2026:</b> alle dargestellten Klassen und Methoden sind im Code umgesetzt. Dargestellt ist das Berechnen ohne Speichern
-  (save: false). Mit save: true speichert zusätzlich der SavedSimulationService (US-08); das Ereignis SIMULATION_SAVED und die Zählung
-  laut E37 gehören zu US-08 und US-11. Nicht dargestellt: das Vorladen der Kurse beim Anlegen eines Portfolios (Thema kursdaten.vorladen, ADR-07).
+  <b>Stand 04.11.2026 (nach BE #128):</b> alle dargestellten Klassen und Methoden sind im Code umgesetzt. Dargestellt ist das Berechnen ohne Speichern
+  (save: false): simulate() führt die Schritte bis zum Ergebnis aus (intern calculate()) und erfasst danach SIMULATION_RUN. Mit save: true ruft
+  der SimulationController stattdessen simulateForSave() auf, das dieselben Schritte ohne SIMULATION_RUN ausführt; der SavedSimulationService
+  speichert und erfasst SIMULATION_SAVED (US-08, E37, B8). Nicht dargestellt: das Vorladen der Kurse beim Anlegen eines Portfolios (Thema kursdaten.vorladen, ADR-07).
   Vorversionen: diagramme/archiv/sequenzdiagramm_us-04_v1, diagramme/archiv/sequenzdiagramm_us-04_v2
 endlegend
 

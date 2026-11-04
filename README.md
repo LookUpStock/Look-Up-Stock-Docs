@@ -43,7 +43,7 @@ Vorgehen: Scrum mit einwöchigen Sprints (Sprint 1 bis 5 vom 28.09. bis 01.11.20
 
 1. Anforderungen: `anforderungen/kurzformat_sprint-1.md` bis `kurzformat_sprint-4.md`, danach `nfr_furps.md` und `glossar.md`
 2. Kern-Stories US-04 (Simulation) und US-07 (Vergleich): Aktivitäts- und Sequenzdiagramme v3 in `diagramme/`
-3. Architektur: `adr/` und `diagramme/klassendiagramm_v6.png`, `diagramme/er-diagramm_v6.png`
+3. Architektur: `adr/` und `diagramme/klassendiagramm_v7.png`, `diagramme/er-diagramm_v6.png`
 4. Qualität: `testkonzept/testkonzept.md`, dann die Abnahmeprotokolle je Sprint
 5. Change Request: `anforderungen/change-request.md`
 
