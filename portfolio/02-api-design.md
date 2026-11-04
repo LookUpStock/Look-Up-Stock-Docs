@@ -15,15 +15,15 @@ Die öffentliche Schnittstelle des core-service liegt unter der Basis-URL `/api/
 | Ressource | Endpunkte | Anmeldung |
 |---|---|---|
 | Anmeldung | `POST /auth/register`, `POST /auth/login`, `POST /auth/logout` | nur Abmelden |
-| Anlagen | `GET /assets/search?q=&limit=`, `GET /assets/{assetId}` | nein |
+| Anlagen | `GET /assets/search?q=&limit=` | nein |
 | Portfolios | `POST /portfolios`, `GET /portfolios`, `GET /portfolios/{id}`, `PUT /portfolios/{id}`, `DELETE /portfolios/{id}` | ja |
 | Simulationen | `POST /simulations` (berechnen; mit `save: true` zusätzlich speichern), `GET /simulations`, `GET /simulations/{id}`, `DELETE /simulations/{id}` | ja |
 | Vergleiche | `POST /comparisons` | ja |
 | Gastmodus | `GET /demo/portfolios`, `POST /demo/simulations` | nein |
 | Auswertungen | `GET /reports/usage?month=`, `GET /reports/usage/export?month=` | ja, Rolle `MANAGER` |
-| GraphQL | `POST /graphql` mit Queries und Mutations | je nach Operation |
+| GraphQL | `POST /graphql` (unter der Basis-URL, also `/api/v1/graphql`) mit Queries und Mutations | je nach Operation |
 
-Eine bewusste Entscheidung betrifft die Berechnungen. Eine Simulation oder ein Vergleich ist kein bloßes Lesen vorhandener Daten, sondern erzeugt ein neues Ergebnis aus umfangreichen Eingaben (Portfolio, Startkapital, Sparrate, Horizont, Pfade, Seed, Zielbetrag). Deshalb laufen beide als `POST` auf eine eigene Ressource. Eine Simulation wird nur gespeichert, wenn der Nutzer das ausdrücklich verlangt; die Antwort ist dann `201 Created` statt `200 OK`. Diese Kombination aus Berechnen und optionalem Speichern in einem Endpunkt hielt das Frontend einfach, vermischt aber zwei Zuständigkeiten in einer Anfrage. Ein getrennter Endpunkt zum Speichern eines bereits berechneten Ergebnisses wäre semantisch klarer gewesen.
+Eine bewusste Entscheidung betrifft die Berechnungen. Eine Simulation oder ein Vergleich ist kein bloßes Lesen vorhandener Daten, sondern erzeugt ein neues Ergebnis aus umfangreichen Eingaben (Portfolio, Startkapital, Sparrate, Horizont, Pfade, Seed, Zielbetrag). Deshalb laufen beide als `POST` auf eine eigene Ressource. Eine Simulation wird nur gespeichert, wenn der Nutzer das ausdrücklich verlangt; die Antwort ist dann `201 Created` statt `200 OK`. Diese Kombination aus Berechnen und optionalem Speichern in einem Endpunkt hielt das Frontend einfach, vermischt aber zwei Zuständigkeiten in einer Anfrage. Ein getrennter Endpunkt zum Speichern eines bereits berechneten Ergebnisses wäre semantisch klarer gewesen. Dass das keine reine Stilfrage ist, zeigte die Abnahme in Sprint 5: Die Oberfläche schickt zum Speichern dieselbe Anfrage noch einmal mit `save: true`, das Backend rechnet erneut und zählte die Simulation für die Nutzungskennzahlen ein zweites Mal als durchgeführt (B8). Behoben wurde das im Backend, indem eine Anfrage mit `save: true` nur noch als gespeicherte Simulation zählt (BE #128). Die doppelte Berechnung bleibt; ein eigener Endpunkt hätte beides vermieden.
 
 Die Beispielsimulation für Gäste erhielt einen eigenen Pfad `/demo`, statt die Simulation optional ohne Anmeldung zu erlauben. So bleiben die Regeln je Endpunkt eindeutig: `/simulations` verlangt immer eine Anmeldung, `/demo` nie, und für Gäste gilt eine eigene Obergrenze von 10.000 Pfaden.
 
@@ -62,5 +62,5 @@ Mit der Aufteilung in Dienste (ADR-07) kamen zwei interne Schnittstellen hinzu: 
 | Token im Body (ADR-04) | falsch, verletzte die HTTP-Semantik und erzwang einen Umbau | Anmeldung über den `Authorization`-Header vom ersten Entwurf an |
 | Serverseitig gespeichertes Token | vertretbar, bewusster Zielkonflikt mit dem sofortigen Abmelden | Entscheidung früher als ADR dokumentieren |
 | Deutsche Fehlertexte aus dem Backend | richtig, eine Quelle für Regeln und Meldungen | beibehalten |
-| Berechnen und Speichern in einem Endpunkt | funktioniert, aber semantisch unscharf | Speichern als eigener Endpunkt |
+| Berechnen und Speichern in einem Endpunkt | funktioniert, aber semantisch unscharf; die Oberfläche rechnet beim Speichern ein zweites Mal, und die Nutzungskennzahlen zählten dadurch jede gespeicherte Simulation doppelt (B8, Abnahme Sprint 5) | Speichern als eigener Endpunkt, der ein bereits berechnetes Ergebnis übernimmt |
 | Interne Schnittstellen parallel zum Code | erzwungen durch die späte Architekturentscheidung | interne Verträge zusammen mit der Architektur festlegen |
