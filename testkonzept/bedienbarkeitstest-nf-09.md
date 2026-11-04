@@ -1,6 +1,6 @@
 # Moderationsleitfaden und Ergebnisbogen: Bedienbarkeitstest NF-09
 
-> **Status:** Durchgeführt am 20.10., 22.10. und 24.10.2026 (P1–P3). Ergebnisse in Abschnitt 7 und 8. Übernahme ins Abnahmeprotokoll noch offen (siehe Abschnitt 9).
+> **Status:** Durchgeführt am 26.10.2026 (P1–P3). Ergebnisse in Abschnitt 7 und 8. Ins Abnahmeprotokoll Sprint 5 übernommen: AT-NF09-01 bestanden, NF-09 erfüllt (2 von 3 Personen unter 5 Minuten).
 
 ## 1. Zweck und Abnahmekriterium
 
@@ -153,5 +153,5 @@ Keine Beispiele oder Hinweise zu Navigation, Schaltflächen, Suchbegriffen oder 
 
 | Maßnahme | Verantwortlich | Zieltermin |
 |---|---|---|
-| Einstieg zur Simulation nach dem Speichern des Portfolios sichtbarer machen | offen (gemeinsam abstimmen) | offen |
+| Einstieg zur Simulation nach dem Speichern des Portfolios sichtbarer machen | Product Owner (Entscheidung) | nicht eingeplant: NF-09 ist erfüllt, Sprint 6 behebt nur die Befunde der Abnahme Sprint 5; als Verbesserungsvorschlag in den Product Backlog aufgenommen (Testkonzept, Abschnitt 10, Schritt 5) |
 
