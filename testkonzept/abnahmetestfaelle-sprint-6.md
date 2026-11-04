@@ -9,10 +9,10 @@
 | **Stand** | 04.11.2026, vor der Abnahme |
 | **Durchführung** | Nachtest von AT-11-03 und AT-11-06 nach dem Deploy (BE #130), übrige Testfälle danach; Ergebnis im Abnahmeprotokoll Sprint 6 (Docs #214) |
 | **Stories** | US-11 Nutzungskennzahlen anzeigen (Docs #156), nach den Fehlern B8 und B9 nicht abgenommen; Hinweise H6 und H8 bis H12 aus der Abnahme Sprint 5 |
-| **Grundlagen** | [Abnahmeprotokoll Sprint 5](abnahmeprotokoll-sprint-5.md) (Abschnitte „Befunde“ und „Folgen“), [Abnahmetestfälle Sprint 5](abnahmetestfaelle-sprint-5.md), Sprint-Planning-Protokoll Sprint 6 (Docs #210; Entscheidung zu B8: Variante a), `anforderungen/kurzformat_sprint-4.md` (US-11, E37, E40), Umsetzung BE #128 (B8), BE #130 (Deploy), FE #67 (B9), FE #68 (H8), FE #69 (H9), FE #70 (H10), FE #71 (H12), Docs #213 (H11), [Testkonzept](testkonzept.md) Version 6 |
+| **Grundlagen** | `anforderungen/nfr_furps.md` Version 5 (NF-05, NF-13), [Abnahmeprotokoll Sprint 5](abnahmeprotokoll-sprint-5.md) (Abschnitte „Befunde“ und „Folgen“), [Abnahmetestfälle Sprint 5](abnahmetestfaelle-sprint-5.md), Sprint-Planning-Protokoll Sprint 6 (Docs #210; Entscheidung zu B8: Variante a), `anforderungen/kurzformat_sprint-4.md` (US-11, E37, E40), Umsetzung BE #128 (B8), BE #130 (Deploy), FE #67 (B9), FE #68 (H8), FE #69 (H9), FE #70 (H10), FE #71 (H12), Docs #213 (H11), [Testkonzept](testkonzept.md) Version 6 |
 | **KI-Nutzung** | Entwurf mit KI-Unterstützung erstellt und vom Product Owner geprüft, siehe KI-Log |
 
-Diese Datei setzt [abnahmetestfaelle-sprint-5.md](abnahmetestfaelle-sprint-5.md) fort. In Sprint 6 gibt es keine neuen User Stories. Sie enthält den Nachtest der Testfälle, die in Sprint 5 fehlgeschlagen sind oder einen Hinweis ergeben haben, und einen neuen Testfall für die präzisierte Zählung gespeicherter Simulationen (E37, Variante a).
+Diese Datei setzt [abnahmetestfaelle-sprint-5.md](abnahmetestfaelle-sprint-5.md) fort. In Sprint 6 gibt es keine neuen User Stories. Sie enthält den Nachtest der Testfälle, die in Sprint 5 fehlgeschlagen sind oder einen Hinweis ergeben haben, einen neuen Testfall für die präzisierte Zählung gespeicherter Simulationen (E37, Variante a) und die Nachweise für NF-05 und NF-13, die bisher keinem Testfall zugeordnet waren (NFRs Version 5).
 
 ---
 
@@ -30,7 +30,8 @@ Es gelten die Vorbemerkungen aus Sprint 1 bis 5 (Bezug, Durchführung, Darstellu
 |---|---|---|---|---|---|---|---|
 | Nachtest Sprint 5 (B8, B9, H6, H8 bis H12) | 4 | 1 | 0 | 2 | 7 | 7 | 0 |
 | US-11 neu (E37, Variante a) | 0 | 1 | 0 | 0 | 1 | 0 | 1 |
-| **Gesamt** | 4 | 2 | 0 | 2 | 8 | 7 | 1 |
+| NF-05, NF-13 | 0 | 0 | 0 | 2 | 2 | 2 | 0 |
+| **Gesamt** | 4 | 2 | 0 | 4 | 10 | 9 | 1 |
 
 Die Art eines Nachtests richtet sich nach dem Testfall aus Sprint 5. Bei Testfällen mit „manuell und automatisiert“ zählt die manuelle Durchführung.
 
@@ -68,6 +69,17 @@ Nach dem Merge der Behebungen werden die betroffenen Testfälle erneut durchgef�
 | AT-11-08 | E37 nach Variante (a): `POST /simulations` mit `save: true` erfasst nur „Gespeicherte Simulationen“, ohne `save` nur „Durchgeführte Simulationen“; GraphQL `simulate` wie REST | Alternativszenario | automatisiert (`SimulationServiceTest`, `SavedSimulationServiceTest`; Testnamen nach dem Merge von BE #128) | 1. Simulation ohne `save`<br>2. Simulation mit `save: true` und Namen<br>3. Mutation `simulate` mit `save: true` | 1. Genau ein Ereignis `SIMULATION_RUN`, kein `SIMULATION_SAVED`.<br>2. Genau ein Ereignis `SIMULATION_SAVED`, kein `SIMULATION_RUN`.<br>3. Wie 2. In jedem Fehlerfall kein Ereignis (wie AT-11-04). | offen |
 
 Nach bestandenem Nachtest von AT-11-01, AT-11-03 und AT-11-06 und bestandenem AT-11-08 sind alle Testfälle von US-11 bestanden; US-11 (Docs #156) kann abgenommen werden.
+
+---
+
+## Nicht-funktionale Anforderungen
+
+Die Adressen der drei Heroku-Apps stehen im Abnahmeprotokoll Sprint 5 (Abschnitt „Umgebung“). Für AT-NF13-01 ist Zugriff auf das Heroku-Dashboard nötig; ihn hat Carl Stibbe. Er zeigt die Angaben in einer Bildschirmfreigabe oder schickt Screenshots.
+
+| ID | Bezug | Art | Durchführung | Schritte / Eingabe | Erwartetes Ergebnis | Status |
+|---|---|---|---|---|---|---|
+| AT-NF05-01 | NF-05: nur über HTTPS erreichbar; Aufruf über `http://` wird auf `https://` umgeleitet; gültiges Zertifikat | NFR | manuell | In PowerShell nacheinander (`-I` zeigt nur die Kopfzeilen der Antwort):<br>1. `curl.exe -I http://lookupstockfrontend-96a9998805cb.herokuapp.com/`<br>2. `curl.exe -I http://lookupstock-da2951e42089.herokuapp.com/actuator/health`<br>3. `curl.exe -I http://lookupstock-marktdaten-12ca5b75c510.herokuapp.com/actuator/health`<br>4. Die drei Adressen mit `https://` im Browser öffnen und auf das Schloss-Symbol klicken | 1. bis 3. Antwort `301` oder `308` mit `Location: https://…`, **keine** Antwort `200` über `http://`.<br>4. Das Zertifikat ist gültig, der Browser zeigt keine Warnung. | offen |
+| AT-NF13-01 | NF-13: Bereitstellung je Komponente ohne manuelle Zwischenschritte | NFR | manuell (Heroku-Dashboard, mit Carl Stibbe) | 1. Für die Apps des Frontends, `lookupstock` und `lookupstock-marktdaten` im Reiter „Deploy“ die Verbindung zum GitHub-Repository und den Branch ansehen<br>2. Im Reiter „Activity“ den letzten Build öffnen<br>3. Im Reiter „Settings“ unter „Config Vars“ nur die **Namen** der Variablen ansehen<br>4. Nach dem Deploy aus BE #130: `/actuator/health` beider Backend-Apps und die Startseite des Frontends aufrufen | 1. Jede App ist mit ihrem Repository verbunden und deployt von `main` (automatisch oder mit einem Klick auf „Deploy Branch“).<br>2. Der Build lief ohne manuelle Eingriffe durch; beim Start der Backend-Apps wendet Flyway die Migrationen selbst an.<br>3. Die Konfiguration steht nur in Konfigurationsvariablen.<br>4. Beide Dienste melden `UP`, die Startseite lädt, ohne weitere Schritte auf dem Server. | offen |
 
 ---
 
