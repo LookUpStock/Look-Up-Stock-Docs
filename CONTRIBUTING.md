@@ -45,13 +45,15 @@ README.md
 
 ```
 anforderungen/        Kurzformat-Tabellen, Akteure, Glossar, NFRs, Simulationsmodell, Change Request
-diagramme/            Use-Case-, Domänen-, Klassen-, ER-, Aktivitäts- und Sequenzdiagramme (aktueller Stand)
+diagramme/            Use-Case-, Domänen-, Klassen-, ER-, Aktivitäts-, Sequenz- und Architekturdiagramme (aktueller Stand)
 diagramme/archiv/     ältere Diagrammversionen
 adr/                  Architecture Decision Records (ADR-01.md bis ADR-08.md)
 api/                  API-Design: Schnittstelle zwischen FE und BE und zwischen den Diensten
 testkonzept/          Testkonzept, Abnahmetestfälle und Abnahmeprotokolle je Sprint, Testabdeckung
 sprints/sprint-<n>/   Sprint-Planning-Protokoll und Sprint Review je Sprint
-portfolio/            Portfolio Webprogrammierung
+ki-log/               KI-Log je Teammitglied
+Portfolio-Webprogrammierung-LookUpStock.pdf
+                      Portfolio Webprogrammierung
 ```
 
 Dateinamen in `sprints/`: `Sprint-Planning-Protokoll-Sprint-<n>.docx` und `Sprint-Review-Sprint-<n>.docx`.

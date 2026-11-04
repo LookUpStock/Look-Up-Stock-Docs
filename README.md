@@ -29,14 +29,14 @@ Vorgehen: Scrum mit einwöchigen Sprints (Sprint 1 bis 5 vom 28.09. bis 01.11.20
 | Ordner / Datei | Inhalt |
 |---|---|
 | `anforderungen/` | Kurzformat-Tabellen der User Stories mit Akzeptanzkriterien und PO-Festlegungen (`kurzformat_sprint-1.md` bis `kurzformat_sprint-4.md`), Akteure, Glossar, nicht-funktionale Anforderungen nach FURPS+ (`nfr_furps.md`), Simulationsmodell, Change Request CR-01 (`change-request.md`) |
-| `diagramme/` | aktueller Stand von Use-Case-Diagramm, Domänenmodell, Klassen- und ER-Diagramm sowie Aktivitäts- und Sequenzdiagrammen der Kern-Stories US-04 und US-07, jeweils als PlantUML-Quelle (`.puml`) und Bild |
+| `diagramme/` | aktueller Stand von Use-Case-Diagramm, Domänenmodell, Klassen- und ER-Diagramm sowie Aktivitäts- und Sequenzdiagrammen der Kern-Stories US-04 und US-07, Architekturüberblick und Schnitt der Dienste (`architektur-ueberblick`, `architektur-dienste`), jeweils als PlantUML-Quelle (`.puml`) und Bild |
 | `diagramme/archiv/` | ältere Versionen aller Diagramme; zeigen das iterative Wachstum und den Stand vor und nach dem Change Request |
 | `adr/` | Architecture Decision Records ADR-01 bis ADR-08 |
 | `api/` | API-Design: REST und GraphQL zwischen Frontend und Backend, interne Schnittstellen zwischen den Diensten (`api-design.md`) |
 | `testkonzept/` | Testkonzept, Abnahmetestfälle und Abnahmeprotokolle je Sprint, Testabdeckung, Bedienbarkeitstest NF-09 |
 | `sprints/` | je Sprint ein Ordner `sprint-<n>/` mit Sprint-Planning-Protokoll und Sprint Review (mit Retrospektive) |
 | `ki-log/` | KI-Log je Teammitglied (`KI-Log-<Vorname>-<Nachname>.docx`) nach der Vorlage aus der Aufgabenstellung |
-| `portfolio/` | Portfolio Webprogrammierung, ein Kapitel je Datei (Aufbau in `portfolio/README.md`) |
+| `Portfolio-Webprogrammierung-LookUpStock.pdf` | Portfolio Webprogrammierung (Abgabe 08.11.2026). Die Kapitel entstanden als Markdown-Dateien im Ordner `portfolio/`; er wurde nach dem Zusammenführen entfernt und ist in der Git-Historie erhalten |
 | `Wireframe` | Links zu den Wireframes in Figma |
 | `CONTRIBUTING.md` | Arbeitsweise im Team: Branches, Pull Requests, Definition of Done, KI-Nutzung |
 
