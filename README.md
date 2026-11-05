@@ -37,7 +37,7 @@ Vorgehen: Scrum mit einwöchigen Sprints (Sprint 1 bis 5 vom 28.09. bis 01.11.20
 | `sprints/` | je Sprint ein Ordner `sprint-<n>/` mit Sprint-Planning-Protokoll und Sprint Review (mit Retrospektive) |
 | `ki-log/` | KI-Log je Teammitglied (`KI-Log-<Vorname>-<Nachname>.docx`) nach der Vorlage aus der Aufgabenstellung |
 | `Portfolio-Webprogrammierung-LookUpStock.pdf` | Portfolio Webprogrammierung (Abgabe 08.11.2026). Die Kapitel entstanden als Markdown-Dateien im Ordner `portfolio/`; er wurde nach dem Zusammenführen entfernt und ist in der Git-Historie erhalten |
-| `Wireframe` | Links zu den Wireframes in Figma |
+| `wireframes/` | Wireframes der Seiten als PNG-Export aus Figma, mit Links zur Figma-Datei und den Abweichungen der Umsetzung (`wireframes/README.md`) |
 | `CONTRIBUTING.md` | Arbeitsweise im Team: Branches, Pull Requests, Definition of Done, KI-Nutzung |
 
 ## Einstieg für Leser

@@ -52,6 +52,7 @@ api/                  API-Design: Schnittstelle zwischen FE und BE und zwischen 
 testkonzept/          Testkonzept, Abnahmetestfälle und Abnahmeprotokolle je Sprint, Testabdeckung
 sprints/sprint-<n>/   Sprint-Planning-Protokoll und Sprint Review je Sprint
 ki-log/               KI-Log je Teammitglied
+wireframes/           Wireframes als PNG-Export aus Figma
 Portfolio-Webprogrammierung-LookUpStock.pdf
                       Portfolio Webprogrammierung
 ```
