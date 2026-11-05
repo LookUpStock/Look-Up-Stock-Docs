@@ -55,8 +55,6 @@ Alle 14 Testfälle sind bestanden. Registrieren, Anmelden mit beliebiger Groß- 
 
 **Festlegung des Product Owners:** In AT-01-02 und AT-01-13 nennt das erwartete Ergebnis eine „Portfolioliste“ in der Oberfläche. Diese Liste gehört zum Portfolio-Editor von US-03 und fehlt dort (F2). Für US-01 entscheidend ist, dass nach der Anmeldung nur eigene Portfolios geliefert werden; das wurde über die API geprüft und ist erfüllt. Die fehlende Liste wird deshalb US-03 zugeordnet und verhindert die Abnahme von US-01 nicht.
 
-**Offen für die Definition of Done:** Die KI-Log-Nummern in den Frontend-Dateien von FE #4 (`login.html`, `auth.js`, `api.js`, `style.css`, `auth.test.js`) sind noch als Platzhalter `[eintragen]` eingetragen und werden nachgetragen.
-
 ### US-02 Anlagen suchen – nicht abgenommen
 
 Die Suche nach Ticker, ISIN und Name funktioniert, auch ohne Anmeldung (AT-02-09); bei keinem Treffer erscheint der richtige Hinweis. Nicht erfüllt sind:
