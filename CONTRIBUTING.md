@@ -122,15 +122,15 @@ Eine User Story gilt als erledigt, wenn
 - die betroffenen Diagramme aktualisiert sind,
 - jede KI-Nutzung im KI-Log eingetragen ist.
 
+## Kommentare im Code
+
+- Kommentare stehen nur dort, wo der Code eine Entscheidung nicht selbst erklärt (z. B. warum `308` statt `301`). Was der Code tut, zeigen Namen und Tests.
+- Kommentare werden auf Englisch geschrieben.
+- Flyway-Migrationen (`db/migration/`) werden nach dem Merge nicht mehr geändert, auch ihre Kommentare nicht: Flyway prüft eine Prüfsumme je Migration, jede Änderung lässt den Start auf Heroku scheitern.
+
 ## KI-Nutzung
 
-- Jede KI-Nutzung, deren Ergebnis in ein abgegebenes Artefakt einfließt, wird im KI-Log eingetragen. Jedes Teammitglied führt ein eigenes KI-Log nach der gemeinsamen Vorlage und legt es als `ki-log/KI-Log-<Vorname>-<Nachname>.docx` im Docs-Repository ab; am Projektende werden die Logs zusammengeführt. Die Nummer im Kommentar ist die Nummer im KI-Log der Person, die den Abschnitt erstellt hat (z. B. `ME-12` im KI-Log von Mert Eminel).
-- Wesentliche KI-generierte Codeabschnitte werden im Quellcode per Kommentar mit der Nummer aus dem KI-Log gekennzeichnet:
-
-```
-// KI-Log ME-14: Grundgerüst der Monte-Carlo-Schleife mit KI erstellt, angepasst und getestet
-```
-
+- Jede KI-Nutzung, deren Ergebnis in ein abgegebenes Artefakt einfließt, wird im KI-Log eingetragen. Jedes Teammitglied führt ein eigenes KI-Log nach der gemeinsamen Vorlage und legt es als `ki-log/KI-Log-<Vorname>-<Nachname>.docx` im Docs-Repository ab; am Projektende werden die Logs zusammengeführt. Die Einträge sind je Person fortlaufend nummeriert (z. B. `ME-12` im KI-Log von Mert Eminel).
 - Keine personenbezogenen oder vertraulichen Daten (z. B. aus dem Ausbildungsbetrieb) in KI-Werkzeuge eingeben.
 
 ## Zugangsdaten und Secrets
