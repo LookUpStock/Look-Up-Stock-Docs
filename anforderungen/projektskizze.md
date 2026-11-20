@@ -1,4 +1,4 @@
-# Projektskizze LookUpStock
+﻿# Projektskizze LookUpStock
 
 | | |
 |---|---|
@@ -97,7 +97,7 @@ Grundlage für die Sprintplanung war der folgende Product Backlog. Priorisiert w
 | US-07 | Als Nutzer möchte ich zwei Anlagen oder Portfolios unter gleichen Annahmen vergleichen, um mich zwischen ihnen zu entscheiden. **(Kern-Story)** | Must | 5 | 3 |
 | US-08 | Als Nutzer möchte ich Simulationen und Vergleiche speichern und später wieder aufrufen. | Should | 3 | 3 |
 | US-09 | Als Gast möchte ich ohne Konto eine Beispielsimulation ausprobieren. | Could | 1 | 4 |
-| US-10 | Als Nutzer möchte ich mehr als zwei Portfolios gleichzeitig vergleichen. | [PRÜFEN: ursprüngliche Priorität] | 8 | 4 |
+| US-10 | Als Nutzer möchte ich mehr als zwei Portfolios gleichzeitig vergleichen. | Could | 8 | 4 |
 
 Die nicht-funktionalen Anforderungen NF-01 bis NF-16 stehen nach FURPS+ mit messbaren Abnahmekriterien in `nfr_furps.md`. NF-01 (Simulation in höchstens 3 Sekunden) wurde wegen seines Aufwands als eigener Backlog-Eintrag mit 3 SP geführt.
 
